@@ -10,7 +10,7 @@ template <typename Symbol = char, typename Compare = std::less<Symbol>>
 class PalindromicTree {
 public:
     struct Node {
-        int length = 0, link = 0;
+        int length = 0, link = 0, parent = -1;
         std::map<Symbol, int, Compare> next;
         long long terminals = 0;
     };
@@ -48,6 +48,7 @@ public:
             int cur = nodes.size();
             Node node;
             node.length = nodes[p].length + 2;
+            node.parent = p;
             if (node.length == 1) {
                 node.link = 1;
             } else {
