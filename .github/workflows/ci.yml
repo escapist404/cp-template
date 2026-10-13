@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install PDF tool dependencies
+        run: python -m pip install pygments reportlab
+      - name: Run C++ tests
+        run: make test
+      - name: Test PDF generator
+        run: make test-code2pdf
+      - name: Build ICPC preset
+        run: make pdf-icpc
