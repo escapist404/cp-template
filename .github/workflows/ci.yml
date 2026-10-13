@@ -29,8 +29,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.13'
       - name: Install verification helper
-        run: python -m pip install --upgrade online-judge-verify-helper
+        run: |
+          python -m pip install --upgrade 'setuptools<81'
+          python -m pip install --upgrade online-judge-verify-helper
       - name: Verify Library Checker solutions
         run: oj-verify run
