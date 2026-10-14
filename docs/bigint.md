@@ -2,7 +2,7 @@
 
 大整数类，支持任意精度的有符号整数运算。
 
-依赖 `types.hpp`（`i64`、`u64`）。
+依赖 `types.hpp`（`i64`、`u64`）和 `polynomial.hpp`（大规模乘法的 NTT）。
 
 ## 类型与构造
 
@@ -29,6 +29,9 @@ BigInt& operator-=(const BigInt& rhs);
 BigInt& operator*=(const BigInt& rhs);
 BigInt& operator*=(i64 rhs);
 ```
+
+乘法在操作数较大时使用三个 NTT 模数和 CRT 重建，复杂度为
+$O(n\log n)$；较小时使用朴素乘法。
 
 除法和取模的结果遵循整数除法规则；除数不能为 0。
 

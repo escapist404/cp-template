@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "binary_search.hpp"
+#include "polynomial.hpp"
 #include "types.hpp"
 
 class BigInt {
@@ -94,8 +95,15 @@ public:
 	BigInt& operator-=(const BigInt& other) { return *this += -other; }
 
 	BigInt& operator*=(const BigInt& other) {
+		if (digits.empty() || other.digits.empty()) return *this = BigInt();
 		BigInt result;
 		result.sign = sign * other.sign;
+		if (std::min(digits.size(), other.digits.size()) >= 64 &&
+				ceil_pow2((int)(digits.size() + other.digits.size() - 1)) <= (1 << 21)) {
+			result.digits = multiply_ntt(digits, other.digits);
+			result.trim();
+			return *this = result;
+		}
 		result.digits.assign(digits.size() + other.digits.size(), 0);
 		for (std::size_t i = 0; i < digits.size(); ++i) {
 			i64 carry = 0;
@@ -176,6 +184,48 @@ public:
 private:
 	std::vector<int> digits;
 	int sign = 1;
+
+	static i64 power_mod(i64 a, i64 e, i64 mod) {
+		i64 result = 1;
+		while (e) {
+			if (e & 1) result = (i64)((i128)result * a % mod);
+			a = (i64)((i128)a * a % mod);
+			e >>= 1;
+		}
+		return result;
+	}
+
+	static std::vector<int> multiply_ntt(const std::vector<int>& a,
+			const std::vector<int>& b) {
+		constexpr i64 p1 = 998244353, p2 = 1004535809, p3 = 469762049;
+		using Z1 = ModInt<i64, p1>;
+		using Z2 = ModInt<i64, p2>;
+		using Z3 = ModInt<i64, p3>;
+		std::vector<Z1> a1(a.begin(), a.end()), b1(b.begin(), b.end());
+		std::vector<Z2> a2(a.begin(), a.end()), b2(b.begin(), b.end());
+		std::vector<Z3> a3(a.begin(), a.end()), b3(b.begin(), b.end());
+		a1 = convolution<i64, p1, 3>(a1, b1);
+		a2 = convolution<i64, p2, 3>(a2, b2);
+		a3 = convolution<i64, p3, 3>(a3, b3);
+		const i64 inv12 = power_mod((i128)p1 * p2 % p3, p3 - 2, p3);
+		const i64 inv1 = power_mod(p1, p2 - 2, p2);
+		std::vector<int> result(a1.size());
+		i128 carry = 0;
+		for (int i = 0; i < (int)result.size(); ++i) {
+			i64 r1 = a1[i].data(), r2 = a2[i].data(), r3 = a3[i].data();
+			i64 t2 = (i64)((i128)(r2 - r1 + p2) * inv1 % p2);
+			i128 x12 = r1 + (i128)p1 * t2;
+			i64 t3 = (i64)((i128)((r3 - (i64)(x12 % p3) + p3) % p3) * inv12 % p3);
+			i128 value = x12 + (i128)p1 * p2 * t3 + carry;
+			result[i] = (int)(value % base);
+			carry = value / base;
+		}
+		while (carry) {
+			result.push_back((int)(carry % base));
+			carry /= base;
+		}
+		return result;
+	}
 
 	void trim() {
 		while (!digits.empty() && digits.back() == 0) digits.pop_back();
