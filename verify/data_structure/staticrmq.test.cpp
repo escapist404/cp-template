@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/staticrmq"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <vector>
 
@@ -10,14 +11,15 @@ struct Min {
 };
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, q;
-	std::cin >> n >> q;
+	io >> n >> q;
 	std::vector<int> a(n);
-	for (int& x : a) std::cin >> x;
+	for (int& x : a) io >> x;
 	SparseTable<int, Min> table(a);
 	while (q--) {
 		int l, r;
-		std::cin >> l >> r;
+		io >> l >> r;
 		std::cout << table.query(l, r) << '\n';
 	}
 }

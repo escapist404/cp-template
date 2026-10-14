@@ -19,6 +19,19 @@ struct GaussianZero {
     }
 };
 
+// Rank of an n by m matrix over a field. The matrix is row-major. This
+// rank-only form avoids the solution/nullspace allocations of the solver.
+template <typename T, typename IsZero = GaussianZero<T>>
+int matrix_rank(std::vector<T> matrix, int n, int m, IsZero is_zero = IsZero{}) {
+	assert(n >= 0 && m >= 0 && (long long)n * m == (long long)matrix.size());
+	if (n == 0 || m == 0) return 0;
+	Matrix<T, 0, 0> result(n, m);
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < m; ++j)
+			result[i][j] = std::move(matrix[(long long)i * m + j]);
+	return result.rank(is_zero);
+}
+
 template <typename T>
 struct GaussianResult {
     bool consistent = true;

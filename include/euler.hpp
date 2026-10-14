@@ -8,6 +8,8 @@
 #include "bigint.hpp"
 #include "modular_arithmetic.hpp"
 
+// Euler totient phi(n) in O(sqrt(n)) and linear sieve phi table on [0, n].
+
 inline i64 euler_phi(i64 n) {
 	assert(n > 0);
 	i64 result = n;

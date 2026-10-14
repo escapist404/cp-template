@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/two_sat"
 
+#include "../../include/fastio.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -7,13 +8,14 @@
 #include "../../include/two_sat.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, m;
 	std::string header;
-	std::cin >> header >> header >> n >> m;
+	io >> header >> header >> n >> m;
 	TwoSat sat(n);
 	while (m--) {
 		int x, y;
-		std::cin >> x >> y >> header;
+		io >> x >> y >> header;
 		int vx = x > 0, vy = y > 0;
 		sat.add_or(std::abs(x) - 1, vx, std::abs(y) - 1, vy);
 	}

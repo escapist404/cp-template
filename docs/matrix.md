@@ -38,6 +38,8 @@ Matrix(std::initializer_list<T> values);
 ```cpp
 size_t rows() const;
 size_t columns() const;
+template <typename IsZero = MatrixRankZero<T>>
+int rank(IsZero is_zero = IsZero{}) const;
 T* operator[](size_t row);
 const T* operator[](size_t row) const;       // 动态矩阵
 std::array<T, C>& operator[](size_t row);    // 静态矩阵
@@ -76,6 +78,8 @@ int main() {
 ```
 
 矩阵支持流式输入输出，输出按行换行。
+
+`rank()` 返回矩阵的秩。它要求元素类型支持域上的除法；默认使用 `value == T{}` 判断零，也可以传入自定义零判断器。秩为 `0` 的情况包括零矩阵；空维度矩阵的秩也定义为 `0`，但当前动态矩阵构造函数要求行数和列数非零。
 
 ## 相关文档
 

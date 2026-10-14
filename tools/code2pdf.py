@@ -120,6 +120,14 @@ def parse_args() -> argparse.Namespace:
         help="config file listing files to include and their order (one path per line, # for comments)",
     )
     parser.add_argument(
+        "--with-docs", nargs="?", const="docs", metavar="DIR",
+        help="interleave matching Markdown docs from DIR (default: docs/) before each header file",
+    )
+    parser.add_argument(
+        "--docs-only", nargs="?", const="docs", metavar="DIR",
+        help="print only Markdown docs from DIR (default: docs/), preserving config section order if -c is given",
+    )
+    parser.add_argument(
         "--orientation", choices=("portrait", "landscape"), default="portrait",
         help="page orientation (default: portrait)",
     )
@@ -154,6 +162,60 @@ def parse_args() -> argparse.Namespace:
         help="directory or file name to skip (repeatable)",
     )
     return parser.parse_args()
+
+
+def display_path(path: Path, root: Path) -> str:
+    """Return a clean relative path even when files span multiple sibling directories."""
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        try:
+            return path.relative_to(root.parent).as_posix()
+        except ValueError:
+            return path.name
+
+
+def resolve_docs_dir(docs_arg: str, root: Path) -> Path:
+    docs_path = Path(docs_arg).expanduser()
+    if docs_path.is_absolute():
+        return docs_path.resolve()
+    cwd_candidate = (Path.cwd() / docs_path).resolve()
+    if cwd_candidate.is_dir():
+        return cwd_candidate
+    parent_candidate = (root.parent / docs_path).resolve()
+    if parent_candidate.is_dir():
+        return parent_candidate
+    return (root / docs_path).resolve()
+
+
+def apply_docs_mode(
+    files: list[Path],
+    sections: list[tuple[str, int]],
+    docs_dir: Path,
+    docs_only: bool,
+) -> tuple[list[Path], list[tuple[str, int]]]:
+    """Transform file list and section indices for --with-docs or --docs-only."""
+    section_at = {index: name for name, index in sections}
+    new_files: list[Path] = []
+    new_sections: list[tuple[str, int]] = []
+
+    for index, path in enumerate(files):
+        if index in section_at:
+            new_sections.append((section_at[index], len(new_files)))
+        doc_file = docs_dir / f"{path.stem}.md"
+        if docs_only:
+            if doc_file.is_file():
+                new_files.append(doc_file)
+            elif path.suffix.lower() == ".md" and path.is_file():
+                new_files.append(path)
+            else:
+                print(f"Warning: Doc file not found for {path.name}: {doc_file}", file=sys.stderr)
+        else:
+            if doc_file.is_file() and doc_file != path:
+                new_files.append(doc_file)
+            new_files.append(path)
+
+    return new_files, new_sections
 
 
 def read_config_file(config_path: Path, root: Path) -> tuple[list[Path], list[tuple[str, int]]] | None:
@@ -338,7 +400,7 @@ def column_pages(root: Path, files: list[Path], width: float, height: float, lin
 
     def heading(path: Path, continued: bool):
         nonlocal y
-        text = path.relative_to(root).as_posix() + (" (cont.)" if continued else "")
+        text = display_path(path, root) + (" (cont.)" if continued else "")
         chunks = wrap_fixed(text, col_width)
         # Keep the file heading with at least the first source row.
         if y - len(chunks) * LINE_HEIGHT < bottom:
@@ -351,8 +413,9 @@ def column_pages(root: Path, files: list[Path], width: float, height: float, lin
     for path in files:
         heading(path, False)
         file_page_map[path] = len(pages)
+        use_numbers = line_numbers and path.suffix.lower() != ".md"
         for number, line in enumerate(read_source(path).splitlines(), 1):
-            prefix = f"{number:>5}  " if line_numbers else "  "
+            prefix = f"{number:>5}  " if use_numbers else "  "
             chunks = wrap_fixed(line.expandtabs(4), col_width - stringWidth(prefix, FONT, FONT_SIZE))
             for index, chunk in enumerate(chunks):
                 if y < bottom:
@@ -380,7 +443,7 @@ def toc_layout(root: Path, files: list[Path], sections: list[tuple[str, int]], w
         name = section_at.get(index)
         entry_prefix_width = stringWidth("· ", FONT, FONT_SIZE)
         chunks = wrap_fixed(
-            path.relative_to(root).as_posix(),
+            display_path(path, root),
             col_width - 10 - 42 - entry_prefix_width,
         )
         space = (len(chunks) - 1) * step
@@ -436,7 +499,10 @@ def build_pdf(
         body, file_page_map = column_pages(root, files, page_width, page_height, line_numbers)
         body_total = len(body)
     else:
-        sources = [source_pages(read_source(p), page_width, page_height, line_numbers) for p in files]
+        sources = [
+            source_pages(read_source(p), page_width, page_height, line_numbers and p.suffix.lower() != ".md")
+            for p in files
+        ]
         file_page_map = {}
         next_page = 1
         for path, pages in zip(files, sources):
@@ -537,7 +603,7 @@ def build_pdf(
         return total_pages
 
     for path, pages in zip(files, sources):
-        relative = path.relative_to(root).as_posix()
+        relative = display_path(path, root)
         lexer = lexer_for(path)
         for page_index, rows in enumerate(pages):
             header = relative
@@ -564,6 +630,8 @@ def main() -> None:
         raise SystemExit("Use font size 5-20 pt and line height between font size and 40 pt")
     if args.max_pages is not None and args.max_pages < 1:
         raise SystemExit("Page limit must be positive")
+    if args.with_docs and args.docs_only:
+        raise SystemExit("Choose either --with-docs or --docs-only, not both")
     root = Path(args.root).expanduser().resolve()
     if not root.is_dir():
         raise SystemExit(f"Not a directory: {root}")
@@ -582,14 +650,28 @@ def main() -> None:
         if result is None:
             raise SystemExit(f"Could not read config file: {config_path}")
         files, sections = result
+        if args.with_docs or args.docs_only:
+            docs_dir = resolve_docs_dir(args.docs_only or args.with_docs, root)
+            files, sections = apply_docs_mode(files, sections, docs_dir, bool(args.docs_only))
+            if args.docs_only:
+                root = docs_dir
+            else:
+                root = Path(os.path.commonpath([str(root), str(docs_dir)]))
         if not files:
             raise SystemExit(f"No valid files found in config: {config_path}")
     else:
-        # Use automatic file discovery
-        extensions = DEFAULT_EXTENSIONS | {e.lower() if e.startswith(".") else f".{e.lower()}" for e in (args.ext or [])}
+        if args.docs_only:
+            root = resolve_docs_dir(args.docs_only, root)
+            extensions = {".md"}
+        else:
+            extensions = DEFAULT_EXTENSIONS | {e.lower() if e.startswith(".") else f".{e.lower()}" for e in (args.ext or [])}
         excludes = DEFAULT_EXCLUDES | set(args.exclude or [])
         excluded_files = {Path(__file__).resolve(), Path(__file__).with_name("code2pdf").resolve()}
         files = source_files(root, not args.no_recursive, extensions, excludes, output.resolve(), excluded_files)
+        if args.with_docs:
+            docs_dir = resolve_docs_dir(args.with_docs, root)
+            files, sections = apply_docs_mode(files, sections, docs_dir, False)
+            root = Path(os.path.commonpath([str(root), str(docs_dir)]))
 
     title = args.title or root.name
     pages = build_pdf(root, output, title, files, sections, not args.no_line_numbers,

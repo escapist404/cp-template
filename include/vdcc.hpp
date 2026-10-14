@@ -8,6 +8,8 @@
 
 #include "scc.hpp"
 
+// 0-based vertex-biconnected components (blocks) returned as edge lists; isolated vertices yield empty lists.
+
 std::vector<std::vector<std::pair<int, int>>>
 get_vdcc(const std::vector<std::vector<int>>& adj) {
 	const int n = adj.size();

@@ -60,7 +60,7 @@ int count_occurrences(const std::string &text, const std::string &pattern) {
 }
 ```
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - 本文件**只提供这一个函数**。没有单独的「求 next / fail 数组」接口，也没有 `kmp_match` 之类的别名；`fail` 数组是函数内部的局部 lambda，不对外暴露。
 - 交卷时若需要 fail 数组（例如求最小循环节），需要自行复制实现，无法从本模板复用。

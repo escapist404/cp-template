@@ -119,7 +119,7 @@ auto answer = [&](Agg &agg, int v) { return agg.distinct; };
 - 结果向量**按下标（顶点号）索引**，每个顶点都会被赋一次值（含叶子和根）。
 - 每次 `solve` 都自行重建 DFS 序与重儿子，没有单独的 `prework` 阶段。
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **`add` 与 `remove` 必须互为严格逆操作**。这是正确性的前提，源码的注释也强调了这一点。若 `add` 有副作用而 `remove` 不能撤销，结果会错。
 - **图必须连通**（`assert(order.size() == n)`），且**不能有环**（`assert(parent[v] == -1)`）。

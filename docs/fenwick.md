@@ -1,193 +1,66 @@
-# Fenwick Tree (Binary Indexed Tree)
+# Fenwick Tree (`fenwick.hpp`)
 
-维护一个可修改的一维数组，支持单点加法和前缀或区间聚合查询。
+`fenwick.hpp` 实现一维树状数组（Binary Indexed Tree）`Fenwick<T>`，支持单点加法更新、前缀/区间和查询以及在树状数组上直接树上倍增二分前缀和下界。依赖 [`bit.hpp`](bit.md)。
 
-## 模板参数
+## 接口说明
 
 ```cpp
 template <typename T>
-class Fenwick;
+class Fenwick {
+public:
+    Fenwick(int n);
+    Fenwick(std::vector<T> init);
+    void add(int p, T value);
+    T get(int p);
+    T get(int l, int r);
+    int lower_bound(T value);
+};
 ```
 
-`T` 类型需要支持：
-- 默认构造 `T()`，返回零元
-- 加法运算 `+=` 和减法运算 `-`
-- 常见类型：`int`、`long long`、`ModInt` 等
+- **索引与区间约定**：对外接口全部采用 **`0-based` 下标**与**左闭右开区间 `[l, r)`**（内部自动转换为 `1-based` 树状数组下标维护）。类型 `T` 需支持默认构造 `T()`（作为零元）、`+=`、`-` 和 `<`。
+- `Fenwick(int n)`：构造长度为 $n$（要求 $n \ge 0$）的全零数组。
+- `Fenwick(std::vector<T> init)`：用给定数组 `init` 初始化长度为 `init.size()` 的树状数组。
+- `add(int p, T value)`：将下标 `p` 处的元素加上 `value`（即 `a[p] += value`），要求 $0 \le p < n$。
+- `get(int p)`：返回前缀半开区间 **`[0, p)`** 的元素和 $\sum_{i=0}^{p-1} a[i]$，要求 $0 \le p \le n$。注意当 `p == 0` 时返回 `T()`（即 $0$），查询包含下标 `i` 在内的前缀和应传入 `get(i + 1)`。
+- `get(int l, int r)`：返回半开区间 **`[l, r)`** 的元素和 $\sum_{i=l}^{r-1} a[i]$，要求 $0 \le l \le r \le n$；当 `l == r` 时返回 `T()`。
+- `lower_bound(T value)`：在树状数组上执行倍增二分，返回满足前缀和 **`get(p + 1) >= value`**（即 $\sum_{i=0}^{p} a[i] \ge \text{value}$）的最小 `0-based` 下标 `p`：
+  - **单调性前提**：调用 `lower_bound` 时，原数组中**所有元素必须非负**（$a[i] \ge 0$），以保证前缀和单调不降；
+  - 若 `value <= T()`（或 `n == 0`），直接返回 `0`；
+  - 若整个数组的总和 `get(n) < value`，则返回 `n`。
 
-## 构造函数
+## 复杂度
 
-```cpp
-Fenwick<T> fenwick(int n)
-Fenwick<T> fenwick(vector<T> init)
-```
-
-- 第一种：创建大小为 $n$ 的树状数组，初始值全为 $0$
-- 第二种：用 `init` 数组初始化
-
-**约束**
-- $0 \leq n \leq 10^8$
-
-**复杂度**
-- $O(n)$ 或 $O(n \log n)$（用 `init` 初始化）
-
-## 成员函数
-
-### add
-
-```cpp
-void fenwick.add(int p, T value)
-```
-
-将位置 $p$ 的值加上 `value`。
-
-**约束**
-- $0 \leq p < n$
-
-**复杂度**
-- $O(\log n)$
-
-### get
-
-```cpp
-T fenwick.get(int p)
-T fenwick.get(int l, int r)
-```
-
-- `get(p)`：返回区间 $[0, p)$ 的和（前缀和）
-- `get(l, r)`：返回区间 $[l, r)$ 的和
-
-**约束**
-- $0 \leq p \leq n$
-- $0 \leq l \leq r \leq n$
-
-**复杂度**
-- $O(\log n)$
-
-### lower_bound
-
-```cpp
-int fenwick.lower_bound(T value)
-```
-
-返回最小的 $p$ 使得 $\mathrm{get}(p+1) \geq \mathrm{value}$。如果不存在返回 $n$。
-
-要求树状数组中的值**非负**。
-
-**约束**
-- 树状数组中所有值 $\geq 0$
-
-**复杂度**
-- $O(\log n)$
+- 构造：全零构造为 $O(n)$；从数组构造为 $O(n \log n)$。
+- `add`、`get`、`lower_bound`：时间复杂度均为 $O(\log n)$。
+- 空间复杂度：$O(n)$。
 
 ## 使用示例
 
-### 基本用法
-
 ```cpp
 #include "fenwick.hpp"
-#include <iostream>
+#include <cassert>
+#include <vector>
 
 int main() {
-    Fenwick<long long> fenwick(5);
-    
-    fenwick.add(0, 1);
-    fenwick.add(1, 2);
-    fenwick.add(2, 3);
-    fenwick.add(3, 4);
-    fenwick.add(4, 5);
-    
-    std::cout << fenwick.get(3) << std::endl;     // 6 (1+2+3)
-    std::cout << fenwick.get(1, 4) << std::endl;  // 9 (2+3+4)
-    std::cout << fenwick.get(5) << std::endl;     // 15 (总和)
-    
+    Fenwick<long long> fw(std::vector<long long>{2, 1, 4, 3, 5});
+
+    assert(fw.get(0) == 0);
+    assert(fw.get(3) == 7);      // [0, 3) -> 2 + 1 + 4 = 7
+    assert(fw.get(1, 4) == 8);   // [1, 4) -> 1 + 4 + 3 = 8
+
+    fw.add(2, 3);                // 数组变为 {2, 1, 7, 3, 5}
+    assert(fw.get(1, 4) == 11);
+
+    // 前缀和依次为: p=0:2, p=1:3, p=2:10, p=3:13, p=4:18
+    assert(fw.lower_bound(10) == 2);
+    assert(fw.lower_bound(11) == 3);
+    assert(fw.lower_bound(20) == 5);
     return 0;
 }
 ```
 
-### 用数组初始化
+## 相关文档
 
-```cpp
-#include "fenwick.hpp"
-#include <vector>
-#include <iostream>
-
-int main() {
-    std::vector<int> arr = {1, 2, 3, 4, 5};
-    Fenwick<int> fenwick(arr);
-    
-    std::cout << fenwick.get(3) << std::endl;  // 6
-    
-    fenwick.add(2, 10);  // arr[2] += 10
-    std::cout << fenwick.get(3) << std::endl;  // 16
-    
-    return 0;
-}
-```
-
-### 使用 lower_bound
-
-```cpp
-// 找到最小的 p，使得前缀和 >= value
-Fenwick<int> fenwick(5);
-fenwick.add(0, 3);
-fenwick.add(1, 2);
-fenwick.add(2, 5);
-fenwick.add(3, 1);
-fenwick.add(4, 4);
-
-int p = fenwick.lower_bound(10);
-// 返回 3，因为 get(3) = 10
-```
-
-### 求逆序对
-
-```cpp
-#include "fenwick.hpp"
-#include <vector>
-#include <algorithm>
-
-long long count_inversions(std::vector<int> arr) {
-    int n = arr.size();
-    
-    // 离散化
-    auto sorted = arr;
-    std::sort(sorted.begin(), sorted.end());
-    sorted.erase(std::unique(sorted.begin(), sorted.end()), sorted.end());
-    
-    for (int& x : arr) {
-        x = std::lower_bound(sorted.begin(), sorted.end(), x) - sorted.begin();
-    }
-    
-    Fenwick<long long> fenwick(sorted.size());
-    long long inversions = 0;
-    
-    for (int i = n - 1; i >= 0; --i) {
-        inversions += fenwick.get(arr[i]);
-        fenwick.add(arr[i], 1);
-    }
-    
-    return inversions;
-}
-```
-
-## 对比：Fenwick vs SegmentTree
-
-| 特性 | Fenwick | SegmentTree |
-|-----|---------|-------------|
-| 单点修改 | $O(\log n)$ | $O(\log n)$ |
-| 区间查询 | $O(\log n)$ | $O(\log n)$ |
-| 支持的运算 | 仅前缀和（可逆运算）| 任意满足结合律的运算 |
-| 常数因子 | 小 | 较大 |
-| 代码复杂度 | 简单 | 较复杂 |
-| 内存使用 | 小 | 较大 |
-
-**建议**：
-- 只需维护前缀和时，优先使用 Fenwick（更快更简洁）
-- 需要维护最值、GCD 等非前缀和信息时，使用 SegmentTree
-- 需要区间修改时，使用 LazySegmentTree
-
-## 实现说明
-
-- 使用标准的树状数组实现
-- `lower_bound` 使用倍增法实现，从高位到低位逐步确定答案
-- 1-indexed 内部实现，对外接口为 0-indexed
+- [Fenwick2D](fenwick2d.md) —— 二维树状数组
+- [SegmentTree](segtree.md) —— 支持一般结合律半群运算与区间二分的线段树
+- [CoordinateCompression](coordinate_compression.md) —— 配合树状数组处理大值域偏序统计

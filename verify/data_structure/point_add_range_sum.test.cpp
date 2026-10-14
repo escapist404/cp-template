@@ -1,29 +1,31 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/point_add_range_sum"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 
 #include "../../include/fenwick.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, q;
-	std::cin >> n >> q;
+	io >> n >> q;
 	Fenwick<long long> fenwick(n);
 	for (int i = 0; i < n; ++i) {
 		long long value;
-		std::cin >> value;
+		io >> value;
 		fenwick.add(i, value);
 	}
 	while (q--) {
 		int t;
-		std::cin >> t;
+		io >> t;
 		if (t == 0) {
 			int p;
 			long long value;
-			std::cin >> p >> value;
+			io >> p >> value;
 			fenwick.add(p, value);
 		} else {
 			int l, r;
-			std::cin >> l >> r;
+			io >> l >> r;
 			std::cout << fenwick.get(l, r) << '\n';
 		}
 	}

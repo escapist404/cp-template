@@ -4,6 +4,8 @@
 #include <utility>
 #include <vector>
 
+// 0-based tree diameter via two DFS passes (requires non-negative edge weights). O(n).
+
 template <typename T>
 std::pair<T, int> tree_diameter_farthest(const std::vector<std::vector<std::pair<int, T>>>& adj,
 			int start) {

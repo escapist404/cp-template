@@ -9,6 +9,8 @@
 
 #include "miller_rabin.hpp"
 
+// Pollard-Rho randomized prime factorization returning sorted prime factors with multiplicity.
+
 inline u64 pollard_rho_split(u64 n) {
 	if (n % 2 == 0) return 2;
 	static std::mt19937_64 generator(

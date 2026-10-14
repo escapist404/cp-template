@@ -46,6 +46,10 @@ public:
 	i64 prime_count() const { return counts.front(); }
 	i64 prime_sum() const { return narrow(sums.front()); }
 
+	std::vector<i64> quotients() const {
+		return std::vector<i64>(values.rbegin(), values.rend());
+	}
+
 	// Sum f(i), 1 <= i <= n, where f(1) = 1 and f(p) = a*p + b.
 	// prime_power(p, e, power) returns f(p^e); power = p^e.
 	template <typename PrimePower>

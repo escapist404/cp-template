@@ -90,7 +90,7 @@ std::vector<MatrixTreeEdge<mint>> edges = { {0,1}, {1,2}, {0,2} };
 std::cout << matrix_tree<mint>(3, edges) << '\n';
 ```
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **`T` 必须支持精确除法**。内部用 **Bareiss** 消元（源码注释：`// Bareiss elimination keeps every intermediate value integral.`），`int` / `long long` 可以（Bareiss 保证整除），`ModInt` 等域也可以。**浮点类型虽然能编译，但精度无保证**。
 - **不连通图返回 `T(0)`**（行列式为 0）。源码**没有显式判定**，需要调用方自己意识到这一点。

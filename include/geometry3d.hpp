@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "geometry_base.hpp"
 
+// 3D vectors, lines, planes, and spheres: dot/cross products, distances, and intersections.
+
 struct Vector3 {
 	Real x, y, z;
 

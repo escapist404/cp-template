@@ -6,6 +6,8 @@
 #include <vector>
 #include "inter.hpp"
 
+// Circle primitives: circumcircle, incircle, tangent lines, circle-line/circle-circle intersections, and intersection area.
+
 inline std::vector<Point> line_circle_intersection(const Line& line, const Circle& circle) {
     const Point foot = line.projection(circle.center);
     const Real distance_to_line = distance(foot, circle.center);

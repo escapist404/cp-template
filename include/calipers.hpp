@@ -6,6 +6,8 @@
 #include <vector>
 #include "geometry_base.hpp"
 
+// Rotating calipers on a counter-clockwise convex hull: diameter and minimum-area/perimeter bounding rectangle.
+
 inline Real convex_polygon_diameter_squared(const std::vector<Point>& polygon) {
     const int n = polygon.size();
     if (n < 2) {

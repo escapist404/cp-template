@@ -9,6 +9,8 @@
 #include "exgcd.hpp"
 #include "modular_arithmetic.hpp"
 
+// Lucas and exLucas theorem for binomial coefficients C(n, m) mod p (prime or arbitrary square-free/composite).
+
 inline i64 lucas_valuation(i64 n, i64 p) {
 	i64 result = 0;
 	while (n) result += n /= p;

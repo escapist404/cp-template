@@ -7,6 +7,8 @@
 
 #include "bit.hpp"
 
+// Dynamic-length bitset backed by 64-bit blocks. O(n / 64) bitwise operations and popcount.
+
 class DynamicBitset {
 	using Block = std::uint64_t;
 	static constexpr int block_bits = 64;

@@ -12,6 +12,7 @@
 // temporary data structure after EACH partition, before either child runs.
 // finish(event, value) records query answers; it may ignore update events.
 // Event and value types are generic. Include a sentinel in the domain if needed.
+
 template <typename Event, typename Integer, typename Route, typename Rollback, typename Finish>
 void overall_binary_search(std::vector<Event> events, Integer low, Integer high,
 	Route route, Rollback rollback, Finish finish) {

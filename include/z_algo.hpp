@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <string>
 
+// Z-algorithm: z[i] is the LCP length of s and s[i..n), with z[0] = n. O(n).
+
 std::vector<int> z_algorithm(const std::string& s) {
     int n = s.size();
     std::vector<int> z(n);

@@ -155,7 +155,7 @@ if (decimal_at_least(exponent_string, phi)) {
 }
 ```
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **文件名叫 `euler` 但内容不是欧拉路径**。找欧拉路径请去 [euler_path.hpp](euler_path.md)。
 - **`euler_power` 要求 $\gcd(a, \mathrm{mod}) = 1$**，不满足时断言失败。不互素必须用 `extended_euler_power`。

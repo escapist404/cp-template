@@ -5,6 +5,8 @@
 #include <vector>
 #include "geometry_base.hpp"
 
+// 2D line-line and segment-segment intersection tests and intersection point calculation.
+
 inline int line_relation(const Line& a, const Line& b) {
     if (dcmp(cross(a.end - a.start, b.end - b.start)) != 0) {
         return 1;

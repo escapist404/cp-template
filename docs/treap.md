@@ -1,112 +1,83 @@
-# Treap
+# Treap (`treap.hpp`)
 
-FHQ Treap，带重复键的有序多重集。
+`treap.hpp` 实现基于旋转/分裂合并的随机化平衡二叉搜索树 `Treap<T, Compare>`（有序多重集合），支持插入重复元素、单次删除一个副本、按值查排名、按排名查值以及严格前驱与后继查询。
 
-## 模板参数
+## 接口说明
+
+### 类模板与构造
 
 ```cpp
 template <typename T = int, typename Compare = std::less<T>>
-class Treap;
+class Treap {
+public:
+    Treap();
+    Treap(const Compare& compare);
+    Treap(const Treap&) = delete;
+    Treap& operator=(const Treap&) = delete;
+    ~Treap();
+};
 ```
 
-源码注释：`// FHQ Treap with duplicate keys.`
+- `T`：元素类型，默认 `int`。由于 `get_prev` 和 `get_next` 使用 `std::numeric_limits<T>::lowest()` 与 `std::numeric_limits<T>::max()` 作为不存在时的返回值，若使用这两个接口，`T` 应当特化了 `std::numeric_limits`（如标准算术类型）。
+- `Compare`：严格弱序比较器，默认 `std::less<T>`（升序排列）。内部通过 `!compare(a, b) && !compare(b, a)` 判定两元素相等并合并计数 `count`。
+- 树节点通过 `new` 动态分配并在析构函数中递归释放，因此**禁用了拷贝构造与拷贝赋值**；传递 `Treap` 时请使用引用或指针。
 
-## 构造与拷贝
-
-```cpp
-Treap() = default;
-Treap(const Compare &compare);
-```
-
-**禁止拷贝**：拷贝构造与拷贝赋值均被 `= delete`。需要传递时用引用。
-
-## 成员函数
+### 成员函数
 
 ```cpp
-void insert(const T &key);
-void remove(const T &key);
-
-int get_rank(const T &key) const;      // 1-based
-T   get_value(const int rank) const;   // rank 为 1-based
-T   get_prev(const T &key) const;      // 严格小于 key 的最大值
-T   get_next(const T &key) const;      // 严格大于 key 的最小值
+void insert(const T& key);
+void remove(const T& key);
+int get_rank(const T& key) const;
+T get_value(int rank) const;
+T get_prev(const T& key) const;
+T get_next(const T& key) const;
 Compare key_comp() const;
 ```
 
-### 名次语义
+- `insert(key)`：向多重集中插入一个 `key`。若 `key` 已存在则将对应节点的 `count` 加 $1$。
+- `remove(key)`：从多重集中删除**一个**等于 `key` 的元素（若 `count > 1` 则仅减 $1$；若 `count == 1` 则移除节点；若 `key` 不存在则无操作）。
+- `get_rank(key)`：返回 `key` 的 **`1-based` 排名**，定义为多重集中严格排在 `key` 前面（即满足 `compare(x, key)`）的元素个数加 $1$。即使 `key` 未插入树中，也可正常返回其假想插入位置的排名。
+- `get_value(rank)`：返回 **`1-based` 排名**为 `rank` 的元素值。**调用者必须保证 $1 \le \text{rank} \le \text{总元素个数}$**，若越界将解引用空指针导致未定义行为。
+- `get_prev(key)`：返回严格小于 `key`（即满足 `compare(x, key)`）的最后一个元素；若不存在则返回 `std::numeric_limits<T>::lowest()`。
+- `get_next(key)`：返回严格大于 `key`（即满足 `compare(key, x)`）的第一个元素；若不存在则返回 `std::numeric_limits<T>::max()`。
+- `key_comp()`：返回当前使用的比较器副本。
 
-- `get_rank` 与 `get_value` 都是 **1-based**，且统计的是**元素个数**（含重复）
-- `get_rank` 对**不存在的键**返回「若插入应处的位置」，不报错、不返回 0
-- `get_value(rank)` 越界时**无边界检查**，会解引用空指针
+## 复杂度
 
-### 前驱与后继的哨兵
-
-- `get_prev` 在不存在时返回 `std::numeric_limits<T>::lowest()`
-- `get_next` 在不存在时返回 `std::numeric_limits<T>::max()`
-
-**没有 `bool` 或 `std::optional` 返回**，调用者需自行判范围。这也意味着 `T` 必须支持 `numeric_limits`。
+- 单次 `insert`、`remove`、`get_rank`、`get_value`、`get_prev`、`get_next`：期望时间复杂度均为 $O(\log m)$，其中 $m$ 为树中不同键值的个数。
+- 空间复杂度：$O(m)$，相同键值共享同一个节点。
 
 ## 使用示例
 
 ```cpp
 #include "treap.hpp"
-#include <iostream>
+#include <cassert>
+#include <limits>
 
 int main() {
-    Treap<int> treap;
+    Treap<int> tr;
+    tr.insert(10);
+    tr.insert(20);
+    tr.insert(20);
+    tr.insert(30);
 
-    treap.insert(5);
-    treap.insert(1);
-    treap.insert(3);
-    treap.insert(3);   // 重复键
+    assert(tr.get_rank(20) == 2);
+    assert(tr.get_value(1) == 10);
+    assert(tr.get_value(2) == 20);
+    assert(tr.get_value(3) == 20);
+    assert(tr.get_value(4) == 30);
 
-    std::cout << treap.get_rank(3) << '\n';    // 1-based 名次
-    std::cout << treap.get_value(1) << '\n';   // 最小值 1
-    std::cout << treap.get_prev(3) << '\n';    // 1
-    std::cout << treap.get_next(3) << '\n';    // 5
+    assert(tr.get_prev(20) == 10);
+    assert(tr.get_next(20) == 30);
+    assert(tr.get_prev(10) == std::numeric_limits<int>::lowest());
 
-    treap.remove(3);   // 只减一个
-
+    tr.remove(20); // 仅删除一个 20，还剩一个 20
+    assert(tr.get_value(2) == 20 && tr.get_value(3) == 30);
     return 0;
 }
 ```
 
-### 当作有序集合用
-
-```cpp
-// 前驱判空
-int prev = treap.get_prev(x);
-if (prev != std::numeric_limits<int>::lowest()) {
-    // 存在严格小于 x 的元素
-}
-
-// 后继判空
-int next = treap.get_next(x);
-if (next != std::numeric_limits<int>::max()) {
-    // 存在严格大于 x 的元素
-}
-```
-
-### 逆序（大顶）
-
-```cpp
-Treap<int, std::greater<int>> treap;
-```
-
-## 前置条件与实现约定
-
-- **禁止拷贝**。`Treap<int> b = a;` 无法编译，函数返回 / 按值传参也不行，必须用引用或指针。
-- `get_prev` / `get_next` 用 `numeric_limits` 哨兵表示「不存在」。当 `T` 为 `int` 且数据中真的含有 `INT_MIN` / `INT_MAX` 时，无法区分「不存在」与「找到了这个值」。数据范围可能触及类型边界时，改用其他容器或自行封装。
-- `get_value(rank)` **无边界检查**，rank 越界会崩溃。
-- `get_rank` 对不存在的键返回应插入位置，不会失败——若业务上需要「查不到就报错」，得自己再加一次查询。
-- 优先级用 `std::uniform_int_distribution<int>`，可能出现相等；源码在 `priority > cur->priority` 时才分裂，相等不触发，treap 性质仍保持。
-- 随机源来自 `std::random_device{}()`，**非确定性**。需要可复现的调试时注意。
-- 析构是递归的，**深度很大时可能栈溢出**（源码未说明深度上界或迭代化处理）。
-- 两个指针都是裸指针，**没有内存池**，频繁插入删除会有较多 `new` / `delete` 开销。
-
 ## 相关文档
 
-- [ScapegoatTree](scapegoat.md) —— 无随机化的替代，同样带重复键
-- [WaveletTree](wavelet_tree.md) —— 静态序列的 k 小查询，空间更省
-- [PersistentSegmentTree](persistent_segtree.md) —— 区间第 k 小
-- [LeftistHeap](leftist_heap.md) —— 只需堆操作时的可合并版本
+- [ImplicitTreap](implicit_treap.md) —— 维护序列下标、支持区间翻转与移动的无旋 Treap
+- [ScapegoatTree](scapegoat.md) —— 基于重量平衡重构的替罪羊树

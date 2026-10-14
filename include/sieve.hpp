@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+// Linear sieve for primes, smallest prime factors, and multiplicative functions on [0, n].
+
 template <typename OnPrime, typename OnComposite>
 std::vector<int> sieve(int n, OnPrime on_prime, OnComposite on_composite) {
 	if (n < 2) return {};

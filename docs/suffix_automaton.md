@@ -157,7 +157,7 @@ for (int i = 1; i < (int)occ.size(); ++i) {
 }
 ```
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **`terminals` 不是最终出现次数**。`add` 中新建的 `cur` 置 1、clone 置 0，它只表示「该状态是否对应某个前缀的 endpos 代表」。要得到出现次数**必须调用 `occurrences()`** 做 link 树传播。
 - **`build` 会清空历史**：它内部先 `nodes.assign(1, Node{})`。想连续追加多个字符串的字符只能用 `add`。

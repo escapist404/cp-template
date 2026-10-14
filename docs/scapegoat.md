@@ -1,122 +1,85 @@
-# ScapegoatTree
+# Scapegoat Tree (`scapegoat.hpp`)
 
-维护一个支持重复键的有序多重集，提供排名、前驱、后继和按排名取值等查询。
+`scapegoat.hpp` 实现基于重量平衡因子 $\alpha = \frac{2}{3}$ 暴力拍平重构的替罪羊树 `ScapegoatTree<T, Compare>`（有序多重集合），支持插入重复元素、单次删除一个副本、集合大小查询、按值查排名、按排名查值以及严格前驱与后继查询。
 
-## 模板参数
+## 接口说明
+
+### 类模板与构造函数
 
 ```cpp
 template <typename T = int, typename Compare = std::less<T>>
-class ScapegoatTree;
+class ScapegoatTree {
+public:
+    ScapegoatTree();
+    ScapegoatTree(Compare compare);
+    ScapegoatTree(const ScapegoatTree&) = delete;
+    ScapegoatTree& operator=(const ScapegoatTree&) = delete;
+    ~ScapegoatTree();
+};
 ```
 
-源码注释：
+- `T`：元素类型，默认 `int`。由于 `get_prev` 和 `get_next` 使用 `std::numeric_limits<T>::lowest()` 与 `std::numeric_limits<T>::max()` 作为不存在时的返回值，若调用这两个接口，`T` 需具有对应的 `std::numeric_limits` 特化。
+- `Compare`：严格弱序比较器，默认 `std::less<T>`（升序）。相等元素共享同一个树节点并通过 `count` 计数。
+- 树节点通过 `new` 动态分配并在析构函数中释放，因此**禁用了拷贝构造与拷贝赋值**。
 
-```
-// Scapegoat tree (ordered multiset) with duplicate keys.
-// All ordinary operations are amortized O(log n); rebuilding a subtree is
-// linear in that subtree's size.
-```
-
-**平衡因子** `alpha = 2.0 / 3.0`，是 `static constexpr`，运行期不可配置。
-
-## 构造与拷贝
+### 成员函数
 
 ```cpp
-ScapegoatTree() = default;
-ScapegoatTree(const Compare &compare);
-```
-
-**禁止拷贝**（拷贝构造与拷贝赋值均 `= delete`）。
-
-## 成员函数
-
-```cpp
-void insert(const T &key);
-void remove(const T &key);
-
-int  size() const;      // 元素总数（含重复）
+void insert(T key);
+void remove(T key);
+int size() const;
 bool empty() const;
-
-int get_rank(const T &key) const;      // 1-based
-T   get_value(const int rank) const;   // 1-based
-T   get_prev(const T &key) const;      // 哨兵 lowest()
-T   get_next(const T &key) const;      // 哨兵 max()
+int get_rank(T key) const;
+T get_value(int rank) const;
+T get_prev(T key) const;
+T get_next(T key) const;
 Compare key_comp() const;
 ```
 
-## 两个「大小」的区别
+- `insert(T key)`：向多重集中插入一个 `key`。若 `key` 是新键值且插入深度超过 $\lfloor \log_{3/2}(\text{max\_nodes}) \rfloor$，则沿插入路径自底向上找到第一个满足 `3 * child->nodes > 2 * parent->nodes` 的失衡祖先并将其拍平重构为完全平衡树。
+- `remove(T key)`：从多重集中删除**一个**等于 `key` 的元素（若 `count > 1` 则仅减 $1$；若 `count == 1` 则真正移除树节点；若 `key` 不存在则无操作）。当树中剩余不同节点数低于历史峰值 `max_nodes` 的 $\frac{2}{3}$ 时，会对整棵树触发一次重构。
+- `size() const` / `empty() const`：返回多重集中的**元素总数**（含重复元素的 `count` 累加）以及集合是否为空。
+- `get_rank(T key) const`：返回 `key` 的 **`1-based` 排名**，即严格排在 `key` 前面（满足 `compare(x, key)`）的元素个数加 $1$（`key` 不必存在于树中）。
+- `get_value(int rank) const`：返回 **`1-based` 排名**为 `rank` 的元素值。**调用者必须保证 $1 \le \text{rank} \le \text{size()}$**，越界访问将解引用空指针。
+- `get_prev(T key) const`：返回严格小于 `key` 的最大元素；若不存在则返回 `std::numeric_limits<T>::lowest()`。
+- `get_next(T key) const`：返回严格大于 `key` 的最小元素；若不存在则返回 `std::numeric_limits<T>::max()`。
 
-节点内部同时维护：
+## 复杂度
 
-- `size`：**元素总数**（含重复）
-- `nodes`：**节点个数**（重复键被压缩在同一节点）
-
-因此 `size()` 返回的是元素数，与节点数不同。例如插入三次 `3`，`size() == 3`，而树中只有 1 个节点。
+- `size`、`empty`：$O(1)$。
+- `insert`、`remove`：均摊时间复杂度 $O(\log m)$，其中 $m$ 为不同键值的节点数（单次重构耗时 $O(\text{subtree\_nodes})$）。
+- `get_rank`、`get_value`、`get_prev`、`get_next`：最坏时间复杂度 $O(\log m)$。
+- 空间复杂度：$O(m)$。
 
 ## 使用示例
 
 ```cpp
 #include "scapegoat.hpp"
-#include <iostream>
+#include <cassert>
 
 int main() {
     ScapegoatTree<int> tree;
+    tree.insert(15);
+    tree.insert(10);
+    tree.insert(20);
+    tree.insert(10);
 
-    tree.insert(5);
-    tree.insert(1);
-    tree.insert(3);
-    tree.insert(3);
+    assert(tree.size() == 4);
+    assert(tree.get_rank(15) == 3);
+    assert(tree.get_value(1) == 10);
+    assert(tree.get_value(2) == 10);
+    assert(tree.get_value(3) == 15);
+    assert(tree.get_prev(15) == 10);
+    assert(tree.get_next(15) == 20);
 
-    std::cout << tree.size() << '\n';          // 4（含重复）
-    std::cout << tree.get_rank(3) << '\n';     // 1-based
-    std::cout << tree.get_value(1) << '\n';    // 1
-    std::cout << tree.get_prev(3) << '\n';     // 1
-    std::cout << tree.get_next(3) << '\n';     // 5
-
-    tree.remove(3);                             // 只减一个
-
-    std::cout << tree.empty() << '\n';
-
+    tree.remove(10);
+    assert(tree.size() == 3);
+    assert(tree.get_rank(15) == 2);
     return 0;
 }
 ```
 
-### 在有序表上跑滑窗平衡
-
-```cpp
-// 维护一个可重复的有序多重集，求中位数
-int median(ScapegoatTree<int> &tree) {
-    int n = tree.size();
-    if (n % 2 == 1) return tree.get_value(n / 2 + 1);
-    return (tree.get_value(n / 2) + tree.get_value(n / 2 + 1)) / 2;
-}
-```
-
-## 前置条件与实现约定
-
-- **禁止拷贝**（与 [Treap](treap.md) 一致）。
-- `get_prev` / `get_next` 用 `numeric_limits<T>::lowest()` / `::max()` 作哨兵，**没有额外的失败信号**，数据可能触及类型边界时无法区分「不存在」。
-- `get_value(rank)` **无边界检查**，越界会解引用空指针。
-- `alpha` 固定为 $2/3$，无法按题目调优。
-- 重复键由 `count` 压缩，`size()` 计元素数、节点内部 `nodes` 计节点数，两者不同。
-- 插入时若命中已有键（只增 `count`）**不触发重建**，因此纯重复插入不会失衡。
-- 析构递归，深度大时可能栈溢出。
-- `remove` 删除结点时用左子树最大值（前驱）替换，随后右子树指针重新接上。
-- `max_nodes` 只增不减，直到触发整树重建才被重置。
-
-## 与 Treap 的取舍
-
-| | ScapegoatTree | Treap |
-|---|---|---|
-| 随机化 | 无 | 是 |
-| 平衡方式 | 失衡时重建子树 | 随机优先级 |
-| 最坏复杂度 | 摊还 $O(\log n)$ | 期望 $O(\log n)$ |
-| 额外空间 | 无 | 每节点一个优先级 |
-
-两者的公开接口**基本一致**（`insert` / `remove` / `get_rank` / `get_value` / `get_prev` / `get_next` / `key_comp`），可直接替换。区别是 `ScapegoatTree` 额外提供 `size()` 与 `empty()`。
-
 ## 相关文档
 
-- [Treap](treap.md) —— 随机化版本
-- [WaveletTree](wavelet_tree.md) —— 静态序列
-- [LeftistHeap](leftist_heap.md) —— 可合并堆
+- [Treap](treap.md) —— 基于随机优先级的平衡二叉搜索树
+- [ImplicitTreap](implicit_treap.md) —— 按序列位置分裂合并的无旋 Treap

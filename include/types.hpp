@@ -4,6 +4,8 @@
 #include <complex>
 #include <iostream>
 
+// Common fixed-width integer/float/complex aliases and std::ostream operator<< for i128.
+
 using i64 = long long;
 using u64 = unsigned long long;
 using i128 = __int128_t;

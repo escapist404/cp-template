@@ -15,6 +15,14 @@ template <typename T, size_t R = 0, size_t C = 0>
 class Matrix;
 
 template <typename T>
+struct MatrixRankZero {
+	bool operator()(const T& value) const { return value == T{}; }
+};
+
+template <typename T, size_t R, size_t C, typename IsZero>
+int matrix_rank_impl(Matrix<T, R, C> matrix, IsZero is_zero);
+
+template <typename T>
 class Matrix<T, 0, 0> {
 private:
 	size_t R, C;
@@ -43,6 +51,11 @@ public:
 
 	size_t rows() const { return R; }
 	size_t columns() const { return C; }
+
+	template <typename IsZero = MatrixRankZero<T>>
+	int rank(IsZero is_zero = IsZero{}) const {
+		return matrix_rank_impl(*this, is_zero);
+	}
 
 	void resize(size_t row, size_t column) {
 		const size_t new_R = row ? row : R;
@@ -152,6 +165,11 @@ public:
 	size_t rows() const { return R; }
 	size_t columns() const { return C; }
 
+	template <typename IsZero = MatrixRankZero<T>>
+	int rank(IsZero is_zero = IsZero{}) const {
+		return matrix_rank_impl(*this, is_zero);
+	}
+
 	std::array<T, C>& operator[](size_t index) { return data[index]; }
 	const std::array<T, C>& operator[](size_t index) const { return data[index]; }
 
@@ -200,6 +218,28 @@ public:
 		return G;
 	}
 };
+
+template <typename T, size_t R, size_t C, typename IsZero>
+int matrix_rank_impl(Matrix<T, R, C> matrix, IsZero is_zero) {
+	int n = matrix.rows(), m = matrix.columns(), rank = 0;
+	for (int col = 0; col < m && rank < n; ++col) {
+		int pivot = rank;
+		while (pivot < n && is_zero(matrix[pivot][col])) ++pivot;
+		if (pivot == n) continue;
+		for (int j = col; j < m; ++j)
+			std::swap(matrix[rank][j], matrix[pivot][j]);
+		T inverse = T(1) / matrix[rank][col];
+		for (int j = col; j < m; ++j) matrix[rank][j] *= inverse;
+		for (int i = rank + 1; i < n; ++i) {
+			T factor = matrix[i][col];
+			if (is_zero(factor)) continue;
+			for (int j = col; j < m; ++j)
+				matrix[i][j] -= factor * matrix[rank][j];
+		}
+		++rank;
+	}
+	return rank;
+}
 
 template <typename T, size_t R, size_t C>
 Matrix<T, 0, 0> operator*(const Matrix<T, R, C>& A,

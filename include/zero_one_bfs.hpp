@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+// 0-based single-source shortest paths for graphs with edge weights in {0, 1} in O(n + m).
+
 std::vector<int> zero_one_bfs(
 		const std::vector<std::vector<std::pair<int, int>>>& adj, int source) {
 	assert(0 <= source && source < (int)adj.size());

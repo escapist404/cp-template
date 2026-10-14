@@ -1,5 +1,6 @@
 #ifndef MODINT_HPP
 #define MODINT_HPP
+
 #include <cassert>
 #include <iostream>
 #include <type_traits>

@@ -1,19 +1,21 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/set_xor_min"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <set>
 
 #include "../../include/binary_trie.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int q;
-	std::cin >> q;
+	io >> q;
 	BinaryTrie<unsigned, 30> trie;
 	std::set<unsigned> values;
 	while (q--) {
 		int type;
 		unsigned x;
-		std::cin >> type >> x;
+		io >> type >> x;
 		if (type == 0) {
 			if (values.insert(x).second) trie.insert(x);
 		} else if (type == 1) {

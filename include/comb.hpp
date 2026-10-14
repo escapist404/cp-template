@@ -5,6 +5,8 @@
 
 #include "modint.hpp"
 
+// Binomial coefficients C(n, k) and factorials modulo prime using O(N) precomputation and O(1) queries.
+
 template <typename Z>
 class Combinatorics {
 public:

@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+// 0-based coordinate compression: returns {sorted_unique_values, compressed_indices} in O(n log n).
+
 template <typename T>
 std::pair<std::vector<T>, std::vector<int>> coordinate_compress(
 		const std::vector<T>& values) {

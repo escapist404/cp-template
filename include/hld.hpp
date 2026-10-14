@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <utility>
 
+// 0-based Heavy-Light Decomposition. Call prework(root) after add_edge(); subtree_range(u) is [l, r).
+
 class HeavyLightDecomposition {
 	int n;
 	std::vector<std::vector<int>> adj;

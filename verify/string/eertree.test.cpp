@@ -1,13 +1,15 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/eertree"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <string>
 
 #include "../../include/palindromic_tree.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	std::string s;
-	std::cin >> s;
+	io >> s;
 	PalindromicTree<char> tree;
 	std::vector<int> last;
 	for (int i = 0; i < (int)s.size(); ++i) {

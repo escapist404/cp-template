@@ -5,7 +5,10 @@
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <type_traits>
+
+// Buffered fread/fwrite fast I/O. Do not mix input with std::cin or scanf.
 
 template <int Len>
 class OptimizedIO {
@@ -30,7 +33,21 @@ public:
         ch = eof ? '\0' : buf_in[pos_in++];
         return *this;
     }
-    template <typename T> OptimizedIO& operator>>(T& value) {
+    OptimizedIO& operator>>(std::string& value) {
+        value.clear();
+        char ch = '\0';
+        do {
+            *this >> ch;
+            if (!ch) return *this;
+        } while (isspace((unsigned char)ch));
+        while (ch && !isspace((unsigned char)ch)) {
+            value.push_back(ch);
+            *this >> ch;
+        }
+        return *this;
+    }
+    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    OptimizedIO& operator>>(T& value) {
         using U = typename std::make_unsigned<T>::type;
         U magnitude = 0;
         bool sign = true;
@@ -48,6 +65,22 @@ public:
         } else {
             value = (T)(~magnitude + 1);
         }
+        return *this;
+    }
+    template <typename T, std::enable_if_t<std::is_floating_point<T>::value, int> = 0>
+    OptimizedIO& operator>>(T& value) {
+        std::string token;
+        *this >> token;
+        value = (T)std::strtod(token.c_str(), nullptr);
+        return *this;
+    }
+    template <typename T,
+            std::enable_if_t<!std::is_integral<T>::value &&
+                    !std::is_floating_point<T>::value, int> = 0>
+    OptimizedIO& operator>>(T& value) {
+        long long number;
+        *this >> number;
+        value = T(number);
         return *this;
     }
     OptimizedIO& operator<<(char ch) {

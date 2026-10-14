@@ -6,6 +6,8 @@
 #include <limits>
 #include <type_traits>
 
+// Integer bit manipulation, power-of-two rounding, log2, and exact integer sqrt utilities.
+
 template <typename T>
 using unsigned_integer_t = std::make_unsigned_t<T>;
 

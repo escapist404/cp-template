@@ -1,22 +1,24 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/lca"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 
 #include "../../include/binary_lifting_lca.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, q;
-	std::cin >> n >> q;
+	io >> n >> q;
 	BinaryLiftingLCA lca(n);
 	for (int v = 1; v < n; ++v) {
 		int parent;
-		std::cin >> parent;
+		io >> parent;
 		lca.add_edge(parent, v);
 	}
 	lca.prework(0);
 	while (q--) {
 		int u, v;
-		std::cin >> u >> v;
+		io >> u >> v;
 		std::cout << lca.lca(u, v) << '\n';
 	}
 }

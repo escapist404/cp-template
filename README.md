@@ -27,14 +27,15 @@ make pdf
 ```bash
 make test          # 运行测试
 make stress        # 运行对拍
-make pdf           # 生成黑白打印版
-make pdf-colored   # 生成彩色版
-make pdf-icpc      # 双栏精简版，检查总页数不超过 25
+make pdf           # 生成包含全部文档与代码的黑白打印版 (codebook.pdf)
+make pdf-colored   # 生成包含全部文档与代码的彩色版 (codebook.pdf)
+make pdf-code      # 仅生成纯代码版 (codebook-code.pdf)
+make pdf-docs      # 仅生成纯文档版 (codebook-docs.pdf)
 make test-code2pdf # 测试 PDF 生成器
 make clean         # 删除生成的 PDF
 ```
 
-默认生成带封面的黑白 A4 纸质版：等宽代码、中文字体支持、双栏目录、罗马目录页码和左右交替的双面页码。按 **100% / 实际大小** 打印，避免打印机再次缩小字号；双面打印选择长边翻转。详细选项见 [打印指南](docs/PRINT_GUIDE.md)。
+默认 `make pdf` 会按 `codebook.conf` 的分类顺序，把每个模块的 `docs/<name>.md` 文档与 `include/<name>.hpp` 源码穿插合订生成带封面的黑白 A4 纸质版 `codebook.pdf`：等宽代码、中文字体支持、双栏目录、罗马目录页码和左右交替的双面页码。按 **100% / 实际大小** 打印，避免打印机再次缩小字号；双面打印选择长边翻转。详细选项见 [打印指南](docs/PRINT_GUIDE.md)。
 
 测试按算法类别放在 `tests/`，详见 [测试说明](tests/README.md)。
 

@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/range_affine_range_sum"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -24,26 +25,27 @@ Lazy composition(Lazy f, Lazy g) {
 Lazy identity_lazy() { return {1, 0}; }
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, q;
-	std::cin >> n >> q;
+	io >> n >> q;
 	std::vector<Value> a(n);
 	for (auto& x : a) {
-		std::cin >> x.first;
+		io >> x.first;
 		x.second = 1;
 	}
 	LazySegmentTree<Value, operation, identity_value, Lazy,
 			mapping, composition, identity_lazy> tree(a);
 	while (q--) {
 		int type;
-		std::cin >> type;
+		io >> type;
 		if (type == 0) {
 			int l, r;
 			Lazy f;
-			std::cin >> l >> r >> f.first >> f.second;
+			io >> l >> r >> f.first >> f.second;
 			tree.apply(l, r, f);
 		} else {
 			int l, r;
-			std::cin >> l >> r;
+			io >> l >> r;
 			std::cout << tree.prod(l, r).first << '\n';
 		}
 	}

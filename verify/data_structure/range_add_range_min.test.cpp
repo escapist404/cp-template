@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/range_add_range_min"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <vector>
 
@@ -15,18 +16,19 @@ Lazy composition(Lazy f, Lazy g) { return f + g; }
 Lazy identity_lazy() { return 0; }
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, q;
-	std::cin >> n >> q;
+	io >> n >> q;
 	std::vector<Value> a(n);
-	for (auto& x : a) std::cin >> x;
+	for (auto& x : a) io >> x;
 	LazySegmentTree<Value, operation, identity_value, Lazy,
 			mapping, composition, identity_lazy> tree(a);
 	while (q--) {
 		int type, l, r;
-		std::cin >> type >> l >> r;
+		io >> type >> l >> r;
 		if (type == 0) {
 			Lazy x;
-			std::cin >> x;
+			io >> x;
 			tree.apply(l, r, x);
 		} else {
 			std::cout << tree.prod(l, r) << '\n';

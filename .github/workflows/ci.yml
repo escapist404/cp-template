@@ -13,14 +13,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - name: Install PDF tool dependencies
-        run: python -m pip install pygments reportlab
+      - name: Install PDF fonts and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk fonts-dejavu-core
+          python -m pip install pygments reportlab
       - name: Run C++ tests
         run: make test
       - name: Test PDF generator
         run: make test-code2pdf
-      - name: Build ICPC preset
-        run: make pdf-icpc
+      - name: Build combined Code + Docs PDF
+        run: make pdf
+      - name: Upload codebook.pdf artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codebook-pdf
+          path: codebook.pdf
 
   library-checker:
     runs-on: ubuntu-latest

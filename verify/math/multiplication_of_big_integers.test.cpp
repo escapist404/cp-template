@@ -1,15 +1,19 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/multiplication_of_big_integers"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
+#include <string>
 
 #include "../../include/bigint.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n;
-	std::cin >> n;
+	io >> n;
 	while (n--) {
-		BigInt a, b;
-		std::cin >> a >> b;
+		std::string sa, sb;
+		io >> sa >> sb;
+		BigInt a(sa), b(sb);
 		std::cout << a * b << '\n';
 	}
 }

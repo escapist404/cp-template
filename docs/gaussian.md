@@ -11,3 +11,12 @@ GaussianResult<T> gaussian_elimination(
 ```
 
 元素类型需要支持加减乘除和零判断。整数模意义下应使用 `ModInt`，浮点数则可使用默认的近零判断策略。
+
+矩阵类还提供只求秩的 `rank()` 成员函数，不构造特解和零空间，适合只需要秩且矩阵元素较多的场景：
+
+```cpp
+template <typename IsZero = MatrixRankZero<T>>
+int Matrix<T, R, C>::rank(IsZero is_zero = IsZero{}) const;
+```
+
+`matrix_rank(vector, n, m)` 是对应的行优先数据接口；当 `n == 0` 或 `m == 0` 时直接返回 `0`。

@@ -5,6 +5,8 @@
 #include <functional>
 #include <string>
 
+// Duval algorithm finding the 0-based starting index of the lexicographically smallest cyclic shift in O(n).
+
 template <typename Sequence, typename Compare = std::less<>>
 int minimal_rotation(const Sequence& sequence, Compare compare = Compare{}) {
 	int n = sequence.size();

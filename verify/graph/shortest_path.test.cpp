@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/shortest_path"
 
+#include "../../include/fastio.hpp"
 #include <algorithm>
 #include <iostream>
 #include <queue>
@@ -14,14 +15,15 @@ struct Edge {
 };
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, m, s, t;
-	std::cin >> n >> m >> s >> t;
+	io >> n >> m >> s >> t;
 	std::vector<std::vector<std::pair<int, long long>>> graph(n);
 	std::vector<std::vector<int>> edge_ids(n);
 	std::vector<Edge> edges;
 	for (int i = 0; i < m; ++i) {
 		Edge edge;
-		std::cin >> edge.from >> edge.to >> edge.weight;
+		io >> edge.from >> edge.to >> edge.weight;
 		graph[edge.from].push_back({edge.to, edge.weight});
 		edge_ids[edge.from].push_back(i);
 		edges.push_back(edge);

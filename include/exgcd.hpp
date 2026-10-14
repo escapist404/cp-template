@@ -5,6 +5,8 @@
 
 #include "types.hpp"
 
+// Extended Euclidean algorithm and modular inverse for general (possibly non-prime) moduli.
+
 inline i64 extended_gcd(i64 a, i64 b,
 		i64& x, i64& y) {
 	i64 old_r = std::llabs(a), r = std::llabs(b);

@@ -9,11 +9,14 @@ class Min25;
 Min25(i64 n);
 i64 prime_count() const;
 i64 prime_sum() const;
+std::vector<i64> quotients() const;
 template <typename PrimePower>
 i64 sum(i64 a, i64 b, const PrimePower& prime_power) const;
 ```
 
 `prime_count()` 返回不超过 `n` 的素数个数，`prime_sum()` 返回素数和。`sum(a,b,prime_power)` 计算满足 `f(p)=a*p+b`、`f(p^e)=prime_power(p,e)` 且 `f(1)=1` 的积性函数前缀和。
+
+`quotients()` 返回所有不同的 `floor(n / x)`，按升序排列。
 
 ## 使用示例
 

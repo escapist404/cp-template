@@ -6,6 +6,8 @@
 #include <vector>
 #include "geometry_base.hpp"
 
+// Euclidean distances and projections between 2D points, lines, segments, and polygons.
+
 inline Real closest_pair_distance_squared(std::vector<Point> points) {
     if (points.size() < 2) {
         return std::numeric_limits<Real>::infinity();

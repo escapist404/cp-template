@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+// 0-based Dinic maximum flow and minimum s-t cut (ACL interface).
+
 template <typename Cap>
 struct MaxFlow {
 	MaxFlow() : n(0) {}

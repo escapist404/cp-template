@@ -5,6 +5,8 @@
 #include <cassert>
 #include <vector>
 
+// 1-based Link-Cut Tree maintaining dynamic forest connectivity and path sums in amortized O(log n).
+
 template <typename T>
 class LinkCutTree {
 	struct Node {

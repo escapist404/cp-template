@@ -64,7 +64,7 @@ std::vector<i64> primes_in(i64 lo, i64 hi) {
 
 小范围（$10^7$ 以内）仍建议用 [sieve](sieve.md)，快得多。
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - 头文件只提供 `is_prime_mr` 一个接口。
 - 本文件依赖 `modular_arithmetic.hpp`（间接引入 `types.hpp` 的 `u64`），**不要**单独把 `miller_rabin.hpp` 抄进题面而不带这个依赖。

@@ -4,6 +4,8 @@
 #include <cassert>
 #include <vector>
 
+// Fast Walsh-Hadamard Transform for bitwise XOR, OR, and AND convolutions in O(n log n).
+
 template <typename T, typename Update>
 void fwt_transform(std::vector<T>& a, Update update) {
 	int n = a.size();

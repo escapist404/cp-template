@@ -12,4 +12,6 @@
 #include "half.hpp"
 #include "minkowski.hpp"
 
+// Umbrella header including all 2D computational geometry modules.
+
 #endif

@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/point_set_range_composite"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <vector>
 
@@ -19,23 +20,24 @@ Affine compose(Affine left, Affine right) {
 Affine identity() { return {1, 0}; }
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, q;
-	std::cin >> n >> q;
+	io >> n >> q;
 	std::vector<Affine> initial(n);
-	for (auto& f : initial) std::cin >> f.a >> f.b;
+	for (auto& f : initial) io >> f.a >> f.b;
 	SegmentTree<Affine, compose, identity> tree(initial);
 	while (q--) {
 		int type;
-		std::cin >> type;
+		io >> type;
 		if (type == 0) {
 			int p;
 			Affine f;
-			std::cin >> p >> f.a >> f.b;
+			io >> p >> f.a >> f.b;
 			tree.set(p, f);
 		} else {
 			int l, r;
 			long long x;
-			std::cin >> l >> r >> x;
+			io >> l >> r >> x;
 			Affine f = tree.prod(l, r);
 			std::cout << (f.a * x + f.b) % MOD << '\n';
 		}

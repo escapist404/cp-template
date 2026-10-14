@@ -3,6 +3,8 @@
 #include <map>
 #include <vector>
 
+// 0-based Chtholly tree (ODT) maintaining interval assignments on [l, r) via std::map.
+
 template <typename T>
 class OldDriverTree {
 private:

@@ -10,7 +10,7 @@ template <typename Symbol = char, typename Compare = std::less<Symbol>>
 class SuffixAutomaton {
 public:
     struct Node {
-        int length = 0, link = -1;
+        int length = 0, link = -1, first_position = -1;
         std::map<Symbol, int, Compare> next;
         long long terminals = 0;
     };
@@ -24,6 +24,7 @@ public:
         int cur = nodes.size();
         nodes.push_back(Node{});
         nodes[cur].length = nodes[last].length + 1;
+        nodes[cur].first_position = nodes[cur].length - 1;
         nodes[cur].terminals = 1;
         int p = last;
         while (p != -1 && !nodes[p].next.count(symbol)) {

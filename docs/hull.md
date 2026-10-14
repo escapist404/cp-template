@@ -61,7 +61,7 @@ Real farthest_pair(const std::vector<Point> &hull) {
 }
 ```
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **严格凸包**：共线点被去除，只保留拐点。
 - 返回顺序为**逆时针**。

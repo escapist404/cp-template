@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/bitwise_xor_convolution"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <vector>
 
@@ -9,12 +10,13 @@
 using Z = ModInt<long long, 998244353>;
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n;
-	std::cin >> n;
+	io >> n;
 	int size = 1 << n;
 	std::vector<Z> a(size), b(size);
-	for (auto& x : a) std::cin >> x;
-	for (auto& x : b) std::cin >> x;
+	for (auto& x : a) io >> x;
+	for (auto& x : b) io >> x;
 	auto result = fwt_convolution<Z, fwt_xor<Z>>(a, b);
 	for (const auto& x : result) std::cout << x << ' ';
 	std::cout << '\n';

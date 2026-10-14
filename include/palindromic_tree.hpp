@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 
+// Palindromic tree (Eertree) with odd root 0 (len -1) and even root 1 (len 0). Call accumulate() for occurrences.
+
 template <typename Symbol = char, typename Compare = std::less<Symbol>>
 class PalindromicTree {
 public:

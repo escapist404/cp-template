@@ -7,10 +7,14 @@
 #include <string>
 #include <vector>
 
+// Aho-Corasick automaton for lowercase a-z strings (0-based pattern IDs).
+// Call build() once after all insert() calls before querying.
+
 class AhoCorasick {
 	struct Node {
 		std::array<int, 26> next{};
 		int fail = 0;
+		int parent = -1;
 		Node() { next.fill(-1); }
 	};
 
@@ -29,6 +33,7 @@ public:
 			if (trie[cur].next[x] == -1) {
 				trie[cur].next[x] = trie.size();
 				trie.emplace_back();
+				trie.back().parent = cur;
 			}
 			cur = trie[cur].next[x];
 		}
@@ -73,6 +78,14 @@ public:
 			result[i] = visit[pattern_node[i]];
 		return result;
 	}
+
+	int size() const { return trie.size(); }
+	std::vector<std::pair<int, int>> state_links() const {
+		std::vector<std::pair<int, int>> result;
+		for (const auto& node : trie) result.push_back({node.parent, node.fail});
+		return result;
+	}
+	const std::vector<int>& pattern_vertices() const { return pattern_node; }
 };
 
 #endif

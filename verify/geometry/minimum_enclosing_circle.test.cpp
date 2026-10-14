@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/minimum_enclosing_circle"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -8,10 +9,11 @@
 #include "../../include/minimum_enclosing_circle.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n;
-	std::cin >> n;
+	io >> n;
 	std::vector<Point> points(n);
-	for (auto& point : points) std::cin >> point.x >> point.y;
+	for (auto& point : points) io >> point.x >> point.y;
 	Circle circle = minimum_enclosing_circle(points);
 	for (const auto& point : points) {
 		Real d2 = distance_squared(circle.center, point);

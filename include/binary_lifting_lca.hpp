@@ -8,6 +8,8 @@
 
 #include "bit.hpp"
 
+// 0-based tree LCA via binary lifting. Call prework(root) after adding all edges. O(n log n) build, O(log n) query.
+
 class BinaryLiftingLCA {
 	int n, logn;
 	std::vector<std::vector<int>> adj;

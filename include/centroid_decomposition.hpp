@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <vector>
 
+// 0-based centroid decomposition tree. parent_of(root) is -1; build is O(n log n).
+
 class CentroidDecomposition {
 	std::vector<std::vector<int>> adj;
 	std::vector<int> size, centroid_parent;

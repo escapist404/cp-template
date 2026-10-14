@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/scc"
 
+#include "../../include/fastio.hpp"
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -7,12 +8,13 @@
 #include "../../include/scc.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, m;
-	std::cin >> n >> m;
+	io >> n >> m;
 	std::vector<std::vector<int>> graph(n);
 	while (m--) {
 		int u, v;
-		std::cin >> u >> v;
+		io >> u >> v;
 		graph[u].push_back(v);
 	}
 	auto components = get_scc(graph);

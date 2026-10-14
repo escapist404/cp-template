@@ -7,6 +7,8 @@
 
 #include "types.hpp"
 
+// Double-modulus polynomial rolling hash for 0-based substring [l, r) queries in O(1).
+
 class RollingHash {
 	using Hash = u64;
 	static constexpr Hash base = 911382323;

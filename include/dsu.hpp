@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 
+// 0-based Disjoint Set Union with path compression and union by size. Amortized O(alpha(n)).
+
 class DisjointSetUnion {
 	int component;
 	std::vector<int> data;

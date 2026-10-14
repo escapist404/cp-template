@@ -49,11 +49,13 @@ Common Commands
 
 Generate Printable PDF
 
-# Generate PDF with all 116 files (uses codebook.conf)
-python3 tools/code2pdf.py include/ -o codebook.pdf -c codebook.conf
+# Generate combined Docs + Code PDF with all 116 modules (uses codebook.conf)
+make pdf
+python3 tools/code2pdf.py include/ -o codebook.pdf -c codebook.conf --with-docs docs/ --black-and-white
 
-# Black and white version (save ink)
-python3 tools/code2pdf.py include/ -o codebook.pdf -c codebook.conf --black-and-white
+# Standalone Code-only or Docs-only PDFs
+make pdf-code
+make pdf-docs
 
 # Without config (auto-discovers all files alphabetically)
 python3 tools/code2pdf.py include/ -o codebook.pdf

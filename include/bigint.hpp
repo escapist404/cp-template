@@ -13,6 +13,8 @@
 #include "polynomial.hpp"
 #include "types.hpp"
 
+// Arbitrary-precision signed integer (base 10^9) with NTT-accelerated multiplication.
+
 class BigInt {
 public:
 	static constexpr int base = 1'000'000'000;

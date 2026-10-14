@@ -1,99 +1,56 @@
-# Dijkstra
+# Dijkstra (`dijkstra.hpp`)
 
-给定带非负边权的图和若干源点，求每个顶点到最近源点的最短距离。
+`dijkstra.hpp` 实现基于二叉堆（`std::priority_queue`）的多源非负权最短路算法 `dijkstra`，支持从单个或多个起点同时出发，计算到所有顶点的最短路径距离。
 
-## 接口
+## 接口说明
 
 ```cpp
 template <typename T>
 std::vector<T> dijkstra(
-        const std::vector<std::vector<std::pair<int, T>>> &adj,
-        std::initializer_list<int> sources);
+    const std::vector<std::vector<std::pair<int, T>>>& adj,
+    const std::initializer_list<int> sources);
 ```
 
-**参数**
-- `adj`：邻接表，`adj[u]` 为 `u` 的全部出边，每条边写作 `{v, w}`。节点数即 `adj.size()`，编号 $0$ 到 $n-1$
-- `sources`：**源点列表**（`std::initializer_list<int>`），可传一个或多个源点
+- **图表示与索引约定**：
+  - 顶点编号为 **`0-based`**，范围 $0 \le u < n$（其中 $n = \text{adj.size()}$）。
+  - 邻接表 `adj[u]` 存储从 `u` 出发的有向边列表 `std::pair<int, T>{to, weight}`（无向图需双向加边）。
+  - **所有边权必须非负**（`weight >= T()`）；若图中存在负权边，请使用 [`difference_constraints.hpp`](difference_constraints.md) 中的 SPFA / Bellman-Ford。
+- **参数与返回值**：
+  - `sources`：起点集合，传入列表初始化形式（单源传入 `{s}`，多源传入 `{s1, s2, ...}`），要求所有起点满足 $0 \le s < n$。
+  - 返回长度为 $n$ 的最短距离数组 `distance`：所有起点初值为 `T()`（即 $0$），**不可达顶点的距离保持为 `std::numeric_limits<T>::max()`**。内部在松弛时自动检查 `current_distance > inf - weight`，避免无穷大或超大边权相加发生有符号整数溢出。
 
-**返回值**
-- 长度 $n$ 的数组 `distance`，`distance[i]` 为「任一源点到 $i$ 的最短距离」
-- 不可达时为 `std::numeric_limits<T>::max()`（即保留 `inf`，不会变成 `inf + w`）
+## 复杂度
 
-**约束**
-- 边权必须**非负**（Dijkstra 的前提）
-- 每个源点需满足 $0 \le s < n$，源码有 `assert`
-
-**复杂度**
-- $O((n + m)\log n)$，其中 $m$ 为边数
+- 时间复杂度：$O((n + m) \log m)$，其中 $n$ 为顶点数，$m$ 为边数。
+- 空间复杂度：$O(n + m)$。
 
 ## 使用示例
 
-### 单源
-
 ```cpp
 #include "dijkstra.hpp"
-#include <iostream>
+#include <cassert>
 #include <limits>
+#include <utility>
 #include <vector>
 
 int main() {
-    int n = 5;
+    int n = 4;
     std::vector<std::vector<std::pair<int, long long>>> adj(n);
-
-    auto add = [&](int u, int v, long long w) {
-        adj[u].push_back({v, w});
-    };
-
-    add(0, 1, 4);
-    add(0, 2, 1);
-    add(2, 1, 2);
-    add(1, 3, 1);
-    add(2, 3, 5);
-    add(3, 4, 3);
+    adj[0].push_back({1, 4});
+    adj[0].push_back({2, 1});
+    adj[2].push_back({1, 2});
+    adj[1].push_back({3, 5});
 
     auto dist = dijkstra(adj, {0});
-
-    for (int i = 0; i < n; ++i) {
-        if (dist[i] == std::numeric_limits<long long>::max()) {
-            std::cout << i << ": unreachable\n";
-        } else {
-            std::cout << i << ": " << dist[i] << '\n';
-        }
-    }
-    // 0: 0, 1: 3, 2: 1, 3: 4, 4: 7
-
+    assert(dist[0] == 0);
+    assert(dist[2] == 1);
+    assert(dist[1] == 3);
+    assert(dist[3] == 8);
     return 0;
 }
 ```
 
-### 多源
+## 相关文档
 
-`sources` 是初始化列表，多源无需建超级源点，直接把源点都写进去：
-
-```cpp
-auto dist = dijkstra(adj, {0, 3, 7});  // 三个源点同时入队
-```
-
-### 建图提示
-
-本接口只接收**邻接表**，不接收边列表或三元组；边是**有向**的，无向边需要双向各加一条：
-
-```cpp
-adj[u].push_back({v, w});
-adj[v].push_back({u, w});  // 无向
-```
-
-## 前置条件与实现约定
-
-- **参数顺序与常见写法不同**：邻接表在前，源点列表在后。
-- 入参是 `std::initializer_list<int>`，因此**必须写花括号**，例如 `dijkstra(adj, {s})`；直接传一个 `std::vector<int>` 不会隐式转换为 `initializer_list`，需要写成 `dijkstra(adj, {v.begin(), v.end()})` 这类形式或改调用方式。
-- 源码对**溢出**做了保护：当 `weight > 0` 且 `current_distance > inf - weight` 时跳过松弛，因此 `inf` 不会被加上权重而回绕成小数。`weight == 0` 的边不受该判断影响。
-- 该保护仅覆盖「加到 `inf` 上」的情形，若图本身的真实距离接近 `T` 的上限，仍应选用更宽的 `T`。
-- 没有返回前驱数组的版本，**路径还原需要自行复制实现**（或在松弛时记录 `prev`）。
-- 没有 `max_flow` 式的提前终止参数，会一直算完全部可达点。
-
-## 相关算法
-
-- [Kruskal](kruskal.md) —— 最小生成树
-- [SCC](scc.md)、[EDCC](edcc.md)、[VDCC](vdcc.md) —— 连通性
-- 负权边请改用 Bellman-Ford / SPFA（本库未提供）
+- [ZeroOneBFS](zero_one_bfs.md) —— 边权仅为 $0$ 或 $1$ 的线性时间最短路
+- [DifferenceConstraints](difference_constraints.md) —— 支持负权边与负环检测的差分约束求解

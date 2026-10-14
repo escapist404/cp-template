@@ -6,7 +6,7 @@
 
 #include "bit.hpp"
 
-// ACL generic interface; indices and ranges are 0-based, [l, r).
+// ACL-style 0-based iterative segment tree over [l, r) with O(log n) prod and max_right/min_left.
 
 template <class V, auto op, auto e>
 class SegmentTree {

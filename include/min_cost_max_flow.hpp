@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+// 0-based primal-dual minimum-cost flow with Johnson potentials (non-negative initial costs).
+
 template <typename Cap, typename Cost>
 struct MinCostMaxFlow {
 private:

@@ -7,6 +7,8 @@
 
 #include "dsu.hpp"
 
+// 0-based Kruskal minimum spanning tree/forest in O(m log m). Returns {total_weight, chosen_edges}.
+
 template <typename T>
 struct KruskalEdge {
 	int u, v;

@@ -125,4 +125,22 @@ with TemporaryDirectory() as directory:
         else:
             raise AssertionError('Expected the page limit to reject this book')
         canvas_factory.assert_not_called()
+
+    # Test --with-docs and --docs-only interleaving and section index remapping
+    docs_dir = root / 'docs'
+    docs_dir.mkdir()
+    doc0 = docs_dir / 'file000.md'
+    doc1 = docs_dir / 'file001.md'
+    doc0.write_text('# File 000 Doc\nUsage details\n')
+    doc1.write_text('# File 001 Doc\nUsage details\n')
+    interleaved_files, interleaved_sections = module.apply_docs_mode(
+        [files[0], files[1]], [('Sec A', 0), ('Sec B', 1)], docs_dir, False
+    )
+    assert interleaved_files == [doc0, files[0], doc1, files[1]]
+    assert interleaved_sections == [('Sec A', 0), ('Sec B', 2)]
+    docs_only_files, docs_only_sections = module.apply_docs_mode(
+        [files[0], files[1]], [('Sec A', 0), ('Sec B', 1)], docs_dir, True
+    )
+    assert docs_only_files == [doc0, doc1]
+    assert docs_only_sections == [('Sec A', 0), ('Sec B', 1)]
 print('Pagination, overflow, and printed TOC page references passed')

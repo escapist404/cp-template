@@ -84,7 +84,7 @@ $$a^{im - j} \equiv b \implies a^{im} \equiv b \cdot a^{j}$$
 4. 若中途 `multiplier == b`，直接返回 `removed`
 5. 最终答案折算为 `i * block - j + removed`
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **乘法用 `(i128)x * y % m` 显式防溢出**，这部分是安全的。
 - baby-step 表用 `std::unordered_map<i64, i64>`，同值冲突时**后写覆盖前写**（源码 `baby[value] = j;` 直接赋值）。源码未说明这是否影响「最小 $x$」的保证；如果对最小性有严格要求，建议自行改写为保留较小 $j$。

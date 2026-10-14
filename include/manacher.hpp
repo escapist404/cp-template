@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <string>
 
+// Manacher algorithm returning palindrome radii for odd and even centers in O(n).
+
 std::vector<int> manacher(const std::string& s) {
 	std::string t = "#";
 	for (auto c : s) {

@@ -79,7 +79,7 @@ inline void pollard_rho_factor(u64 n, std::vector<i64>& factors); // 递归分�
 - `pollard_rho_split`：偶数直接返回 2；否则用 Floyd 龟兔随机迭代（$f(x) = x^2 + c \bmod n$）寻找非平凡因子，`divisor != n` 时返回，等于 `n` 时重试
 - 迭代中的乘法用 `multiply_mod` 防溢出
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **结果是随机化的**：内部用 `std::mt19937_64`，种子取自 `std::chrono::steady_clock::now()`，每次运行的迭代路径不同——但**因子集合是确定的**。
 - 依赖 `<random>` 与 `<chrono>`，不是纯确定性算法。多测环境下若要求完全可复现需自行固定种子。

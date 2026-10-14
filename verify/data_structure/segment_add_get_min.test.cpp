@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/segment_add_get_min"
 
+#include "../../include/fastio.hpp"
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -18,24 +19,25 @@ struct Query {
 };
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, q;
-	std::cin >> n >> q;
+	io >> n >> q;
 	std::vector<Query> initial(n), queries;
 	std::vector<long long> coordinates;
 	for (auto& query : initial) {
-		std::cin >> query.l >> query.r >> query.a >> query.b;
+		io >> query.l >> query.r >> query.a >> query.b;
 		coordinates.push_back(query.l);
 		coordinates.push_back(query.r);
 	}
 	for (int i = 0; i < q; ++i) {
 		Query query;
-		std::cin >> query.type;
+		io >> query.type;
 		if (query.type == 0) {
-			std::cin >> query.l >> query.r >> query.a >> query.b;
+			io >> query.l >> query.r >> query.a >> query.b;
 			coordinates.push_back(query.l);
 			coordinates.push_back(query.r);
 		} else {
-			std::cin >> query.l;
+			io >> query.l;
 			coordinates.push_back(query.l);
 		}
 		queries.push_back(query);

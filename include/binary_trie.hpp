@@ -6,6 +6,8 @@
 #include <type_traits>
 #include <vector>
 
+// Fixed-width bitwise 0-1 trie multiset for unsigned integer T. O(Bits) insert/erase/max_xor/min_xor.
+
 template <typename T = std::uint64_t, int Bits = sizeof(T) * 8>
 class BinaryTrie {
 	static_assert(std::is_unsigned<T>::value && 0 < Bits && Bits <= sizeof(T) * 8);

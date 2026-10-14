@@ -137,7 +137,7 @@ std::vector<int> a = {3, 1, 4, 1, 5};
 SuffixArray sa(a);   // 自动做离散化
 ```
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **接口是方法而非公开成员**。`sa`、`rank`、`height` 是私有的，必须通过 `array()` / `ranks()` / `lcp_array()` 访问。写成 `sa.sa[i]` 无法编译。
 - **返回值是常引用**：可以 `const auto &x = sa.array();` 避免拷贝。对象析构前有效。

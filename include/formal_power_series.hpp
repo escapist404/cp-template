@@ -173,7 +173,7 @@ public:
 			return result;
 		}
 		const int length = n - (int)((i128)shift * exponent);
-		Self normalized = truncated(size() - shift);
+		Self normalized(std::vector<Z>(coefficient.begin() + shift, coefficient.end()));
 		for (int i = 0; i < normalized.size(); ++i) normalized[i] /= coefficient[shift];
 		Self result = (normalized.logarithm(length) * Z(exponent)).exponential(length);
 		const Z scale = ::power(Z(1), coefficient[shift], exponent);
@@ -197,7 +197,7 @@ public:
 		}
 		assert(shift % 2 == 0 && shift / 2 < n);
 		const int offset = shift / 2;
-		Self normalized = truncated(size() - shift);
+		Self normalized(std::vector<Z>(coefficient.begin() + shift, coefficient.end()));
 		for (int i = 0; i < normalized.size(); ++i) normalized[i] /= coefficient[shift];
 		const Z root_value = square_root(coefficient[shift]);
 		const int length = n - offset;

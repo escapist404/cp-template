@@ -6,6 +6,8 @@
 #include <queue>
 #include <vector>
 
+// 0-based functional graph (out-degree 1) cycle decomposition and 64-bit binary lifting jump.
+
 class FunctionalGraph {
 	enum { LOG = 64 };
 	int n;

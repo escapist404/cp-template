@@ -12,6 +12,8 @@
 #include "types.hpp"
 #include "bit.hpp"
 
+// NTT (for ModInt) and FFT (for Complex/i64) polynomial convolutions in O(n log n).
+
 template <typename T>
 constexpr T polynomial_primitive_root(T mod) {
 	if (mod == 2) {

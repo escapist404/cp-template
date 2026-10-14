@@ -1,17 +1,19 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/two_edge_connected_components"
 
+#include "../../include/fastio.hpp"
 #include <iostream>
 #include <vector>
 
 #include "../../include/edcc.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n, m;
-	std::cin >> n >> m;
+	io >> n >> m;
 	std::vector<std::vector<int>> graph(n);
 	while (m--) {
 		int u, v;
-		std::cin >> u >> v;
+		io >> u >> v;
 		graph[u].push_back(v);
 		graph[v].push_back(u);
 	}

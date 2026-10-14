@@ -80,7 +80,7 @@ bool has_duplicate_of_length(const RollingHash &hash, int n, int L) {
 - `base = 911382323`，是 `static constexpr`
 - **单一 base + 自然溢出，无抗碰撞保证**；源码未提供第二模数或随机化机制
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **`base` 不可修改**（`static constexpr`，且是私有成员）。这意味着使用本模板的提交代码的哈希取值是**公开且固定**的——在多测 / Hack 型比赛中（如 Codeforces），这是可被针对性构造碰撞的。需要抗 Hack 时请自行改为随机 base（例如运行时从 `chrono` 取值）。
 - `get` 无边界检查，`l > r` 或 `r > |s|` 直接 UB。

@@ -3,6 +3,8 @@
 
 #include "modular_arithmetic.hpp"
 
+// Deterministic 64-bit Miller-Rabin primality test for i64 in O(log n).
+
 inline bool is_prime_mr(i64 n) {
 	if (n < 2) return false;
 	u64 value = (u64)n;

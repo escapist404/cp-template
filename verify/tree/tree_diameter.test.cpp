@@ -1,5 +1,6 @@
 #define PROBLEM "https://judge.yosupo.jp/problem/tree_diameter"
 
+#include "../../include/fastio.hpp"
 #include <algorithm>
 #include <iostream>
 #include <utility>
@@ -8,13 +9,14 @@
 #include "../../include/tree_diameter.hpp"
 
 int main() {
+	OptimizedIO<1 << 20> io;
 	int n;
-	std::cin >> n;
+	io >> n;
 	std::vector<std::vector<std::pair<int, long long>>> graph(n);
 	for (int i = 0; i + 1 < n; ++i) {
 		int u, v;
 		long long weight;
-		std::cin >> u >> v >> weight;
+		io >> u >> v >> weight;
 		graph[u].push_back({v, weight});
 		graph[v].push_back({u, weight});
 	}

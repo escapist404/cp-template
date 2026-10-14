@@ -111,7 +111,7 @@ bool rooted_isomorphic(const TreeHash &a, const TreeHash &b) {
 - 有根哈希还混入子节点个数 `children.size()`；无根哈希混入 `graph.size()` 与重心个数
 - 遍历均为**迭代式**，无爆栈问题
 
-## 前置条件与实现约定
+### 补充说明与使用约定
 
 - **是概率算法**，不是严格判定。$2^{64}$ 空间的碰撞概率极低，但理论上存在；出题人若已知 `seed` 且刻意构造，可以 Hack。**默认 `seed` 是公开常量**，与 [RollingHash](rolling_hash.md) 的情况相同。
 - **必须连通且无环**。有环或非连通输入在 debug 下断言失败，release 下产生错误哈希（源码未说明）。

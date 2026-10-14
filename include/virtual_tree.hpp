@@ -8,6 +8,8 @@
 
 #include "bit.hpp"
 
+// 0-based virtual tree (auxiliary tree) construction over key vertices in O(k log k).
+
 struct VirtualTree {
 	std::vector<int> vertices;
 	std::vector<std::pair<int, int>> edges;
