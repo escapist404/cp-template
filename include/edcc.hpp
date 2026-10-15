@@ -9,10 +9,19 @@
 
 #include "scc.hpp"
 
-// 【无向图边双连通分量 EDCC (edcc.hpp)】
-// - 0-based 无向图邻接表 adj（每条无向边需双向添加，支持重边与自环），平均时间复杂度 O(n + m)
-// - get_edcc(adj): 识别所有割边（桥）并通过 BFS 将全部顶点划分为不相交的边双连通分量点集
+// ============================================================================
+// 【无向图边双连通分量 Edge-Biconnected Components / EDCC (edcc.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   std::vector<std::vector<int>> get_edcc(const std::vector<std::vector<int>>& adj)
+// 参数与返回值详解：
+//   - adj：0-based 无向图邻接表（每条无向边 (u, v) 必须在 adj[u] 与 adj[v] 中双向添加；支持平行重边与自环）。
+//   - 返回值 std::vector<std::vector<int>>：
+//     将全部 n 个顶点 [0, n) 划分为若干个互不相交的边双连通分量点集（每个顶点恰好属于其中一个分量）。
+// 复杂度：基于 Tarjan 找割边（桥）后 BFS 划分连通块，平均时间与空间复杂度均为 O(n + m)。
+// ============================================================================
 
+// std::vector<std::vector<int>> get_edcc(const std::vector<std::vector<int>>& adj) — 功能：参数与返回值详解：
 std::vector<std::vector<int>> get_edcc(const std::vector<std::vector<int>>& adj) {
 	const int n = adj.size();
 	std::vector<std::unordered_set<int>> bridge(n);

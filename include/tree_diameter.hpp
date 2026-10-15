@@ -4,11 +4,25 @@
 #include <utility>
 #include <vector>
 
-// 【树的直径 (tree_diameter.hpp)】
-// - 0-based 连通无向树，通过两次 DFS 在 O(n) 时间内求直径（要求所有树边权非负）
-// - tree_diameter_farthest(adj, start): 返回 {最远距离, 最远端点}
-// - tree_diameter(adj)                : 支持带权邻接表或无权邻接表（默认边权 1），返回 {直径长度, {端点 u, 端点 v}}
+// ============================================================================
+// 【树的直径（两次 DFS 法）Tree Diameter (tree_diameter.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名详解（0-based 顶点编号 [0, n)，要求输入为连通无向树且所有边权非负）：
+//   1. template <typename T>
+//      std::pair<T, int> tree_diameter_farthest(
+//          const std::vector<std::vector<std::pair<int, T>>>& adj, int start)
+//      功能：从顶点 start 出发做一次 DFS，返回 {最大距离, 距离 start 最远的顶点编号}。时间复杂度 O(n)。
+//   2. template <typename T>
+//      std::pair<T, std::pair<int, int>> tree_diameter(
+//          const std::vector<std::vector<std::pair<int, T>>>& adj)
+//      功能：计算带权树 adj（adj[u] = {{v, w}, ...}）的直径。
+//      返回：{直径总长度, {直径端点 u, 直径端点 v}}（空树返回 {0, {-1, -1}}）。时间复杂度 O(n)。
+//   3. inline std::pair<int, std::pair<int, int>> tree_diameter(
+//          const std::vector<std::vector<int>>& adj)
+//      功能：无权树重载（每条树边权视为 1），返回 {直径边数, {端点 u, 端点 v}}。时间复杂度 O(n)。
+// ============================================================================
 
+// template <typename T> std::pair<T, int> tree_diameter_farthest( const std::vector<std::vector<std::pair<int, T>>>& adj, int start) — 功能：从顶点 start 出发做一次 DFS，返回 {最大距离, 距离 start 最远的顶点编号}。时间复杂度 O(n)。
 template <typename T>
 std::pair<T, int> tree_diameter_farthest(const std::vector<std::vector<std::pair<int, T>>>& adj,
 			int start) {

@@ -4,9 +4,20 @@
 #include <algorithm>
 #include <vector>
 
-// 【树的重心分解 / 点分树 (centroid_decomposition.hpp)】
-// - 0-based 连通无向树，构造重心树（点分树）的时间复杂度为 O(n log n)，树高 O(log n)
-// - parent_of(u): 返回节点 u 在点分树上的父节点编号（整棵点分树根节点的父节点为 -1）
+// ============================================================================
+// 【树的重心分解 / 点分树 Centroid Decomposition (centroid_decomposition.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class CentroidDecomposition
+//   对 0-based 连通无向树递归提取重心并构建点分树（重心树），点分树高度不超过 O(log n)。
+// 构造函数与成员函数签名详解：
+//   - CentroidDecomposition(const std::vector<std::vector<int>>& graph)
+//     功能：输入 0-based 连通无向树邻接表 graph，在构造时完成整棵点分树的构建。
+//     复杂度：时间复杂度 O(n log n)，空间复杂度 O(n)。
+//   - const std::vector<int>& parent() const
+//     功能：返回长度为 n 的点分树父节点数组 centroid_parent（点分树根节点的父节点为 -1）。O(1)。
+//   - int parent_of(int vertex) const
+//     功能：返回顶点 vertex (0 <= vertex < n) 在点分树上的直接父重心编号（根重心返回 -1）。O(1)。
+// ============================================================================
 
 class CentroidDecomposition {
 	std::vector<std::vector<int>> adj;
@@ -38,6 +49,7 @@ class CentroidDecomposition {
 	}
 
 public:
+	// CentroidDecomposition(const std::vector<std::vector<int>>& graph) — 功能：输入 0-based 连通无向树邻接表 graph，在构造时完成整棵点分树的构建。
 	CentroidDecomposition(const std::vector<std::vector<int>>& graph)
 		: adj(graph), size(graph.size()), centroid_parent(graph.size(), -1),
 		  removed(graph.size()) {

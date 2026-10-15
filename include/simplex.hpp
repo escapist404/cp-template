@@ -10,13 +10,26 @@
 
 #include "matrix.hpp"
 
-// 【单纯形法求解线性规划 (simplex.hpp)】
-// - 求解标准型线性规划: 在 A * x <= b, x >= 0 约束下，最大化目标函数 c^T * x
-// - simplex(A, b, c): 返回 SimplexResult{status, value, solution}
-//   - status  : 0 表示无可行解 (Infeasible)，1 表示存在有限最优解 (Optimal)，2 表示目标函数无界 (Unbounded)
-//   - value   : 最优目标函数值（仅当 status == 1 时有效）
-//   - solution: 最优决策变量向量 x
+// ============================================================================
+// 【两阶段单纯形法求解线性规划 Two-Phase Simplex (simplex.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename T, size_t R, size_t C>
+//   std::pair<T, std::vector<T>> simplex(const Matrix<T, R, C>& A,
+//                                        const std::vector<T>& b,
+//                                        const std::vector<T>& c)
+// 标准型定义与参数说明：
+//   在约束 A * x <= b 且 x >= 0 下，最大化目标函数 c^T * x = sum_{j=0}^{n-1} c[j] * x[j]。
+//   - A：m 行 n 列约束矩阵（要求 A.rows() == b.size() 且 A.columns() == c.size()）；
+//   - b：长度为 m 的右端常数向量（允许含负数，自动通过第一阶段辅助规划找初始可行基）；
+//   - c：长度为 n 的目标函数系数向量。
+// 返回值 std::pair{optimal_value, solution}（设 infinity = numeric_limits<T>::max() / 4）：
+//   1. 存在有限最优解：返回 {最优目标值, 长度为 n 的最优解向量 x}；
+//   2. 无可行解 (Infeasible)：返回 {-infinity, 全 0 向量}；
+//   3. 目标无界 (Unbounded)：返回 {+infinity, 全 0 向量}。采用 Bland 规则防退化循环。
+// ============================================================================
 
+// template <typename T, size_t R, size_t C> std::pair<T, std::vector<T>> simplex(const Matrix<T, R, C>& A, — 功能：const std::vector<T>& b,
 template <typename T, size_t R, size_t C>
 std::pair<T, std::vector<T>> simplex(const Matrix<T, R, C>& A,
 		const std::vector<T>& b, const std::vector<T>& c) {

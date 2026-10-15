@@ -6,10 +6,25 @@
 #include <cstdint>
 #include <vector>
 
-// 【有根树与无根树同构哈希 (tree_hash.hpp)】
-// - 0-based 连通无向树，基于 SplitMix64 混淆，比较两棵树同构时必须使用相同的随机种子 seed
-// - centers()  : O(n) 返回无根树的 1 或 2 个中心顶点
-// - solve(root): 传入 0 <= root < n 时计算以 root 为根的有根树哈希；传入默认 root = -1 时通过中心化计算无根树同构哈希。复杂度 O(n log n)
+// ============================================================================
+// 【有根树与无根树同构哈希 Tree Isomorphism Hash (tree_hash.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class TreeHash
+//   基于 SplitMix64 非线性混淆器计算有根树或无根树的 64 位同构哈希值，顶点编号为 0-based [0, n)。
+//   【重要提示】比较两棵树是否同构时，两个 TreeHash 实例必须使用完全相同的随机种子 seed。
+// 构造函数与成员函数签名详解：
+//   - TreeHash(int n, u64 seed = 0x243f6a8885a308d3ULL)
+//     功能：初始化包含 n 个顶点 [0, n) 的树容器及哈希种子 seed。O(n)。
+//   - void add_edge(int u, int v)
+//     功能：添加无向树边 (u, v)（要求 0 <= u, v < n，总共添加 n - 1 条边构成连通树）。O(1)。
+//   - std::vector<int> centers() const
+//     功能：通过拓扑剥叶法返回无根树的 1 个或 2 个中心（重心/直径中心）顶点编号。时间复杂度 O(n)。
+//   - u64 solve(int root = -1) const
+//     功能：
+//       - 当传入 0 <= root < n 时，计算以 root 为根的【有根树同构哈希值】；
+//       - 当使用默认值 root == -1 时，自动枚举 centers() 中的 1~2 个中心计算【无根树同构哈希值】。
+//     复杂度：因需对各节点子树的哈希值排序，时间复杂度为 O(n log n)，空间复杂度 O(n)。
+// ============================================================================
 
 class TreeHash {
     using u64 = std::uint64_t;
@@ -24,13 +39,16 @@ class TreeHash {
     }
 
 public:
+    // TreeHash(int n, u64 seed = 0x243f6a8885a308d3ULL) — 功能：初始化包含 n 个顶点 [0, n) 的树容器及哈希种子 seed。O(n)。
     TreeHash(int n, u64 seed = 0x243f6a8885a308d3ULL) : seed(seed), graph(n) {}
 
+    // void add_edge(int u, int v) — 功能：添加无向树边 (u, v)（要求 0 <= u, v < n，总共添加 n - 1 条边构成连通树）。O(1)。
     void add_edge(int u, int v) {
         graph[u].push_back(v);
         graph[v].push_back(u);
     }
 
+    // std::vector<int> centers() const — 功能：通过拓扑剥叶法返回无根树的 1 个或 2 个中心（重心/直径中心）顶点编号。时间复杂度 O(n)。
     std::vector<int> centers() const {
         int n = graph.size();
         std::vector<int> degree(n), leaves;
@@ -57,6 +75,7 @@ public:
         return leaves;
     }
 
+    // u64 solve(int root = -1) const — 功能：
     u64 solve(int root = -1) const {
         if (graph.empty()) {
             return mix(seed);

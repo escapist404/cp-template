@@ -4,10 +4,33 @@
 #include <cmath>
 #include "types.hpp"
 
-// 【二维计算几何基础：点、向量、直线与线段 (geometry_base.hpp)】
-// - 定义精度常数 eps = 1e-8、符号函数 sgn(x)、浮点数比较 cmp(x, y)
-// - Point / Vector: 支持向量加减、数乘、点积 (A * B)、叉积 (A ^ B)、模长 len()、旋转 rotate(rad)、极角象限排序立等
-// - Line / Segment: 有向直线与线段表示，支持点在线段上判定 on_segment(p, s)
+// ============================================================================
+// 【二维计算几何基础：常数、点、向量、直线、线段与圆 (geometry_base.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 精度常数与三态比较函数签名：
+//    - inline constexpr Real PI = 3.141592653589793238462643383279502884;
+//    - inline constexpr Real EPS = 1E-8;
+//    - inline int dcmp(Real a, Real b = 0)  // |a - b| < EPS 返回 0；a < b 返回 -1；a > b 返回 1
+// 2. 二维点与向量结构体签名：struct Vector / using Point = Vector;
+//    - Vector(Real x = 0, Real y = 0)
+//    - Vector operator+(Vector) const / operator-(Vector) const / operator*(Real) const / operator/(Real) const / operator==(Vector) const
+//    - Real length_squared() const / Real length() const：模长平方 / 欧氏模长
+//    - Vector unit() const                              ：返回单位方向向量 *this / length()
+//    - Vector normal() const                            ：返回逆时针旋转 90 度后的单位法向量 Vector(-y, x).unit()
+//    - Vector rotated(Real angle) const                 ：返回逆时针旋转弧度 angle 后的向量
+// 3. 全局向量函数签名：
+//    - inline Real dot(Vector a, Vector b)              ：点积 a.x * b.x + a.y * b.y
+//    - inline Real cross(Vector a, Vector b)            ：叉积 a.x * b.y - a.y * b.x
+//    - inline Real distance_squared(Point a, Point b) / inline Real distance(Point a, Point b)
+//    - inline Real angle(Vector a, Vector b)            ：两向量夹角弧度 in [0, PI]
+// 4. 直线与线段结构体签名：struct Line / using Segment = Line;
+//    - Line() / Line(Point p1, Point p2) / Line(Point point, Real angle) / Line(Real a, Real b, Real c)（一般式 ax + by + c = 0）
+//    - Point projection(Point point) const              ：点在直线上的正交投影点（垂足）
+//    - Point reflection(Point point) const              ：点关于直线的镜像对称点
+//    - inline Real distance(Point point, const Line& line)：点到直线的垂直距离
+// 5. 圆结构体签名：struct Circle { Point center; Real radius; };
+//    - Circle() / Circle(Point center, Real radius) / Circle(Real x, Real y, Real radius)
+// ============================================================================
 
 inline constexpr Real PI = 3.141592653589793238462643383279502884;
 inline constexpr Real EPS = 1E-8;

@@ -9,15 +9,38 @@
 
 #include "polynomial.hpp"
 
-// 【形式幂级数 / 多项式全家桶 (formal_power_series.hpp)】
-// - 定义模 NTT 素数（如 998244353）上的多项式类 Polynomial<T, mod, root>，所有截断运算复杂度均为 O(n log n)
-// - 基础算术: 支持 +、-、*（NTT 卷积）、/（多项式带余除法商）、%（余式）及 divmod(divisor)
-// - derivative() / integral(): 形式求导与形式积分（常数项为 0）
-// - inverse(n)               : 模 x^n 乘法逆元（要求常数项 a[0] != 0）
-// - logarithm(n) / log(n)    : 模 x^n 多项式对数 ln A(x)（要求常数项 a[0] == 1）
-// - exponential(n) / exp(n)  : 模 x^n 多项式指数 exp A(x)（要求常数项 a[0] == 0）
-// - power(k, n) / pow(k, n)  : 模 x^n 多项式 k 次幂 A(x)^k（要求 k >= 0，自动处理前导零平移）
-// - square_root(n) / sqrt(n) : 模 x^n 多项式开方（要求首个非零项次数为偶数且系数存在模平方根，内部含 Tonelli-Shanks）
+// ============================================================================
+// 【形式幂级数 / 多项式全家桶 Formal Power Series (formal_power_series.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：
+//   template <typename T, T mod, T root = primitive_root_constexpr(mod)> class Polynomial
+//   - 类型别名：using Z = ModInt<T, mod>; using Self = Polynomial<T, mod, root>;
+//   - 维护模 NTT 素数 mod 下的多项式 / 形式幂级数，自动去除最高位多余的零系数（零多项式为空向量，degree() == -1）。
+// 构造函数与基础访问签名：
+//   - Polynomial() / Polynomial(const std::vector<Z>&) / Polynomial(std::initializer_list<Z>)
+//   - int degree() const / bool empty() const / int size() const
+//   - Z& operator[](int index) / const Z& operator[](int index) const（只读越界安全返回 0）
+//   - const std::vector<Z>& data() const / void resize(int n) / Self truncated(int n) const（截取前 n 项 mod x^n）
+// 核心幂级数运算成员函数签名详解（所有传参 n 的函数均返回 mod x^n 的前 n 项结果，复杂度均为 O(n log n)）：
+//   - Self derivative() const
+//     功能：形式求导 f'(x)。时间复杂度 O(n)。
+//   - Self integral() const
+//     功能：形式不定积分 int_0^x f(t) dt（常数项为 0，要求 n <= mod）。时间复杂度 O(n)。
+//   - Self inverse(int n) const
+//     功能：牛顿迭代求模 x^n 乘法逆元 f^(-1)(x)（【前置条件】常数项 f[0] != 0）。O(n log n)。
+//   - Self logarithm(int n) const
+//     功能：求形式自然对数 ln f(x) = int (f'(x) * f^(-1)(x)) dx mod x^n（【前置条件】常数项 f[0] == 1）。O(n log n)。
+//   - Self exponential(int n) const
+//     功能：牛顿迭代求形式指数函数 exp f(x) mod x^n（【前置条件】常数项 f[0] == 0）。O(n log n)。
+//   - Self power(i64 exponent, int n) const
+//     功能：求非负整数次幂 (f(x))^exponent mod x^n（要求 exponent >= 0；自动提取最低非零项平移，不要求 f[0] == 1）。O(n log n)。
+//   - Self square_root(int n) const
+//     功能：求模 x^n 下的多项式平方根 g(x) 满足 g^2(x) === f(x) (mod x^n)
+//     （【前置条件】最低非零项次数必须为偶数，且其系数在模 mod 下为二次剩余；否则触发 assert）。O(n log n)。
+//   - std::pair<Self, Self> divmod(Self divisor) const
+//     功能：多项式带余除法，返回 {商多项式 Q, 余多项式 R}，满足 *this == Q * divisor + R 且 deg(R) < deg(divisor)。
+//   - 算术运算符：operator+, operator-, operator*, operator/, operator% 及其复合赋值。
+// ============================================================================
 
 template <typename T, T mod, T root = primitive_root_constexpr(mod)>
 class Polynomial {
@@ -91,6 +114,7 @@ public:
 		return Self(std::move(result));
 	}
 
+	// Self derivative() const — 功能：形式求导 f'(x)。时间复杂度 O(n)。
 	Self derivative() const {
 		if (size() <= 1) {
 			return {};
@@ -103,6 +127,7 @@ public:
 		return result;
 	}
 
+	// Self integral() const — 功能：形式不定积分 int_0^x f(t) dt（常数项为 0，要求 n <= mod）。时间复杂度 O(n)。
 	Self integral() const {
 		std::vector<Z> result(size() + 1);
 		for (int i = 0; i < size(); ++i) {
@@ -111,6 +136,7 @@ public:
 		return result;
 	}
 
+	// Self logarithm(int n) const — 功能：求形式自然对数 ln f(x) = int (f'(x) * f^(-1)(x)) dx mod x^n（【前置条件】常数项 f[0] == 1）。O(n log n)。
 	Self logarithm(int n) const {
 		assert(n >= 0 && !empty() && coefficient[0] == Z(1));
 		if (!n) return {};
@@ -119,6 +145,7 @@ public:
 		return result;
 	}
 
+	// Self square_root(int n) const — 功能：求模 x^n 下的多项式平方根 g(x) 满足 g^2(x) === f(x) (mod x^n)
 	static Z square_root(Z value) {
 		const T p = Z::mod();
 		assert(p > 1);
@@ -150,6 +177,7 @@ public:
 		return x.data() < other.data() ? x : other;
 	}
 
+	// Self exponential(int n) const — 功能：牛顿迭代求形式指数函数 exp f(x) mod x^n（【前置条件】常数项 f[0] == 0）。O(n log n)。
 	Self exponential(int n) const {
 		assert(n >= 0 && (empty() || coefficient[0] == Z(0)));
 		if (!n) return {};
@@ -166,6 +194,7 @@ public:
 		return result;
 	}
 
+	// Self power(i64 exponent, int n) const — 功能：求非负整数次幂 (f(x))^exponent mod x^n（要求 exponent >= 0；自动提取最低非零项平移，不要求 f[0] == 1）。O(n log n)。
 	Self power(i64 exponent, int n) const {
 		assert(exponent >= 0 && n >= 0);
 		if (!n) return {};
@@ -225,6 +254,7 @@ public:
 		return answer;
 	}
 
+	// Self inverse(int n) const — 功能：牛顿迭代求模 x^n 乘法逆元 f^(-1)(x)（【前置条件】常数项 f[0] != 0）。O(n log n)。
 	Self inverse(int n) const {
 		assert(!empty() && coefficient[0].data() != 0);
 		Self result({Z(1) / coefficient[0]});
@@ -245,6 +275,7 @@ public:
 		return result;
 	}
 
+	// std::pair<Self, Self> divmod(Self divisor) const — 功能：多项式带余除法，返回 {商多项式 Q, 余多项式 R}，满足 *this == Q * divisor + R 且 deg(R) < deg(divisor)。
 	std::pair<Self, Self> divmod(Self divisor) const {
 		assert(!divisor.empty());
 		Self remainder = *this;

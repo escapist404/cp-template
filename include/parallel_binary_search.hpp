@@ -7,9 +7,22 @@
 #include <vector>
 #include "binary_search.hpp"
 
+// ============================================================================
 // 【并行二分查找 Parallel Binary Search (parallel_binary_search.hpp)】
-// - 同时对 q 个单调询问在时间轴 [low, high) 上二分：每轮按中点分组，从头重放一遍修改并批量检验所有询问，共 log2(high - low) 轮
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename Query, typename Integer, typename Reset, typename Advance, typename Check>
+//   std::vector<Integer> parallel_binary_search(
+//       const std::vector<Query>& queries, Integer low, Integer high,
+//       Reset reset, Advance advance, Check check)
+// 回调签名约定（在左闭右开时间域 [low, high) 上同时对 q 个询问二分）：
+//   - `void reset()`                        ：每轮二分开始前重置全局数据结构；
+//   - `void advance(Integer target_time)`   ：将数据结构单调推进到时刻 target_time；
+//   - `bool check(const Query& q, Integer t)`：检验询问 q 在时刻 t 是否已满足条件。
+//   返回长度为 q 的首个满足条件时刻数组（始终不满足则收敛为 high）。共 O(log(high - low)) 轮。
+// ============================================================================
 
+// template <typename Query, typename Integer, typename Reset, typename Advance, typename Check> std::vector<Integer> parallel_binary_search( — 功能：const std::vector<Query>& queries, Integer low, Integer high,
 template <typename Query, typename Integer, typename Reset, typename Advance, typename Check>
 std::vector<Integer> parallel_binary_search(const std::vector<Query>& queries,
 	Integer low, Integer high, Reset reset, Advance advance, Check check) {

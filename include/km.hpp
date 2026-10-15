@@ -6,10 +6,24 @@
 #include <utility>
 #include <vector>
 
-// 【Kuhn-Munkres (KM) 二分图最大权完美匹配 (km.hpp)】
-// - 左部点 0-based [0, n)，右部点 0-based [0, m)，要求 n <= m（以保证左部每个点都能匹配），时间复杂度 O(n^2 m)
-// - kuhn_munkres(weights): weights 为 n x m 权值矩阵，返回 pair{最大总权值, match_right}
-//   - match_right[i] : 左部点 i 所匹配的右部点编号 (0 <= match_right[i] < m)
+// ============================================================================
+// 【Kuhn-Munkres (KM / 匈牙利算法) 二分图最大权完备匹配 (km.hpp)】
+// ----------------------------------------------------------------------------
+// 结果结构体签名：
+//   template <typename T> struct KuhnMunkresResult {
+//       T weight{};              // 最大权匹配的总权值
+//       std::vector<int> left;   // 长度为 n，left[i] 为左部点 i 匹配的右部点编号 in [0, m)
+//       std::vector<int> right;  // 长度为 m，right[j] 为右部点 j 匹配的左部点编号（未匹配为 -1）
+//   };
+// 求解函数签名：
+//   template <typename T>
+//   KuhnMunkresResult<T> kuhn_munkres(const std::vector<std::vector<T>>& weight)
+// 参数与前置条件详解：
+//   - weight：n 行 m 列的完全二分图边权矩阵，weight[i][j] 表示左部点 i (0 <= i < n) 与右部点 j (0 <= j < m) 的边权。
+//   - 【前置条件】必须满足 n <= m（以保证左部每个顶点都能匹配到一个互不相同的右部顶点）；T 需为有符号算术类型。
+//   - 若某些边不存在，可根据题目将对应 weight[i][j] 设为充分小的负权（但绝对值勿超过 numeric_limits<T>::max() / 8 以防溢出）。
+// 复杂度：基于势能与最短路交替树增广，时间复杂度严格 O(n^2 m)，空间复杂度 O(nm)。
+// ============================================================================
 
 template <typename T>
 struct KuhnMunkresResult {
@@ -17,7 +31,7 @@ struct KuhnMunkresResult {
 	std::vector<int> left, right;
 };
 
-// T must be a signed arithmetic ordered type with finite, nonoverflowing sums.
+// Kuhn-Munkres (匈牙利/KM) 二分图最大权完美匹配：T 需为有符号算术类型且权值和不溢出。
 template <typename T>
 KuhnMunkresResult<T> kuhn_munkres(const std::vector<std::vector<T>>& weight) {
 	const int n = weight.size();

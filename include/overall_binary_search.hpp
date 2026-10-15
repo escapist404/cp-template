@@ -6,10 +6,21 @@
 #include <vector>
 #include "binary_search.hpp"
 
-// 【整体二分 Overall Binary Search (overall_binary_search.hpp)】
-// - 基于事件流分治的整体二分框架 overall_binary_search(events, low, high, route, rollback, finish)
-// - route(event, mid) 将修改与询问按 mid 路由到左半（返回 true）或右半（返回 false）；每次划分后调用 rollback() 清空临时数据结构
+// ============================================================================
+// 【整体二分框架 Overall Binary Search (overall_binary_search.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename Event, typename Integer, typename Route, typename Rollback, typename Finish>
+//   void overall_binary_search(
+//       std::vector<Event> events, Integer low, Integer high,
+//       Route route, Rollback rollback, Finish finish)
+// 回调签名约定（在闭区间答案域 [low, high] 上递归分流事件）：
+//   - `bool route(Event& event, Integer mid)`：返回 true 分入左半 [l, mid]，返回 false 分入右半 [mid + 1, r]；
+//   - `void rollback()`                      ：清空或回滚本层 route 产生的临时数据结构修改；
+//   - `void finish(Event& event, Integer ans)`：当 l == r == ans 时记录事件最终答案。
+// ============================================================================
 
+// template <typename Event, typename Integer, typename Route, typename Rollback, typename Finish> void overall_binary_search( — 功能：Route route, Rollback rollback, Finish finish)
 template <typename Event, typename Integer, typename Route, typename Rollback, typename Finish>
 void overall_binary_search(std::vector<Event> events, Integer low, Integer high,
 	Route route, Rollback rollback, Finish finish) {

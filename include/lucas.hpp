@@ -9,10 +9,23 @@
 #include "exgcd.hpp"
 #include "modular_arithmetic.hpp"
 
-// 【Lucas 定理与扩展 Lucas 定理 exLucas (lucas.hpp)】
-// - 求解大整数 n, m 对小素数或任意合数取模的组合数 C(n, m) mod p
-// - lucas(n, m, p)   : 要求 p 为素数，时间复杂度 O(p + log_p(n))
-// - exlucas(n, m, p) : 支持 p 为任意合数（质因数分解 + 素数幂阶乘剥离 + CRT 合并）
+// ============================================================================
+// 【Lucas 定理（模素数）与扩展 Lucas 定理（模任意正整数）(lucas.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 模素数 Lucas 类签名：class Lucas
+//    适用于 n, k 极大（如 10^18）而模数 prime 为较小素数（如 prime <= 10^6）的情形：
+//    - Lucas(i64 prime)
+//      功能：预处理 [0, prime - 1] 的阶乘与阶乘逆元（要求 prime >= 2 且为素数）。时空复杂度 O(prime)。
+//    - i64 choose(i64 n, i64 k) const
+//      功能：递归应用 Lucas 定理 C(n, k) === C(n/p, k/p) * C(n%p, k%p) (mod p) 计算组合数（k < 0 或 k > n 返回 0）。O(log_p(n))。
+// 2. 扩展 Lucas 定理与辅助函数签名（适用于模数 modulus 为任意合数，且 prime^alpha 不大）：
+//    - inline i64 lucas_valuation(i64 n, i64 p)
+//      功能：Legendre 公式计算 n! 中包含质因子 p 的幂次指数 sum_{k>=1} floor(n / p^k)。O(log_p(n))。
+//    - inline i64 lucas_choose_prime_power(i64 n, i64 k, i64 p, i64 q)
+//      功能：计算组合数 C(n, k) mod q，其中 q = p^a 为素数 p 的幂次。时间复杂度 O(q + log_p(n) * log(q))。
+//    - inline i64 exlucas(i64 n, i64 k, i64 modulus)
+//      功能：对任意正整数模数 modulus > 0（不一定为素数或无平方因子数），分解质因数幂并结合 CRT 求 C(n, k) mod modulus。
+// ============================================================================
 
 inline i64 lucas_valuation(i64 n, i64 p) {
 	i64 result = 0;

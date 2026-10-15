@@ -4,17 +4,28 @@
 #include <cassert>
 #include <vector>
 
-// 【第一类与第二类斯特林数 (stirling.hpp)】
-// - 依赖正式幂级数与 NTT 卷积，在 O(n log n) 时间内计算一行或固定列的斯特林数（模 NTT 素数）：
-// - stirling_first_row(n)      : 返回无符号第一类斯特林数第 n 行 [s(n, 0), ..., s(n, n)]
-// - stirling_second_row(n)     : 返回第二类斯特林数第 n 行 [S(n, 0), ..., S(n, n)]
-// - stirling_first_column(n, k) / stirling_second_column(n, k): 返回固定列 k、行从 0 到 n 的斯特林数
+// ============================================================================
+// 【第一类（无符号）与第二类斯特林数递推表 Stirling Numbers (stirling.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename Z> class StirlingNumbers
+//   通过二维递推在 O(n^2) 时空内同时预处理 0 <= i, j <= n 的无符号第一类斯特林数与第二类斯特林数：
+//   - 第一类斯特林数 [n, k]：将 n 个不同元素排成 k 个非空圆排列的方案数，递推式 f[i][j] = f[i-1][j-1] + (i-1) * f[i-1][j]；
+//   - 第二类斯特林数 {n, k}：将 n 个不同元素划分为 k 个非空无序集合的方案数，递推式 s[i][j] = s[i-1][j-1] + j * s[i-1][j]。
+// 构造函数与成员函数签名详解：
+//   - StirlingNumbers(int n)
+//     功能：预处理阶数上限为 n (n >= 0) 的第一类与第二类斯特林数表。时空复杂度 O(n^2)。
+//   - Z first(int n, int k) const
+//     功能：返回无符号第一类斯特林数 [n, k]（要求 0 <= n <= N；若 k < 0 或 k > n 返回 Z(0)）。O(1)。
+//   - Z second(int n, int k) const
+//     功能：返回第二类斯特林数 {n, k}（要求 0 <= n <= N；若 k < 0 或 k > n 返回 Z(0)）。O(1)。
+// ============================================================================
 
 template <typename Z>
 class StirlingNumbers {
 	std::vector<std::vector<Z>> first_, second_;
 
 public:
+	// StirlingNumbers(int n) — 功能：预处理阶数上限为 n (n >= 0) 的第一类与第二类斯特林数表。时空复杂度 O(n^2)。
 	StirlingNumbers(int n) : first_(n >= 0 ? n + 1 : 0, std::vector<Z>(n >= 0 ? n + 1 : 0)),
 		second_(n >= 0 ? n + 1 : 0, std::vector<Z>(n >= 0 ? n + 1 : 0)) {
 		assert(n >= 0);
@@ -27,11 +38,13 @@ public:
 		}
 	}
 
+	// Z first(int n, int k) const — 功能：返回无符号第一类斯特林数 [n, k]（要求 0 <= n <= N；若 k < 0 或 k > n 返回 Z(0)）。O(1)。
 	Z first(int n, int k) const {
 		assert(0 <= n && n < (int)first_.size());
 		return 0 <= k && k <= n ? first_[n][k] : Z(0);
 	}
 
+	// Z second(int n, int k) const — 功能：返回第二类斯特林数 {n, k}（要求 0 <= n <= N；若 k < 0 或 k > n 返回 Z(0)）。O(1)。
 	Z second(int n, int k) const {
 		assert(0 <= n && n < (int)second_.size());
 		return 0 <= k && k <= n ? second_[n][k] : Z(0);

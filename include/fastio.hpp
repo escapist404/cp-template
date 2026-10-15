@@ -8,11 +8,40 @@
 #include <string>
 #include <type_traits>
 
-// 【快速输入输出 (fastio.hpp)】
-// - 基于固定大小 fread / fwrite 缓冲区的高速 I/O 类 OptimizedIO<Len>（通常设 Len = 1 << 20）
-// - 读入 (>>) 支持: char（不跳过空白）、std::string、所有有符号/无符号整型（含 i128）、浮点型及 ModInt
-// - 输出 (<<) 支持: char、C 风格字符串 (const char* / char*)、所有整型（含 i128）
-// - 注意: 析构时自动刷新输出缓冲；启用后切勿在同一程序中与 std::cin / scanf 混用输入
+// ============================================================================
+// 【基于 fread / fwrite 缓冲区的快速输入输出 (fastio.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <int Len> class OptimizedIO
+//   - Len：底层输入/输出字节缓冲区大小（竞赛常用 OptimizedIO<1 << 20> io;）。
+// 构造函数与析构函数签名：
+//   - OptimizedIO(FILE *file_in = stdin, FILE *file_out = stdout)
+//     绑定输入与输出流并在构造时立即预读第一块输入缓冲。
+//   - ~OptimizedIO()
+//     析构时自动调用 flush_out() 将未写出的输出缓冲全部刷入目标文件流。
+// 缓冲区刷新签名：
+//   - void flush_in()
+//     使用 fread 从 file_in 重新填充输入缓冲区 buf_in 并重置读指针 pos_in。
+//   - void flush_out()
+//     使用 fwrite 将 buf_out[0 .. pos_out) 写入 file_out 并重置写指针 pos_out。
+// 输入运算符签名（均返回 OptimizedIO& 以支持 io >> a >> b 链式调用）：
+//   - OptimizedIO& operator>>(char& ch)
+//     读取下一个原始字节（【注意】不跳过空白字符；到达 EOF 时置 ch = -1, eof = true）。
+//   - OptimizedIO& operator>>(std::string& value)
+//     跳过前导空白字符，读取一个连续非空白字符串到 value。
+//   - template <typename T> OptimizedIO& operator>>(T& value) [有符号/无符号整型，含 i128]
+//     跳过非数字字符，识别紧邻的 '-' 号并读取十进制整数（支持负数最小值无溢出读取）。
+//   - template <typename T> OptimizedIO& operator>>(T& value) [浮点型 float/double/long double]
+//     读取一个空白分隔的词元并通过 std::strtod 转换为浮点数。
+//   - template <typename T> OptimizedIO& operator>>(T& value) [含 T::mod() 的 ModInt 类型]
+//     先按 64 位有符号整数读入，再构造为对应的模整数 T(number)。
+// 输出运算符签名（均返回 OptimizedIO& 以支持 io << a << '\n' 链式调用）：
+//   - OptimizedIO& operator<<(char ch)
+//     向输出缓冲区写入单个字符，缓冲区满时自动触发 flush_out()。
+//   - OptimizedIO& operator<<(const char *str) / OptimizedIO& operator<<(char *str)
+//     向输出缓冲区逐字节写入以 '\0' 结尾的 C 风格字符串。
+//   - template <typename T> OptimizedIO& operator<<(T value)
+//     将有符号或无符号整型（含 i128）按十进制写入输出缓冲（不带末尾换行，需手动输出 '\n'）。
+// ============================================================================
 
 template <int Len>
 class OptimizedIO {
@@ -123,6 +152,7 @@ public:
         while (dep);
         return *this;
     }
+    // - OptimizedIO(FILE *file_in = stdin, FILE *file_out = stdout) 绑定输入与输出流并在构造时立即预读第一块输入缓冲。 — 功能：OptimizedIO(FILE *file_in = stdin, FILE *file_out = stdout)
     OptimizedIO(FILE *file_in = stdin, FILE *file_out = stdout)
         : pos_in(0), size_in(0), pos_out(0), eof(false), file_in(file_in), file_out(file_out) {
         flush_in();

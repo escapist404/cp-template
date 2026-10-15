@@ -9,10 +9,22 @@
 #include <utility>
 #include <vector>
 
-// 【Dijkstra 最短路 (dijkstra.hpp)】
-// - 0-based 邻接表 adj[u] = {{v, weight}, ...}，要求所有边权非负 (weight >= 0)，时间复杂度 O((n + m) log m)
-// - 支持单源或多源同时出发：sources 传入初始化列表（如 {s} 或 {s1, s2}）
-// - 返回长度为 n 的距离数组：起点距离为 0，不可达顶点距离为 std::numeric_limits<T>::max()（内部自带防加权溢出保护）
+// ============================================================================
+// 【Dijkstra 单源/多源非负权最短路 (dijkstra.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename T>
+//   std::vector<T> dijkstra(const std::vector<std::vector<std::pair<int, T>>>& adj,
+//                           std::initializer_list<int> sources)
+// 参数与返回值详解：
+//   - adj：0-based 有向或无向带权图邻接表，adj[u] 存储从 u 出发的边 {终点 v, 边权 weight}。
+//     【前置条件】所有边权必须满足 weight >= 0（内部含 assert(weight >= T())）。
+//   - sources：起点初始化列表，单源最短路传 {s}，多源最短路传 {s1, s2, ...}。
+//   - 返回值 std::vector<T>：长度为 n = adj.size() 的最短距离数组 distance：
+//     - 各起点处 distance[s] = 0；
+//     - 不可达顶点处 distance[v] == std::numeric_limits<T>::max()（内部自带加法溢出保护，无需改小无穷大常数）。
+// 复杂度：时间复杂度 O((n + m) log m)，空间复杂度 O(n + m)。
+// ============================================================================
 
 template <typename T>
 std::vector<T> dijkstra(

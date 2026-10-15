@@ -6,13 +6,28 @@
 #include <random>
 #include <utility>
 
-// 【旋转/分裂平衡树 Treap (treap.hpp)】
-// - 维护有序多重集合 Treap<T, Compare>（默认 std::less<T> 升序），各操作期望复杂度 O(log n)，禁用拷贝
-// - insert(key)  : 插入一个 key（重复键值合并计数）
-// - remove(key)  : 删除一个等于 key 的副本（不存在则无操作）
-// - get_rank(key): 返回 1-based 排名（严格小于 key 的元素个数 + 1）
-// - get_value(r) : 返回 1-based 排名为 r 的元素（要求 1 <= r <= 总元素数）
-// - get_prev(key) / get_next(key): 返回严格前驱 / 严格后继（不存在时返回 numeric_limits<T>::lowest() / max()）
+// ============================================================================
+// 【分裂合并平衡树 Treap (treap.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T = int, typename Compare = std::less<T>> class Treap
+//   基于随机优先级维护有序多重集合（相同键值合并计数 count），默认 std::less<T> 按升序排列。
+//   内部含裸指针节点，已禁用拷贝构造与拷贝赋值，析构时自动释放全部节点。
+// 构造函数与成员函数签名详解（所有操作期望时间复杂度均为 O(log n)）：
+//   - Treap() / Treap(const Compare& compare)
+//     功能：构造空平衡树。O(1)。
+//   - void insert(const T& key)
+//     功能：向多重集合中插入一个 key（若已存在则对应节点 count 加 1）。期望 O(log n)。
+//   - void remove(const T& key)
+//     功能：从多重集合中删除一个 key 副本（count 减 1，归零时移除节点；若 key 不存在则无操作）。期望 O(log n)。
+//   - int get_rank(const T& key) const
+//     功能：查询 key 的 1-based 排名，定义为【严格小于 key 的元素总个数（含重复）+ 1】。期望 O(log n)。
+//   - T get_value(int rank) const
+//     功能：查询 1-based 排名为 rank 的元素值（要求 1 <= rank <= 总元素数，越界触发 assert）。期望 O(log n)。
+//   - T get_prev(const T& key) const
+//     功能：查询严格小于 key 的最大元素（严格前驱）；若不存在则返回 std::numeric_limits<T>::lowest()。期望 O(log n)。
+//   - T get_next(const T& key) const
+//     功能：查询严格大于 key 的最小元素（严格后继）；若不存在则返回 std::numeric_limits<T>::max()。期望 O(log n)。
+// ============================================================================
 
 template <typename T = int, typename Compare = std::less<T>>
 class Treap {
@@ -74,6 +89,7 @@ class Treap {
 		return {parts.first, cur};
 	}
 
+	// void insert(const T& key) — 功能：向多重集合中插入一个 key（若已存在则对应节点 count 加 1）。期望 O(log n)。
 	Node* insert(Node* cur, const T& key, int priority) {
 		if (!cur) {
 			return new Node(key, priority);
@@ -165,8 +181,10 @@ class Treap {
 	}
 
 public:
+	// Treap() — 功能：构造空平衡树。O(1)。
 	Treap() = default;
 
+	// Treap(const Compare& compare) — 功能：构造空平衡树。O(1)。
 	Treap(const Compare& compare)
 		: compare(compare) {}
 
@@ -181,10 +199,12 @@ public:
 		root = insert(root, key, random_priority());
 	}
 
+	// void remove(const T& key) — 功能：从多重集合中删除一个 key 副本（count 减 1，归零时移除节点；若 key 不存在则无操作）。期望 O(log n)。
 	void remove(const T& key) {
 		root = erase(root, key);
 	}
 
+	// int get_rank(const T& key) const — 功能：查询 key 的 1-based 排名，定义为【严格小于 key 的元素总个数（含重复）+ 1】。期望 O(log n)。
 	int get_rank(const T& key) const {
 		const Node* cur = root;
 		int result = 1;
@@ -203,10 +223,12 @@ public:
 		return result;
 	}
 
+	// T get_value(int rank) const — 功能：查询 1-based 排名为 rank 的元素值（要求 1 <= rank <= 总元素数，越界触发 assert）。期望 O(log n)。
 	T get_value(int rank) const {
 		return value_at(root, rank);
 	}
 
+	// T get_prev(const T& key) const — 功能：查询严格小于 key 的最大元素（严格前驱）；若不存在则返回 std::numeric_limits<T>::lowest()。期望 O(log n)。
 	T get_prev(const T& key) const {
 		T result = std::numeric_limits<T>::lowest();
 		const Node* cur = root;
@@ -223,6 +245,7 @@ public:
 		return result;
 	}
 
+	// T get_next(const T& key) const — 功能：查询严格大于 key 的最小元素（严格后继）；若不存在则返回 std::numeric_limits<T>::max()。期望 O(log n)。
 	T get_next(const T& key) const {
 		T result = std::numeric_limits<T>::max();
 		const Node* cur = root;

@@ -6,12 +6,24 @@
 #include <queue>
 #include <vector>
 
-// 【函数图 / 基环内向树分解与倍增跳转 (functional_graph.hpp)】
-// - 0-based 顶点编号 [0, n)，next[u] 表示 u 的唯一出边终点，构造时空复杂度 O(64 n)
-// - jump(u, steps)       : O(log steps) 返回从 u 出发走 steps 步（支持 uint64_t 步数）到达的顶点
-// - component(u)         : O(1) 返回 u 所属弱连通分量（对应唯一基环）的 0-based 编号
-// - distance_to_cycle(u) : O(1) 返回从 u 进入基环所需的最少步数（环上顶点为 0）
-// - cycle_length(u)      : O(1) 返回 u 所在分量基环的长度
+// ============================================================================
+// 【函数图 / 基环内向树倍增跳转与环分解 (functional_graph.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class FunctionalGraph
+//   每个顶点 0 <= u < n 恰有一条有向出边 u -> next[u]，每个弱连通分量是一棵指向唯一有向环的基环内向树。
+// 构造函数与成员函数签名详解：
+//   - FunctionalGraph(const std::vector<int>& next)
+//     功能：预处理 64 层倍增表及每个点的所属基环编号、入环距离与环长（要求 0 <= next[u] < n）。
+//     复杂度：时间与空间复杂度均为 O(64 * n)。
+//   - int jump(int vertex, std::uint64_t steps)
+//     功能：返回从顶点 vertex 出发沿出边连续走 steps 步（0 <= steps < 2^64）后到达的顶点编号。O(log(steps))。
+//   - int component(int vertex)
+//     功能：返回顶点 vertex 所属弱连通分量（对应唯一基环）的 0-based 编号；两点的后继轨迹最终汇合当且仅当 component 相同。O(1)。
+//   - int distance_to_cycle(int vertex)
+//     功能：返回从 vertex 出发首次进入其所在基环所需的最少步数（已在基环上的顶点返回 0）。O(1)。
+//   - int cycle_length(int vertex)
+//     功能：返回 vertex 所属弱连通分量的有向基环长度（>= 1）。O(1)。
+// ============================================================================
 
 class FunctionalGraph {
 	enum { LOG = 64 };
@@ -20,6 +32,7 @@ class FunctionalGraph {
 	std::vector<int> cycle, distance, length;
 
 public:
+	// FunctionalGraph(const std::vector<int>& next) — 功能：预处理 64 层倍增表及每个点的所属基环编号、入环距离与环长（要求 0 <= next[u] < n）。
 	FunctionalGraph(const std::vector<int>& next) : n(next.size()), up(LOG, next),
 		cycle(n, -1), distance(n), length(n) {
 		std::vector<int> indegree(n);
@@ -63,6 +76,7 @@ public:
 				up[k][i] = up[k - 1][up[k - 1][i]];
 	}
 
+	// int jump(int vertex, std::uint64_t steps) — 功能：返回从顶点 vertex 出发沿出边连续走 steps 步（0 <= steps < 2^64）后到达的顶点编号。O(log(steps))。
 	int jump(int vertex, std::uint64_t steps) {
 		assert(0 <= vertex && vertex < n);
 		for (int k = 0; steps; ++k, steps >>= 1)

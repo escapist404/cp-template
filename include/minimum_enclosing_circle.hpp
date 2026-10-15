@@ -8,8 +8,17 @@
 
 #include "geometry_base.hpp"
 
-// 【随机增量法最小圆覆盖 (minimum_enclosing_circle.hpp)】
-// - minimum_enclosing_circle(points): 在期望严格线性 O(n) 时间内计算覆盖平面上所有给定点的最小圆 Circle{center, radius}
+// ============================================================================
+// 【随机增量法求最小圆覆盖 Minimum Enclosing Circle (minimum_enclosing_circle.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解：
+//   1. inline Circle circumcircle(Point a, Point b, Point c)
+//      求平面三点 a, b, c 的外接圆（共线退化时返回最远两点为直径的圆）。O(1)。
+//   2. inline bool contains(const Circle& circle, Point point)
+//      判断点 point 是否在圆 circle 内部或圆周上（含 EPS 容差）。O(1)。
+//   3. inline Circle minimum_enclosing_circle(std::vector<Point> points)
+//      随机打乱后运行 Welzl 随机增量法，返回覆盖所有点的最小圆 Circle{center, radius}。期望时间复杂度严格 O(n)。
+// ============================================================================
 
 inline Circle circumcircle(Point a, Point b, Point c) {
 	const Real determinant = 2 * cross(b - a, c - a);
@@ -33,7 +42,7 @@ inline bool contains(const Circle& circle, Point point) {
 	return distance_squared(circle.center, point) <= circle.radius * circle.radius + EPS;
 }
 
-// Expected O(n^3) randomized incremental algorithm.
+// 随机增量法求最小覆盖圆：打乱点序后期望时间复杂度 O(n)，最坏情况 O(n^3)。
 inline Circle minimum_enclosing_circle(std::vector<Point> points) {
 	if (points.empty()) return Circle();
 	std::mt19937 random(712367821);

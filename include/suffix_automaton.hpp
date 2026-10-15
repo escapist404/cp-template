@@ -6,12 +6,32 @@
 #include <map>
 #include <vector>
 
+// ============================================================================
 // 【后缀自动机 Suffix Automaton / SAM (suffix_automaton.hpp)】
-// - 在线构建字符串的所有子串状态图，状态数 <= 2n - 1，转移数 <= 3n - 4，构建复杂度 O(n log sigma)
-// - Node 字段 : length（最长子串长度）、link（后缀链接，根 0 的 link = -1）、first_position（首次出现的结束位置）、terminals（endpos 大小）
-// - extend(c) : 在末尾追加一个字符 c
-// - accumulate(): 按长度降序沿后缀链接树自底向上累加 terminals，调用后 nodes[u].terminals 即为状态 u 对应子串在原串中的出现次数
-// - distinct_substrings(): O(状态数) 返回原串本质不同非空子串的总数 sum(length[u] - length[link[u]])
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename Symbol = char, typename Compare = std::less<Symbol>> class SuffixAutomaton
+//   在线构建一般字符集序列的后缀自动机（状态总数 <= 2n - 1，转移边数 <= 3n - 4；0 号节点为初始根状态，link = -1）。
+// 公开状态节点结构体签名：
+//   struct Node {
+//       std::map<Symbol, int, Compare> next; // 字符转移表
+//       int link = -1;                       // 后缀链接（Parent 树父节点编号，根状态 0 的 link 为 -1）
+//       int length = 0;                      // 该等价类中最长子串的长度 len(u)（最短子串长度为 len(link) + 1）
+//       int terminals = 0;                   // 非克隆前缀状态标记（实建状态为 1，克隆状态与根为 0，用于统计 endpos 大小）
+//   };
+// 构造函数与成员函数签名详解：
+//   - int add(const Symbol& symbol)
+//     功能：在线追加单个字符 symbol，更新自动机并返回新的整个前缀所在状态编号 last。均摊 O(log |Sigma|)。
+//   - template <typename Sequence> void build(const Sequence& text)
+//     功能：重置自动机并依次插入序列 text 中的所有元素。时间复杂度 O(|text| log |Sigma|)，空间 O(|text|)。
+//   - template <typename Sequence> bool contains(const Sequence& text) const
+//     功能：从根状态 0 出发沿转移边匹配，判断序列 text 是否为原串的子串。时间复杂度 O(|text| log |Sigma|)。
+//   - long long distinct_substrings() const
+//     功能：统计原串中本质不同非空子串的总个数，即 sum_{u > 0} (nodes[u].length - nodes[nodes[u].link].length)。O(|states|)。
+//   - std::vector<long long> occurrences() const
+//     功能：按 length 降序沿后缀链接 link 向上累加 terminals，返回每个状态 u 的出现次数（即 |endpos(u)|）数组。O(|states| log |states|)。
+//   - const std::vector<Node>& states() const
+//     功能：返回内部所有状态节点数组 nodes 的常引用（下标 0 为根状态）。O(1)。
+// ============================================================================
 
 template <typename Symbol = char, typename Compare = std::less<Symbol>>
 class SuffixAutomaton {
@@ -27,6 +47,7 @@ private:
     int last = 0;
 
 public:
+    // int add(const Symbol& symbol) — 功能：在线追加单个字符 symbol，更新自动机并返回新的整个前缀所在状态编号 last。均摊 O(log |Sigma|)。
     int add(const Symbol& symbol) {
         int cur = nodes.size();
         nodes.push_back(Node{});
@@ -65,6 +86,7 @@ public:
         return cur;
     }
 
+    // template <typename Sequence> void build(const Sequence& text) — 功能：重置自动机并依次插入序列 text 中的所有元素。时间复杂度 O(|text| log |Sigma|)，空间 O(|text|)。
     template <typename Sequence>
     void build(const Sequence& text) {
         nodes.assign(1, Node{});
@@ -74,6 +96,7 @@ public:
         }
     }
 
+    // template <typename Sequence> bool contains(const Sequence& text) const — 功能：从根状态 0 出发沿转移边匹配，判断序列 text 是否为原串的子串。时间复杂度 O(|text| log |Sigma|)。
     template <typename Sequence>
     bool contains(const Sequence& text) const {
         int node = 0;
@@ -87,6 +110,7 @@ public:
         return true;
     }
 
+    // long long distinct_substrings() const — 功能：统计原串中本质不同非空子串的总个数，即 sum_{u > 0} (nodes[u].length - nodes[nodes[u].link].length)。O(|states|)。
     long long distinct_substrings() const {
         long long result = 0;
         for (int i = 1; i < (int)nodes.size(); ++i) {
@@ -95,7 +119,7 @@ public:
         return result;
     }
 
-    // A fresh vector each call, so propagation is repeatable after more adds.
+    // 每次调用返回全新的出现次数数组，支持继续 extend 字符后重复调用。
     std::vector<long long> occurrences() const {
         std::vector<int> order(nodes.size());
         std::vector<long long> result;
@@ -114,6 +138,7 @@ public:
         return result;
     }
 
+    // const std::vector<Node>& states() const — 功能：返回内部所有状态节点数组 nodes 的常引用（下标 0 为根状态）。O(1)。
     const std::vector<Node>& states() const {
         return nodes;
     }

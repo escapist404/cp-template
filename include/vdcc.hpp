@@ -8,11 +8,22 @@
 
 #include "scc.hpp"
 
-// 【无向图点双连通分量 VDCC (vdcc.hpp)】
-// - 0-based 无向图邻接表 adj（每条无向边需双向添加），时间与空间复杂度均为 O(n + m)
-// - get_vdcc(adj): 按【边集】返回每个点双连通分量 std::vector<std::pair<int, int>>；若存在无关联边的孤立顶点，对应追加一个空边集 {}
+// ============================================================================
+// 【无向图点双连通分量 Vertex-Biconnected Components / VDCC (vdcc.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   std::vector<std::vector<std::pair<int, int>>> get_vdcc(const std::vector<std::vector<int>>& adj)
+// 参数与返回值详解：
+//   - adj：0-based 无向图邻接表（每条无向边需双向添加；不支持自环）。
+//   - 返回值 std::vector<std::vector<std::pair<int, int>>>：
+//     因为割点可同时属于多个点双连通分量，而每条边唯一属于一个点双，本函数按【边集】返回各个点双连通分量：
+//     - 对含有边的点双，返回该分量内部的所有树边与返祖边 {u, v}；
+//     - 对没有任何关联边的孤立顶点，会在结果末尾追加一个空边集 {} 以标识该孤立点分量。
+// 复杂度：时间与空间复杂度均为 O(n + m)。
+// ============================================================================
 
 std::vector<std::vector<std::pair<int, int>>>
+// std::vector<std::vector<std::pair<int, int>>> get_vdcc(const std::vector<std::vector<int>>& adj) — 功能：参数与返回值详解：
 get_vdcc(const std::vector<std::vector<int>>& adj) {
 	const int n = adj.size();
 	std::stack<std::pair<int, int>> edge_stack;

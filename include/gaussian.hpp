@@ -8,13 +8,31 @@
 
 #include "matrix.hpp"
 
-// 【高斯消元求解线性方程组与矩阵求秩 (gaussian.hpp)】
-// - gaussian_elimination(A, b, is_zero): O(n^2 m) 求解线性方程组 A * x = b，返回 GaussianResult<T>{consistent, rank, solution, basis}
-//   - consistent: 方程组是否有解
-//   - rank      : 系数矩阵的秩
-//   - solution  : 一组特解 x_0（自由变量取 0）
-//   - basis     : 齐次方程组 A * x = 0 的零空间基向量列表（维数 = m - rank，通解为 solution + sum(c_i * basis[i])）
-// - matrix_rank(vec, n, m, is_zero): 仅求 n x m 行优先矩阵的秩（支持 n=0 或 m=0，不分配解空间）
+// ============================================================================
+// 【域上高斯消元求解线性方程组与矩阵求秩 Gaussian Elimination (gaussian.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 判零仿函数与求解结果结构体签名：
+//    - template <typename T> struct GaussianZero { bool operator()(T value) const; };
+//      浮点类型按 |value| <= 1e-10 判零，精确类型（如 ModInt）按 value == T{} 判零。
+//    - template <typename T> struct GaussianResult {
+//          bool consistent = true;                // 方程组是否相容（有解为 true，矛盾无解为 false）
+//          int rank = 0;                          // 系数矩阵的秩
+//          std::vector<T> particular;             // 当有解时，返回长度为 variables 的一组特解 x_0（自由变量取 0）
+//          std::vector<std::vector<T>> nullspace; // 齐次方程组 A*x = 0 的零空间基向量列表（共 variables - rank 个长度为 variables 的基向量）
+//      };
+//      【通解表示】方程组的全部解集可表示为 x = particular + sum_k c_k * nullspace[k]。
+// 2. 函数签名与接口详解（要求 T 为域类型，如 double/long double 或素数模 ModInt）：
+//    - template <typename T, typename IsZero = GaussianZero<T>>
+//      int matrix_rank(std::vector<T> matrix, int n, int m, IsZero is_zero = IsZero{})
+//      功能：传入长度为 n * m 的行优先一维数组 matrix，仅计算 n 行 m 列矩阵的秩（支持 n=0 或 m=0）。O(n * m * min(n, m))。
+//    - template <typename T, size_t R, size_t C, typename IsZero = GaussianZero<T>>
+//      GaussianResult<T> gaussian_elimination(Matrix<T, R, C> augmented, int variables, IsZero is_zero = IsZero{})
+//    - template <typename T, typename IsZero = GaussianZero<T>>
+//      GaussianResult<T> gaussian_elimination(std::vector<std::vector<T>> augmented, int variables, IsZero is_zero = IsZero{})
+//      功能：输入 n 行 (variables + 1) 列的增广矩阵 [A | b]（前 variables 列为未知数系数，最后一列为常数项 b），
+//            执行高斯-约旦列主元消元并返回 GaussianResult<T>{consistent, rank, particular, nullspace}。
+//      复杂度：时间复杂度 O(n * variables * min(n, variables))，空间复杂度 O(variables * (n + variables))。
+// ============================================================================
 
 template <typename T>
 struct GaussianZero {
@@ -27,8 +45,7 @@ struct GaussianZero {
     }
 };
 
-// Rank of an n by m matrix over a field. The matrix is row-major. This
-// rank-only form avoids the solution/nullspace allocations of the solver.
+// 计算域上 n x m 矩阵的秩（行主序存储），避免构造特解与零空间向量以节省开销。
 template <typename T, typename IsZero = GaussianZero<T>>
 int matrix_rank(std::vector<T> matrix, int n, int m, IsZero is_zero = IsZero{}) {
 	assert(n >= 0 && m >= 0 && (long long)n * m == (long long)matrix.size());
@@ -48,9 +65,7 @@ struct GaussianResult {
     std::vector<std::vector<T>> nullspace;
 };
 
-// Solve Ax=b over a field: float/double or prime-modulus ModInt, not integers.
-// Each row of augmented contains variables+1 entries. No equations is allowed
-// by supplying variables explicitly. All solutions = particular + span(nullspace).
+// 求解域（浮点数或素数模数 ModInt）上的线性方程组 Ax = b：增广矩阵每行含 variables + 1 列，通解 = particular + span(nullspace)。
 template <typename T, size_t R, size_t C, typename IsZero = GaussianZero<T>>
 GaussianResult<T> gaussian_elimination(Matrix<T, R, C> augmented,
                                       int variables, IsZero is_zero = IsZero{}) {

@@ -6,17 +6,27 @@
 
 #include "matrix.hpp"
 
-// 【任意模数与域上的行列式 (determinant.hpp)】
-// - determinant(a)          : O(n^3) 域上高斯消元求方阵行列式（适用于 ModInt<素数> 或浮点数）
-// - determinant_mod(a, mod) : O(n^3 log(mod)) 基于辗转相除消元，求【任意正整数模数（含合数）】下的方阵行列式
+// ============================================================================
+// 【Bareiss 无分数消元求方阵行列式 Determinant (determinant.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename T, size_t R, size_t C>
+//   T determinant(const Matrix<T, R, C>& input)
+// 参数与返回值详解：
+//   - input：n x n 方阵（要求 input.rows() == input.columns()，n == 0 时返回单位元 T(1)）。
+//   - 算法原理：采用 Bareiss 无分数高斯消元（a[i][j] = (a[i][j] * a[k][k] - a[i][k] * a[k][j]) / previous），
+//     在素数模 ModInt、有理数或无溢出的整环 T 上均可直接精确计算方阵行列式 det(input)。
+//   - 复杂度：时间复杂度 O(n^3)，空间复杂度 O(n^2)。
+// ============================================================================
 
+// template <typename T, size_t R, size_t C> T determinant(const Matrix<T, R, C>& input) — 功能：T determinant(const Matrix<T, R, C>& input)
 template <typename T, size_t R, size_t C>
 T determinant(const Matrix<T, R, C>& input) {
 	assert(input.rows() == input.columns());
 	const size_t n = input.rows();
 	if (n == 0) return T(1);
 
-	// Bareiss elimination keeps every intermediate value integral.
+	// Bareiss 无分数高斯消元：每步除法均保证整除，中间过程全部保持精确整数。
 	auto a = input;
 	T previous = T(1);
 	bool negated = false;
@@ -38,4 +48,4 @@ T determinant(const Matrix<T, R, C>& input) {
 	return negated ? -a[n - 1][n - 1] : a[n - 1][n - 1];
 }
 
-#endif // DETERMINANT_HPP
+#endif

@@ -5,10 +5,20 @@
 #include <utility>
 #include "types.hpp"
 
-// 【WQS 二分 / Aliens Trick 凸包带权二分 (wqs_binary_search.hpp)】
-// - 用于消除“恰好选 k 个物品”的个数限制，将问题转化为每个物品附加惩罚斜率 penalty 后的无限制最优值问题
-// - wqs_binary_search(low, high, target_count, evaluate): O(log(high - low) * T_eval) 返回消除惩罚后的原问题最优值
+// ============================================================================
+// 【WQS 二分 / Aliens Trick 带权惩罚凸包二分 (wqs_binary_search.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename T, typename Solve>
+//   T wqs_binary_search(i64 low, i64 high, int required, Solve solve)
+// 参数与契约详解：
+//   - 在闭区间 [low, high] 上二分惩罚斜率 mid，回调签名为 `std::pair<int, T> solve(i64 penalty)`，
+//     返回 {所选物品个数 count, 含 +penalty * count 在内的增广目标值}。
+//   - 要求随 penalty 增大，count 单调不增（即 `solve(low).first >= required >= solve(high).first`）；
+//     返回扣除惩罚项后的原问题真实最优值 `solve(opt).second - opt * required`。调用次数 O(log(high - low))。
+// ============================================================================
 
+// template <typename T, typename Solve> T wqs_binary_search(i64 low, i64 high, int required, Solve solve) — 功能：T wqs_binary_search(i64 low, i64 high, int required, Solve solve)
 template <typename T, typename Solve>
 T wqs_binary_search(i64 low, i64 high, int required, Solve solve) {
 	assert(low <= high && required >= 0);

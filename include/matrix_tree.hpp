@@ -6,10 +6,22 @@
 
 #include "determinant.hpp"
 
-// 【Kirchhoff 矩阵树定理生成树计数 (matrix_tree.hpp)】
-// - 0-based 顶点编号 [0, n)，时间复杂度 O(n^3)
-// - count_spanning_trees_undirected(n, edges)       : 统计无向图所有生成树的边权乘积之和（无权图传 weight = 1）
-// - count_spanning_trees_directed(n, edges, root, out): 统计以 root 为根的有向生成树数量（out=true 为外向树，false 为内向树）
+// ============================================================================
+// 【Kirchhoff 矩阵树定理：无向图生成树计数 (matrix_tree.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 带权边结构体签名：
+//    template <typename T> struct MatrixTreeEdge {
+//        int u, v; T weight;
+//        MatrixTreeEdge(int u, int v, T weight = T(1));
+//    };
+// 2. 函数签名与接口详解（0-based 顶点编号 [0, n)，自动忽略自环 u == v，支持重边累加）：
+//    - template <typename T>
+//      T matrix_tree(int n, const std::vector<MatrixTreeEdge<T>>& edges)
+//      功能：构造无向图拉普拉斯矩阵 L 并求其 (n - 1) 阶主子式行列式，返回所有生成树的边权乘积之和（n <= 1 返回 T(1)）。O(n^3 + m)。
+//    - template <typename T = long long>
+//      T matrix_tree(int n, const std::vector<std::pair<int, int>>& edges)
+//      功能：无权无向图重载（边权视为 1），返回无向图的生成树总棵数。时间复杂度 O(n^3 + m)。
+// ============================================================================
 
 template <typename T>
 struct MatrixTreeEdge {
@@ -20,8 +32,7 @@ struct MatrixTreeEdge {
 		: u(u), v(v), weight(weight) {}
 };
 
-// Weighted undirected graph. Parallel edges are allowed; self-loops are ignored.
-// T must support +, -, *, /, unary -, equality, and construction from 0 and 1.
+// 无向加权图的 Matrix-Tree 定理：支持重边，自动忽略自环，返回所有生成树边权乘积之和。
 template <typename T>
 T matrix_tree(int n, const std::vector<MatrixTreeEdge<T>>& edges) {
 	assert(n >= 1);
@@ -52,4 +63,4 @@ T matrix_tree(int n, const std::vector<std::pair<int, int>>& edges) {
 	return matrix_tree(n, weighted);
 }
 
-#endif // MATRIX_TREE_HPP
+#endif

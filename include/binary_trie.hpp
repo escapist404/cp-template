@@ -6,11 +6,25 @@
 #include <type_traits>
 #include <vector>
 
-// 【0-1 字典树 (binary_trie.hpp)】
-// - 固定位宽的多重集合 0-1 Trie，模板参数 T 必须为无符号整型（如 uint64_t / uint32_t），单次操作 O(Bits)
-// - insert(val) / erase(val): 插入一个 val / 删除一个已存在的 val（erase 要求 count(val) > 0）
-// - count(val) / size()     : 查询 val 的出现次数 / 集合总元素数
-// - max_xor(val) / min_xor(val): 返回集合元素与 val 异或的最大结果 / 最小结果本身（要求 size() > 0）
+// ============================================================================
+// 【定长无符号整数 0-1 字典树 Binary Trie (binary_trie.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T = std::uint64_t, int Bits = sizeof(T) * 8> class BinaryTrie
+//   【模板约束】T 必须为无符号整型（如 uint64_t, uint32_t），0 < Bits <= sizeof(T) * 8；若 Bits 小于位宽，所有传入值的 >= Bits 高位必须为 0。
+// 成员函数签名详解（单次操作时间复杂度均为 O(Bits)）：
+//   - int size()
+//     功能：返回当前字典树中存储的元素总数（含重复元素）。O(1)。
+//   - void insert(T value)
+//     功能：向多重集合中插入一个无符号整数 value。时间复杂度 O(Bits)。
+//   - void erase(T value)
+//     功能：从多重集合中删除一个 value 副本（【前置条件】必须保证 count(value) > 0，否则触发 assert）。O(Bits)。
+//   - int count(T value)
+//     功能：查询整数 value 在当前多重集合中的出现次数。O(Bits)。
+//   - T max_xor(T value)
+//     功能：要求 size() > 0；返回集合中某个元素 x 与 value 的最大异或结果 (x ^ value) 本身。O(Bits)。
+//   - T min_xor(T value)
+//     功能：要求 size() > 0；返回集合中某个元素 x 与 value 的最小异或结果 (x ^ value) 本身。O(Bits)。
+// ============================================================================
 
 template <typename T = std::uint64_t, int Bits = sizeof(T) * 8>
 class BinaryTrie {
@@ -24,6 +38,7 @@ class BinaryTrie {
 public:
 	int size() { return tree[0].count; }
 
+	// void insert(T value) — 功能：向多重集合中插入一个无符号整数 value。时间复杂度 O(Bits)。
 	void insert(T value) {
 		U x = (U)value;
 		if constexpr (Bits < sizeof(T) * 8) assert((x >> Bits) == 0);
@@ -40,6 +55,7 @@ public:
 		}
 	}
 
+	// void erase(T value) — 功能：从多重集合中删除一个 value 副本（【前置条件】必须保证 count(value) > 0，否则触发 assert）。O(Bits)。
 	void erase(T value) {
 		U x = (U)value;
 		if constexpr (Bits < sizeof(T) * 8) assert((x >> Bits) == 0);
@@ -52,6 +68,7 @@ public:
 		}
 	}
 
+	// int count(T value) — 功能：查询整数 value 在当前多重集合中的出现次数。O(Bits)。
 	int count(T value) {
 		U x = (U)value;
 		if constexpr (Bits < sizeof(T) * 8) assert((x >> Bits) == 0);
@@ -63,6 +80,7 @@ public:
 		return cur ? tree[cur].count : 0;
 	}
 
+	// T max_xor(T value) — 功能：要求 size() > 0；返回集合中某个元素 x 与 value 的最大异或结果 (x ^ value) 本身。O(Bits)。
 	T max_xor(T value) {
 		assert(size());
 		U x = (U)value, result = 0;
@@ -79,6 +97,7 @@ public:
 		return (T)result;
 	}
 
+	// T min_xor(T value) — 功能：要求 size() > 0；返回集合中某个元素 x 与 value 的最小异或结果 (x ^ value) 本身。O(Bits)。
 	T min_xor(T value) {
 		assert(size());
 		U x = (U)value, result = 0;

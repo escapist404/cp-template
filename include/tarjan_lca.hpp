@@ -4,10 +4,22 @@
 #include <vector>
 #include <utility>
 
-// 【Tarjan 离线最近公共祖先 (tarjan_lca.hpp)】
-// - 0-based 连通无向树邻接表 adj，以 root 为根，离线批量回答 queries 中的点对 {u, v} 的 LCA
-// - 时间复杂度 O((n + q) alpha(n))，空间复杂度 O(n + q)，返回与 queries 等长的 LCA 结果数组
+// ============================================================================
+// 【Tarjan 离线求最近公共祖先 Tarjan Offline LCA (tarjan_lca.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   std::vector<int> tarjan_lca(const std::vector<std::vector<int>>& adj,
+//                               int root,
+//                               const std::vector<std::pair<int, int>>& queries)
+// 参数与返回值详解：
+//   - adj：0-based 连通无向树邻接表（长度为 n）。
+//   - root：有根树的根节点编号（0 <= root < n）。
+//   - queries：离线询问点对列表，第 i 项为 {u_i, v_i}（0 <= u_i, v_i < n）。
+//   - 返回值 std::vector<int>：与 queries 等长的结果数组，第 i 项为 u_i 与 v_i 的最近公共祖先编号。
+// 复杂度：基于一次 DFS 与并查集，时间复杂度 O((n + q) alpha(n))，空间复杂度 O(n + q)。
+// ============================================================================
 
+// std::vector<int> tarjan_lca(const std::vector<std::vector<int>>& adj, int root, — 功能：const std::vector<std::pair<int, int>>& queries)
 std::vector<int> tarjan_lca(const std::vector<std::vector<int>>& adj, int root, const std::vector<std::pair<int, int>>& queries) {
 	const int n = adj.size();
 	std::vector<std::vector<std::pair<int, int>>> queries_on_node(n);

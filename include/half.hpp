@@ -7,10 +7,18 @@
 #include <vector>
 #include "inter.hpp"
 
-// 【半平面交 S&I 算法 (half.hpp)】
-// - 每条有向直线 Line(s, t) 代表其【左侧】半平面（即满足 ((t - s) ^ (p - s)) >= 0 的点集）
-// - half_plane_intersection(lines): O(n log n) 按极角排序并维护双端队列，返回核区域的逆时针凸多边形顶点列表（无解或面积退化返回空）
+// ============================================================================
+// 【半平面交 S&I 算法 Half-Plane Intersection (half.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   inline std::vector<Point> half_plane_intersection(std::vector<Line> lines)
+// 参数与返回值详解：
+//   - 每条有向直线 Line(start, end) 表示其【左侧半平面】（满足 cross(end - start, p - start) >= 0 的点集）。
+//   - 若半平面交可能无界，调用前需手动添加四条包围盒边界有向直线。
+//   - 返回值：核区域退化或为空集时返回 {}；否则按【逆时针顺序】返回核凸多边形的顶点列表。O(n log n)。
+// ============================================================================
 
+// inline std::vector<Point> half_plane_intersection(std::vector<Line> lines) — 功能：参数与返回值详解：
 inline std::vector<Point> half_plane_intersection(std::vector<Line> lines) {
     const auto angle = [](const Line& line) {
         return std::atan2(line.end.y - line.start.y, line.end.x - line.start.x);

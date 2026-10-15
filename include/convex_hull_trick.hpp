@@ -4,8 +4,18 @@
 #include <cassert>
 #include <vector>
 
-// 【凸包斜率优化 Convex Hull Trick (convex_hull_trick.hpp)】
-// - 维护直线集合 y = k * x + b 的下凸壳/上凸壳，支持斜率单调插入与单调/二分查询极值，常用于斜率优化 DP
+// ============================================================================
+// 【单调斜率凸包优化栈 Convex Hull Trick / CHT (convex_hull_trick.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T = long long> class ConvexHullTrick
+//   维护直线 y = slope * x + intercept 的下包络线（求最小值），内部用 long double 防相乘溢出。
+// 成员函数签名详解：
+//   - void clear() / bool empty() const / int size() const
+//   - void add_line(T slope, T intercept)
+//     【前置条件】插入直线的斜率 slope 必须【单调不降】（slope >= hull.back().slope），均摊 O(1)。
+//   - T query(T x) const
+//     二分查询横坐标 x 处的最小函数值 min_i (slope_i * x + intercept_i)（要求 !empty()）。O(log n)。
+// ============================================================================
 
 template <typename T = long long>
 class ConvexHullTrick {

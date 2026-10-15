@@ -5,10 +5,18 @@
 #include <vector>
 #include "geometry_base.hpp"
 
-// 【二维凸包 Andrew 单调链算法 (hull.hpp)】
-// - convex_hull(points, strict): O(n log n) 按逆时针顺序返回凸包顶点序列（起点为字典序最小点）
-// - strict 参数控制共线点处理：strict = true 时严格剔除边内部共线点，strict = false 时保留边界上的共线点
+// ============================================================================
+// 【Andrew 单调链算法求二维严格凸包 Convex Hull (hull.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   inline std::vector<Point> convex_hull(std::vector<Point> points)
+// 参数与返回值详解：
+//   - points：平面点集（内部自动排序并按 dcmp 去重）。
+//   - 严格凸包约定：使用 `dcmp(cross(...)) <= 0` 弹栈，【剔除边内部共线点】，仅保留严格极点。
+//   - 返回值 std::vector<Point>：按【逆时针 (CCW)】顺序排列的凸包顶点（首点为最左下点，首尾不重复）。O(n log n)。
+// ============================================================================
 
+// inline std::vector<Point> convex_hull(std::vector<Point> points) — 功能：参数与返回值详解：
 inline std::vector<Point> convex_hull(std::vector<Point> points) {
     std::sort(points.begin(), points.end(), [](Point a, Point b) {
         if (dcmp(a.x, b.x) != 0) {

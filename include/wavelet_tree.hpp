@@ -8,12 +8,22 @@
 
 #include "bit.hpp"
 
-// 【小波树 Wavelet Matrix (wavelet_tree.hpp)】
-// - 内置自动离散化的静态区间查询结构 WaveletTree<T, Compare>（T 仅需支持严格弱序比较）
-// - 建树时间 O(n log n)，空间 O(n log sigma)，单次查询 O(log sigma)，区间均为 0-based 左闭右开 [l, r)
-// - kth(l, r, k)           : 返回子区间 [l, r) 内 0-based 第 k 小元素（要求 0 <= k < r - l）
-// - count_less(l, r, val)  : 返回子区间 [l, r) 内严格小于 val 的元素个数
-// - count(l, r, low, high) : 返回子区间 [l, r) 内落在左闭右开值域 [low, high) 的元素个数（要求 low <= high）
+// ============================================================================
+// 【小波树 / 小波矩阵 Wavelet Matrix (wavelet_tree.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T, typename Compare = std::less<T>> class WaveletTree
+//   内置自动坐标离散化，支持任意可严格弱序比较类型 T 的静态子区间第 k 小与值域频数统计。
+//   所有下标与查询区间均为 0-based【左闭右开 [l, r)】。
+// 构造函数与成员函数签名详解（设 sigma 为不同元素个数）：
+//   - WaveletTree(const std::vector<T>& values, Compare compare = Compare{})
+//     功能：对数组 values 自动离散化并构建位平面前缀和矩阵。时间 O(n log n)，空间 O(n log sigma)。
+//   - T kth(int l, int r, int k) const
+//     功能：查询子区间 [l, r) 内按 compare 排序后的 0-based 第 k 小元素（要求 0 <= l <= r <= n 且 0 <= k < r - l）。O(log sigma)。
+//   - int count_less(int l, int r, const T& value) const
+//     功能：统计子区间 [l, r) (0 <= l <= r <= n) 内严格排在 value 之前（即 compare(x, value) 为真）的元素个数。O(log sigma)。
+//   - int count(int l, int r, const T& low, const T& high) const
+//     功能：统计子区间 [l, r) 内落在半开值域 [low, high)（即 low <= x < high）内的元素个数（要求 !compare(high, low)）。O(log sigma)。
+// ============================================================================
 
 template <typename T, typename Compare = std::less<T>>
 class WaveletTree {
@@ -24,6 +34,7 @@ class WaveletTree {
     std::vector<int> middle;
 
 public:
+    // WaveletTree(const std::vector<T>& values, Compare compare = Compare{}) — 功能：对数组 values 自动离散化并构建位平面前缀和矩阵。时间 O(n log n)，空间 O(n log sigma)。
     WaveletTree(const std::vector<T>& values, Compare compare = Compare{})
         : n(values.size()), compare(compare), alphabet(values) {
         std::sort(alphabet.begin(), alphabet.end(), compare);

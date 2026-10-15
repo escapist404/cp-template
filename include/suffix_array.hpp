@@ -7,18 +7,34 @@
 #include <numeric>
 #include <vector>
 
-// 【倍增后缀数组与高度数组 (suffix_array.hpp)】
-// - 构造时间复杂度 O(n log n)，支持 std::string 或任意可比较序列 BasicSuffixArray<Sequence>
-// - sa[i]     : 字典序第 i 小（0-based）的后缀起始下标
-// - rk[i]     : 起始于下标 i 的后缀在所有后缀中的 0-based 字典序排名（满足 sa[rk[i]] == i）
-// - height[i] : 排名相邻的两个后缀 sa[i] 与 sa[i + 1] 的最长公共前缀 (LCP) 长度（长度为 max(0, n - 1)）
-// - lcp(i, j) : O(1) 返回原串两个【起始位置 i 与 j】（注意不是排名！）的后缀的 LCP 长度（内部结合 SparseTable 维护）
+// ============================================================================
+// 【倍增法后缀数组、Kasai 高度数组与 O(1) LCP 查询 Suffix Array (suffix_array.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class SuffixArray
+//   支持任意可比较序列（std::string 或 std::vector<T>），内部自动完成字符集离散化、O(n log n) 倍增基数排序、
+//   O(n) Kasai 算法构建相邻后缀 LCP 数组 height 及 O(n log n) ST 表预处理。
+// 构造函数与成员函数签名详解（所有下标均为 0-based）：
+//   - template <typename Sequence, typename Compare = std::less<typename Sequence::value_type>>
+//     SuffixArray(const Sequence& text, Compare compare = Compare{})
+//     功能：构造序列 text（长度为 n）的后缀数组、名次数组、高度数组及 RMQ 表。时空复杂度 O(n log n)。
+//   - const std::vector<int>& array() const
+//     功能：返回长度为 n 的后缀数组 sa，其中 sa[k] (0 <= k < n) 表示字典序排名第 k 小（0-based）的后缀起始下标。O(1)。
+//   - const std::vector<int>& ranks() const
+//     功能：返回长度为 n 的名次数组 rank，其中 rank[i] (0 <= i < n) 表示起始于下标 i 的后缀在所有后缀中的 0-based 排名（满足 sa[rank[i]] == i）。O(1)。
+//   - const std::vector<int>& lcp_array() const
+//     功能：返回长度为 max(0, n - 1) 的高度数组 height，其中 height[k] = LCP(suffix(sa[k]), suffix(sa[k + 1]))。O(1)。
+//   - int lcp(int i, int j) const
+//     功能：查询原序列中起始于下标 i 与下标 j (0 <= i, j < n) 的两个后缀的最长公共前缀长度：
+//           当 i == j 时返回 n - i；当 i != j 时通过 ST 表查询 min_{min(rk[i],rk[j]) <= k < max(rk[i],rk[j])} height[k]。
+//     复杂度：单次查询严格 O(1)。
+// ============================================================================
 
 class SuffixArray {
     std::vector<int> sa, rank, height, logarithm;
     std::vector<std::vector<int>> rmq;
 
 public:
+    // template <typename Sequence, typename Compare = std::less<typename Sequence::value_type>> SuffixArray(const Sequence& text, Compare compare = Compare{}) — 功能：构造序列 text（长度为 n）的后缀数组、名次数组、高度数组及 RMQ 表。时空复杂度 O(n log n)。
     template <typename Sequence, typename Compare = std::less<typename Sequence::value_type>>
     SuffixArray(const Sequence& text, Compare compare = Compare{}) {
         int n = text.size();
@@ -77,7 +93,7 @@ public:
             rank.swap(next);
             classes = new_classes;
         }
-        // Make rank the inverse of sa, including the n=1/distinct-symbol case.
+        // 规范化 rank 数组使其严格成为 sa 的逆排列（涵盖 n = 1 或字符两两不同的边界情形）。
         for (int i = 0; i < n; ++i) {
             rank[sa[i]] = i;
         }
@@ -115,18 +131,22 @@ public:
         }
     }
 
+    // const std::vector<int>& array() const — 功能：返回长度为 n 的后缀数组 sa，其中 sa[k] (0 <= k < n) 表示字典序排名第 k 小（0-based）的后缀起始下标。O(1)。
     const std::vector<int>& array() const {
         return sa;
     }
 
+    // const std::vector<int>& ranks() const — 功能：返回长度为 n 的名次数组 rank，其中 rank[i] (0 <= i < n) 表示起始于下标 i 的后缀在所有后缀中的 0-based 排名（满足 sa[rank[i]] == i）。O(1)。
     const std::vector<int>& ranks() const {
         return rank;
     }
 
+    // const std::vector<int>& lcp_array() const — 功能：返回长度为 max(0, n - 1) 的高度数组 height，其中 height[k] = LCP(suffix(sa[k]), suffix(sa[k + 1]))。O(1)。
     const std::vector<int>& lcp_array() const {
         return height;
     }
 
+    // int lcp(int i, int j) const — 功能：查询原序列中起始于下标 i 与下标 j (0 <= i, j < n) 的两个后缀的最长公共前缀长度：
     int lcp(int i, int j) const {
         int n = sa.size();
         assert(0 <= i && i < n && 0 <= j && j < n);

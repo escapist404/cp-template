@@ -8,13 +8,29 @@
 #include <utility>
 #include <vector>
 
+// ============================================================================
 // 【替罪羊树 Scapegoat Tree (scapegoat.hpp)】
-// - 基于重量平衡因子 alpha = 2/3 重构的有序多重集合，各操作均摊复杂度 O(log n)，禁用拷贝
-// - insert(key) / remove(key): 插入一个 key / 删除一个 key 副本
-// - size() / empty()         : 返回含重复元素的总元素个数 / 判空
-// - get_rank(key)            : 返回 1-based 排名（严格小于 key 的元素个数 + 1）
-// - get_value(rank)          : 返回 1-based 排名对应的元素（要求 1 <= rank <= size()）
-// - get_prev(key) / get_next(key): 严格前驱 / 严格后继（不存在返回 numeric_limits<T>::lowest() / max()）
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T = int, typename Compare = std::less<T>> class ScapegoatTree
+//   基于重量平衡因子 alpha = 2/3 暴力拍平重构的有序多重集合，禁用拷贝构造与拷贝赋值。
+// 构造函数与成员函数签名详解（所有修改与查询均摊时间复杂度 O(log n)）：
+//   - ScapegoatTree() / ScapegoatTree(Compare compare)
+//     功能：构造空替罪羊树。O(1)。
+//   - int size() const / bool empty() const
+//     功能：返回集合中元素的总个数（含重复元素） / 判断集合是否为空。O(1)。
+//   - void insert(T key)
+//     功能：插入一个元素 key；若插入后路径深度超过阈值则触发最高失衡祖先的 O(size) 重构。均摊 O(log n)。
+//   - void remove(T key)
+//     功能：删除一个等于 key 的元素副本（若 key 不存在则无操作）。均摊 O(log n)。
+//   - int get_rank(T key) const
+//     功能：返回 key 的 1-based 排名（严格小于 key 的元素个数 + 1）。均摊 O(log n)。
+//   - T get_value(int rank) const
+//     功能：返回 1-based 排名为 rank 的元素值（要求 1 <= rank <= size()）。均摊 O(log n)。
+//   - T get_prev(T key) const
+//     功能：返回严格小于 key 的最大元素（不存在返回 std::numeric_limits<T>::lowest()）。均摊 O(log n)。
+//   - T get_next(T key) const
+//     功能：返回严格大于 key 的最小元素（不存在返回 std::numeric_limits<T>::max()）。均摊 O(log n)。
+// ============================================================================
 
 template <typename T = int, typename Compare = std::less<T>>
 class ScapegoatTree {
@@ -61,6 +77,7 @@ class ScapegoatTree {
 		return cur ? cur->size : 0;
 	}
 
+	// void insert(T key) — 功能：插入一个元素 key；若插入后路径深度超过阈值则触发最高失衡祖先的 O(size) 重构。均摊 O(log n)。
 	Node* insert(Node* cur, T key, std::vector<Node*>& path, bool& inserted_node) {
 		if (!cur) {
 			Node* node = new Node(key);
@@ -193,8 +210,10 @@ class ScapegoatTree {
 	}
 
 public:
+	// ScapegoatTree() — 功能：构造空替罪羊树。O(1)。
 	ScapegoatTree() = default;
 
+	// ScapegoatTree(Compare compare) — 功能：构造空替罪羊树。O(1)。
 	ScapegoatTree(Compare compare) : compare(compare) {}
 
 	ScapegoatTree(const ScapegoatTree&) = delete;
@@ -216,6 +235,7 @@ public:
 		}
 	}
 
+	// void remove(T key) — 功能：删除一个等于 key 的元素副本（若 key 不存在则无操作）。均摊 O(log n)。
 	void remove(T key) {
 		bool removed = false;
 		root = erase(root, key, removed);
@@ -228,14 +248,17 @@ public:
 		}
 	}
 
+	// int size() const — 功能：返回集合中元素的总个数（含重复元素） / 判断集合是否为空。O(1)。
 	int size() const {
 		return element_count(root);
 	}
 
+	// bool empty() const — 功能：返回集合中元素的总个数（含重复元素） / 判断集合是否为空。O(1)。
 	bool empty() const {
 		return root == nullptr;
 	}
 
+	// int get_rank(T key) const — 功能：返回 key 的 1-based 排名（严格小于 key 的元素个数 + 1）。均摊 O(log n)。
 	int get_rank(T key) const {
 		Node* cur = root;
 		int result = 1;
@@ -252,10 +275,12 @@ public:
 		return result;
 	}
 
+	// T get_value(int rank) const — 功能：返回 1-based 排名为 rank 的元素值（要求 1 <= rank <= size()）。均摊 O(log n)。
 	T get_value(int rank) const {
 		return value_at(root, rank);
 	}
 
+	// T get_prev(T key) const — 功能：返回严格小于 key 的最大元素（不存在返回 std::numeric_limits<T>::lowest()）。均摊 O(log n)。
 	T get_prev(T key) const {
 		T result = std::numeric_limits<T>::lowest();
 		Node* cur = root;
@@ -270,6 +295,7 @@ public:
 		return result;
 	}
 
+	// T get_next(T key) const — 功能：返回严格大于 key 的最小元素（不存在返回 std::numeric_limits<T>::max()）。均摊 O(log n)。
 	T get_next(T key) const {
 		T result = std::numeric_limits<T>::max();
 		Node* cur = root;

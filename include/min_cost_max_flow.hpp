@@ -7,11 +7,28 @@
 #include <utility>
 #include <vector>
 
-// 【最小费用最大流 MCMF (min_cost_max_flow.hpp)】
-// - ACL 风格基于 Johnson 势能与 Dijkstra 增广的最小费用流 MinCostMaxFlow<Cap, Cost>，0-based 顶点编号 [0, n)
-// - add_edge(from, to, cap, cost): 添加容量 cap >= 0、单位费用 cost >= 0 的有向边
-// - flow(s, t, flow_limit)       : 返回 pair{最大流量, 最小总费用}
-// - slope(s, t, flow_limit)      : 返回流量-费用凸壳的所有折点序列 std::vector<std::pair<Cap, Cost>>
+// ============================================================================
+// 【最小费用最大流 Min-Cost Max-Flow / SSP + Johnson 势能 (min_cost_max_flow.hpp)】
+// ----------------------------------------------------------------------------
+// 模板结构体签名：template <typename Cap, typename Cost> struct MinCostMaxFlow
+//   ACL 风格最小费用流（内部使用 CSR 紧凑邻接表 + Dijkstra 势能增广），顶点编号为 0-based [0, n)。
+// 内部边信息结构体签名：
+//   struct edge { int from, to; Cap cap, flow; Cost cost; };
+// 构造函数与成员函数签名详解：
+//   - MinCostMaxFlow() / MinCostMaxFlow(int n)
+//     功能：构造包含 0 个或 n 个顶点的费用流网络。O(1)。
+//   - int add_edge(int from, int to, Cap cap, Cost cost)
+//     功能：添加有向边 from -> to，容量 cap >= 0，单位费用 cost >= 0（【注意】要求非负初始边权），返回边的 0-based 编号。O(1)。
+//   - std::pair<Cap, Cost> flow(int s, int t)
+//   - std::pair<Cap, Cost> flow(int s, int t, Cap flow_limit)
+//     功能：计算从 s 到 t（流量上限 flow_limit）的最小费用最大流，返回 {总流量, 最小总费用}。
+//     复杂度：O(F * (V + E) log V)，其中 F 为总增广流量。
+//   - std::vector<std::pair<Cap, Cost>> slope(int s, int t)
+//   - std::vector<std::pair<Cap, Cost>> slope(int s, int t, Cap flow_limit)
+//     功能：返回流量-最小费用下凸壳的所有折点序列 {{0, 0}, ..., {max_flow, min_cost}}（同一斜率的多轮增广自动合并）。
+//   - edge get_edge(int i) const / std::vector<edge> edges() const
+//     功能：查询第 i 条边或所有边的 {from, to, cap, flow, cost} 状态。
+// ============================================================================
 
 template <typename Cap, typename Cost>
 struct MinCostMaxFlow {
@@ -31,9 +48,12 @@ private:
 	};
 
 public:
+	// MinCostMaxFlow() — 功能：构造包含 0 个或 n 个顶点的费用流网络。O(1)。
 	MinCostMaxFlow() : n(0) {}
+	// MinCostMaxFlow(int n) — 功能：构造包含 0 个或 n 个顶点的费用流网络。O(1)。
 	MinCostMaxFlow(int n) : n(n) {}
 
+	// int add_edge(int from, int to, Cap cap, Cost cost) — 功能：添加有向边 from -> to，容量 cap >= 0，单位费用 cost >= 0（【注意】要求非负初始边权），返回边的 0-based 编号。O(1)。
 	int add_edge(int from, int to, Cap cap, Cost cost) {
 		assert(0 <= from && from < n);
 		assert(0 <= to && to < n);
@@ -49,6 +69,7 @@ public:
 		Cost cost;
 	};
 
+	// edge get_edge(int i) const — 功能：查询第 i 条边或所有边的 {from, to, cap, flow, cost} 状态。
 	edge get_edge(int i) const {
 		assert(0 <= i && i < (int)edges_data.size());
 		return edges_data[i];
@@ -56,6 +77,7 @@ public:
 
 	std::vector<edge> edges() const { return edges_data; }
 
+	// std::pair<Cap, Cost> flow(int s, int t, Cap flow_limit) — 功能：计算从 s 到 t（流量上限 flow_limit）的最小费用最大流，返回 {总流量, 最小总费用}。
 	std::pair<Cap, Cost> flow(int s, int t) {
 		return flow(s, t, std::numeric_limits<Cap>::max());
 	}
@@ -64,6 +86,7 @@ public:
 		return slope(s, t, flow_limit).back();
 	}
 
+	// std::vector<std::pair<Cap, Cost>> slope(int s, int t, Cap flow_limit) — 功能：返回流量-最小费用下凸壳的所有折点序列 {{0, 0}, ..., {max_flow, min_cost}}（同一斜率的多轮增广自动合并）。
 	std::vector<std::pair<Cap, Cost>> slope(int s, int t) {
 		return slope(s, t, std::numeric_limits<Cap>::max());
 	}

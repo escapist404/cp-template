@@ -8,24 +8,40 @@
 #include <utility>
 #include <vector>
 
-// 【树上启发式合并 / Sack 算法 (dsu_on_tree.hpp)】
-// - 0-based 连通无向树，全非递归实现，每个节点作为轻子树成员最多被加入和移除 O(log n) 次
-// - solve(root, state, add, remove, answer) 回调约定:
-//   1. add(int u, State& st)         : 将顶点 u 的单点贡献加入全局状态 st
-//   2. remove(int u, State& st)      : 将顶点 u 的单点贡献从 st 中移除（必须为 add 的严格逆操作）
-//   3. answer(const State& st, int u): 当 st 中恰好包含整个子树 u 时调用，返回子树 u 的查询答案（注意参数顺序为 st 在前、u 在后）
+// ============================================================================
+// 【树上启发式合并 / Sack 算法 DSU on Tree (dsu_on_tree.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class DSUOnTree
+//   静态树子树离线统计框架（全非递归显式任务栈实现，防爆栈），顶点编号为 0-based [0, n)。
+// 构造函数与成员函数签名详解：
+//   - DSUOnTree(int n)
+//     功能：初始化包含 n 个顶点 [0, n) 的空树。O(n)。
+//   - void add_edge(int u, int v)
+//     功能：添加一条连接 u 与 v 的无向树边。O(1)。
+//   - template <typename State, typename Add, typename Remove, typename Answer>
+//     auto solve(int root, State& state, Add add, Remove remove, Answer answer) const
+//     功能：以 root 为根执行树上启发式合并，返回长度为 n 的各子树答案数组 std::vector<Result>。
+//     【回调函数签名约定】
+//       1. void add(int u, State& state)          ：将顶点 u 的单点信息加入全局状态 state；
+//       2. void remove(int u, State& state)       ：将顶点 u 的单点信息从 state 中撤销（必须为 add 的逆操作）；
+//       3. Result answer(const State& state, int u)：当 state 恰好包含子树 u 的全部顶点时调用，返回子树 u 的答案（【注意参数顺序】state 在前，u 在后）。
+//     复杂度：每个顶点最多被 add/remove O(log n) 次，总时间 O(n log n * T_op + n * T_ans)。
+// ============================================================================
 
 class DSUOnTree {
     std::vector<std::vector<int>> graph;
 
 public:
+    // DSUOnTree(int n) — 功能：初始化包含 n 个顶点 [0, n) 的空树。O(n)。
     DSUOnTree(int n) : graph(n) {}
 
+    // void add_edge(int u, int v) — 功能：添加一条连接 u 与 v 的无向树边。O(1)。
     void add_edge(int u, int v) {
         graph[u].push_back(v);
         graph[v].push_back(u);
     }
 
+    // template <typename State, typename Add, typename Remove, typename Answer> auto solve(int root, State& state, Add add, Remove remove, Answer answer) const — 功能：以 root 为根执行树上启发式合并，返回长度为 n 的各子树答案数组 std::vector<Result>。
     template <typename State, typename Add, typename Remove, typename Answer>
     auto solve(int root, State& state, Add add, Remove remove, Answer answer) const {
         using Result = std::decay_t<decltype(answer(state, root))>;

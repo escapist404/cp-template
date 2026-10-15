@@ -4,9 +4,20 @@
 #include <cassert>
 #include <vector>
 
-// 【CDQ 分治框架 (cdq.hpp)】
-// - cdq_divide_and_conquer(items, merge_step, leaf_step): 处理三维偏序或离线动态转静态问题，左闭右开区间 [l, r)
-// - 递归顺序为: 先递归左半 [l, m)，再调用 merge_step(items, l, m, r) 计算左半对右半的贡献，最后递归右半 [m, r)
+// ============================================================================
+// 【CDQ 分治框架：三维偏序与带依赖分治 DP (cdq.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解（所有区间均为 0-based 左闭右开 [l, r)）：
+//   1. template <typename T, typename Merge, typename Leaf>
+//      void cdq_divide(std::vector<T>& items, Merge merge, Leaf leaf)
+//      标准后序 CDQ（三维偏序）：先递归 [l, m) -> 再递归 [m, r) -> 最后调用 `merge(items, l, m, r)`。
+//   2. template <typename T, typename Cross, typename Leaf>
+//      void cdq_dp(std::vector<T>& items, Cross cross, Leaf leaf)
+//      中序 CDQ（1D/1D 分治 DP）：先递归 [l, m) -> 立即调用 `cross(items, l, m, r)` 转移给右半 -> 最后递归 [m, r)。
+//   3. template <typename T, typename Cross, typename Leaf>
+//      void cdq_solve(std::vector<T>& items, Cross cross, Leaf leaf, bool cross_after_right)
+//      底层分治引擎：单点叶子调用 `leaf(items, i)`，跨区间调用 `cross(items, l, m, r)`。
+// ============================================================================
 
 template <typename T, typename Cross, typename Leaf>
 void cdq_solve(std::vector<T>& items, Cross cross, Leaf leaf, bool cross_after_right) {
@@ -26,16 +37,13 @@ void cdq_solve(std::vector<T>& items, Cross cross, Leaf leaf, bool cross_after_r
 }
 
 
-// Ordinary CDQ: solve both halves, then cross-contribute/merge.
-// merge(items, l, m, r) handles [l,m) -> [m,r) and restores temporary state.
-// leaf(items, i) initializes/finalizes a singleton. Empty ranges do nothing.
+// 标准归并型 CDQ 分治：先递归求解左半 [l, m) 与右半 [m, r)，再调用 merge(items, l, m, r) 统计跨区间贡献并归并。
 template <typename T, typename Merge, typename Leaf>
 void cdq_divide(std::vector<T>& items, Merge merge, Leaf leaf) {
 	cdq_solve(items, merge, leaf, true);
 }
 
-// CDQ for DP dependencies: left -> cross contribution -> right.
-// cross must preserve the original index order of both halves.
+// DP 转移型 CDQ 分治（中序分治）：递归左半 [l, m) -> 调用 cross(items, l, m, r) 用左半转移右半 -> 递归右半 [m, r)。
 template <typename T, typename Cross, typename Leaf>
 void cdq_dp(std::vector<T>& items, Cross cross, Leaf leaf) {
 	cdq_solve(items, cross, leaf, false);

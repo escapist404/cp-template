@@ -6,12 +6,27 @@
 #include <utility>
 #include <vector>
 
-// 【差分约束系统 (difference_constraints.hpp)】
-// - 0-based 变量编号 [0, n)，使用队列优化 Bellman-Ford (SPFA) 求解，最坏复杂度 O(nm)
-// - 约束方向约定: DifferenceConstraint{u, v, w} 表示不等式 x[v] - x[u] <= w（即 x[v] <= x[u] + w）
-//   - 若需 x[v] - x[u] >= w，可转化为 x[u] - x[v] <= -w，添加 {v, u, -w}
-//   - 若需 x[v] - x[u] == w，同时添加 {u, v, w} 与 {v, u, -w}
-// - 返回 {true, x} 表示有解并给出一组可行解 x；若存在负权环（矛盾）则返回 {false, {}}
+// ============================================================================
+// 【差分约束系统求解器 Difference Constraints (difference_constraints.hpp)】
+// ----------------------------------------------------------------------------
+// 约束结构体签名：
+//   template <typename T = long long> struct DifferenceConstraint { int u, v; T weight; };
+//   【不等式方向约定】每条约束 {u, v, weight} 严格表示：
+//       x[v] - x[u] <= weight   （即 x[v] <= x[u] + weight，对应有向边 u -> v 权 weight）
+//   - 若需表示 x[v] - x[u] >= w，请转化为 x[u] - x[v] <= -w，添加 {v, u, -w}；
+//   - 若需表示 x[v] - x[u] == w，请同时添加 {u, v, w} 与 {v, u, -w}。
+// 求解函数签名：
+//   template <typename T = long long>
+//   std::pair<bool, std::vector<T>> difference_constraints(
+//       int n, const std::vector<DifferenceConstraint<T>>& edges)
+// 参数与返回值详解：
+//   - n：变量个数，变量编号为 0-based [0, n)。
+//   - edges：不等式约束列表。
+//   - 返回值 std::pair{feasible, values}：
+//     - 若系统无负权环（有解），返回 {true, x}，其中 x 为满足所有约束的一组可行解（初始全 0 超源点松弛出的最大非正解）；
+//     - 若存在负权环（约束矛盾无解），返回 {false, {}}。
+// 复杂度：基于 SPFA 判负环，最坏时间复杂度 O(n * m)，空间复杂度 O(n + m)。
+// ============================================================================
 
 template <typename T = long long>
 struct DifferenceConstraint {

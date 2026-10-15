@@ -13,9 +13,26 @@
 #include "polynomial.hpp"
 #include "types.hpp"
 
-// 【高精度有符号大整数 BigInt (bigint.hpp)】
-// - 采用 10^9 压位存储，支持任意精度正负整数的 +、-、*（大规模自动切换三模数 NTT 加速至 O(n log n)）、/、%、比较与流式输入输出
-// - 支持从 i64 或十进制字符串直接构造 BigInt("-12345678901234567890")
+// ============================================================================
+// 【高精度有符号大整数类 BigInt（10^9 压位 + 三模数 NTT 乘法加速）(bigint.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class BigInt（采用 base = 10^9 每块 9 位十进制小端序存储，0 表示为 digits 空且 sign = 1）
+// 构造函数与基础转换签名：
+//   - BigInt(i64 value = 0) / BigInt(const std::string& value)
+//   - BigInt& operator=(i64 value) / BigInt& read(const std::string& value)
+//   - bool zero() const / i64 to_i64() const / BigInt abs() const / BigInt operator-() const
+// 算术、比较与流运算符签名（设 n, m 为压位块数 = 十进制位数 / 9）：
+//   - BigInt& operator+=(const BigInt& other) / BigInt& operator-=(const BigInt& other)
+//   - friend BigInt operator+(BigInt lhs, const BigInt& rhs) / operator-(BigInt lhs, const BigInt& rhs)
+//     功能：高精度有符号加减法。时间复杂度 O(max(n, m))。
+//   - BigInt& operator*=(const BigInt& other) / BigInt& operator*=(i64 value)
+//   - friend BigInt operator*(BigInt lhs, const BigInt& rhs) / operator*(BigInt lhs, i64 rhs)
+//     功能：高精度乘法；当 min(n, m) >= 64 时自动切换三模数 NTT + Garner CRT 加速至 O((n + m) log(n + m))。
+//   - friend std::pair<BigInt, BigInt> divmod(const BigInt& dividend, const BigInt& divisor)
+//   - friend BigInt operator/(const BigInt& lhs, const BigInt& rhs) / operator%(const BigInt& lhs, const BigInt& rhs)
+//     功能：带余除法与整除/取模（要求 !divisor.zero()，商向零取整，余数与被除数同号）。
+//   - 比较与流运算：operator==, operator!=, operator<, operator>, operator<=, operator>=, operator<<, operator>>。
+// ============================================================================
 
 class BigInt {
 public:
@@ -77,6 +94,7 @@ public:
 		return result;
 	}
 
+	// operator-(BigInt lhs, const BigInt& rhs) — 功能：高精度有符号加减法。时间复杂度 O(max(n, m))。
 	BigInt operator-() const {
 		BigInt result = *this;
 		if (!result.zero()) result.sign = -result.sign;
@@ -124,9 +142,12 @@ public:
 
 	BigInt& operator*=(i64 value) { return *this *= BigInt(value); }
 
+	// friend BigInt operator+(BigInt lhs, const BigInt& rhs) — 功能：高精度有符号加减法。时间复杂度 O(max(n, m))。
 	friend BigInt operator+(BigInt lhs, const BigInt& rhs) { return lhs += rhs; }
 	friend BigInt operator-(BigInt lhs, const BigInt& rhs) { return lhs -= rhs; }
+	// friend BigInt operator*(BigInt lhs, const BigInt& rhs) — 功能：高精度乘法；当 min(n, m) >= 64 时自动切换三模数 NTT + Garner CRT 加速至 O((n + m) log(n + m))。
 	friend BigInt operator*(BigInt lhs, const BigInt& rhs) { return lhs *= rhs; }
+	// operator*(BigInt lhs, i64 rhs) — 功能：高精度乘法；当 min(n, m) >= 64 时自动切换三模数 NTT + Garner CRT 加速至 O((n + m) log(n + m))。
 	friend BigInt operator*(BigInt lhs, i64 rhs) { return lhs *= rhs; }
 
 	friend bool operator==(const BigInt& lhs, const BigInt& rhs) {
@@ -162,7 +183,9 @@ public:
 		return {quotient, remainder};
 	}
 
+	// friend BigInt operator/(const BigInt& lhs, const BigInt& rhs) — 功能：带余除法与整除/取模（要求 !divisor.zero()，商向零取整，余数与被除数同号）。
 	friend BigInt operator/(const BigInt& lhs, const BigInt& rhs) { return divmod(lhs, rhs).first; }
+	// operator%(const BigInt& lhs, const BigInt& rhs) — 功能：带余除法与整除/取模（要求 !divisor.zero()，商向零取整，余数与被除数同号）。
 	friend BigInt operator%(const BigInt& lhs, const BigInt& rhs) { return divmod(lhs, rhs).second; }
 
 	friend std::ostream& operator<<(std::ostream& out, const BigInt& value) {

@@ -6,14 +6,30 @@
 #include <limits>
 #include <vector>
 
+// ============================================================================
 // 【吉司机线段树 Segment Tree Beats (segment_tree_beats.hpp)】
-// - 0-based 左闭右开区间 [l, r)，同时支持区间取 min、取 max、区间加与区间和/最值查询，均摊复杂度 O(log^2 n)
-// - 模板参数: SegmentTreeBeats<T, Sum>，所有元素与标记中间值必须严格处于 (numeric_limits<T>::lowest(), max()) 内部
-// - add(l, r, v)   : 区间 [l, r) 每个元素加 v
-// - chmin(l, r, v) : 区间 [l, r) 每个元素变为 min(a[i], v)
-// - chmax(l, r, v) : 区间 [l, r) 每个元素变为 max(a[i], v)
-// - sum(l, r)      : 查询 [l, r) 元素和 (0 <= l <= r <= n)
-// - min / max(l, r): 查询 [l, r) 最值（要求区间非空 0 <= l < r <= n）
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T = long long, typename Sum = T> class SegmentTreeBeats
+//   维护长度为 n 的 0-based 序列，支持区间加、区间取 min、区间取 max 及区间和/最值查询。
+//   【数值范围要求】所有元素及标记中间值必须严格介于 (numeric_limits<T>::lowest(), max()) 之间（两端极值保留作次小/次大哨兵）。
+// 构造函数与成员函数签名详解（所有区间均为左闭右开 [l, r)）：
+//   - SegmentTreeBeats(const std::vector<T>& a)
+//     功能：用数组 a 建树。时间与空间复杂度 O(n)。
+//   - SegmentTreeBeats(int n, T value = T())
+//     功能：构造长度为 n (n >= 0)、初始值全为 value 的吉司机线段树。时空复杂度 O(n)。
+//   - void add(int l, int r, T value)
+//     功能：将区间 [l, r) (0 <= l <= r <= n) 内每个元素加上 value。均摊复杂度 O(log^2 n)。
+//   - void chmin(int l, int r, T value)
+//     功能：将区间 [l, r) (0 <= l <= r <= n) 内每个元素更新为 std::min(a[i], value)。均摊 O(log^2 n)。
+//   - void chmax(int l, int r, T value)
+//     功能：将区间 [l, r) (0 <= l <= r <= n) 内每个元素更新为 std::max(a[i], value)。均摊 O(log^2 n)。
+//   - Sum sum(int l, int r)
+//     功能：查询区间 [l, r) (0 <= l <= r <= n) 的元素总和（空区间 l == r 返回 Sum()）。O(log n)。
+//   - T min(int l, int r)
+//     功能：查询非空区间 [l, r) (0 <= l < r <= n) 的最小值（空区间触发 assert）。O(log n)。
+//   - T max(int l, int r)
+//     功能：查询非空区间 [l, r) (0 <= l < r <= n) 的最大值（空区间触发 assert）。O(log n)。
+// ============================================================================
 
 template <typename T = long long, typename Sum = T>
 class SegmentTreeBeats {
@@ -99,6 +115,7 @@ class SegmentTreeBeats {
 		pull(p);
 	}
 
+	// void add(int l, int r, T value) — 功能：将区间 [l, r) (0 <= l <= r <= n) 内每个元素加上 value。均摊复杂度 O(log^2 n)。
 	void add(int p, int l, int r, int L, int R, T value) {
 		if (R <= l || r <= L) return;
 		if (L <= l && r <= R) return apply_add(p, value, r - l);
@@ -109,6 +126,7 @@ class SegmentTreeBeats {
 		pull(p);
 	}
 
+	// void chmin(int l, int r, T value) — 功能：将区间 [l, r) (0 <= l <= r <= n) 内每个元素更新为 std::min(a[i], value)。均摊 O(log^2 n)。
 	void chmin(int p, int l, int r, int L, int R, T value) {
 		if (R <= l || r <= L || tree[p].max1 <= value) return;
 		if (L <= l && r <= R && (tree[p].max2 < value || tree[p].max_count == r - l)) return apply_max(p, value);
@@ -119,6 +137,7 @@ class SegmentTreeBeats {
 		pull(p);
 	}
 
+	// void chmax(int l, int r, T value) — 功能：将区间 [l, r) (0 <= l <= r <= n) 内每个元素更新为 std::max(a[i], value)。均摊 O(log^2 n)。
 	void chmax(int p, int l, int r, int L, int R, T value) {
 		if (R <= l || r <= L || tree[p].min1 >= value) return;
 		if (L <= l && r <= R && (tree[p].min2 > value || tree[p].min_count == r - l)) return apply_min(p, value);
@@ -129,6 +148,7 @@ class SegmentTreeBeats {
 		pull(p);
 	}
 
+	// Sum sum(int l, int r) — 功能：查询区间 [l, r) (0 <= l <= r <= n) 的元素总和（空区间 l == r 返回 Sum()）。O(log n)。
 	Sum sum(int p, int l, int r, int L, int R) {
 		if (R <= l || r <= L) return Sum();
 		if (L <= l && r <= R) return tree[p].sum;
@@ -150,10 +170,12 @@ class SegmentTreeBeats {
 	static int assert_size(int n) { assert(n >= 0); return n; }
 
 public:
+	// SegmentTreeBeats(const std::vector<T>& a) — 功能：用数组 a 建树。时间与空间复杂度 O(n)。
 	SegmentTreeBeats(const std::vector<T>& a) : n(a.size()), tree(std::max(1, n * 4)) {
 		if (n) build(1, 0, n, a);
 	}
 
+	// SegmentTreeBeats(int n, T value = T()) — 功能：构造长度为 n (n >= 0)、初始值全为 value 的吉司机线段树。时空复杂度 O(n)。
 	SegmentTreeBeats(int n, T value = T()) : SegmentTreeBeats(std::vector<T>(assert_size(n), value)) {}
 
 	void add(int l, int r, T value) { assert(0 <= l && l <= r && r <= n); add(1, 0, n, l, r, value); }

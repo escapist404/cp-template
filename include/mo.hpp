@@ -10,11 +10,26 @@
 
 #include "bit.hpp"
 
-// 【莫队算法离线区间查询 (mo.hpp)】
-// - 0-based 左闭右开查询区间 [l, r)，时间复杂度 O(n sqrt(q))
-// - mo_algorithm(queries, n, state, add, remove, answer, block):
-//   - Query 结构体必须包含 l, r, id 三个字段（id 为 0..q-1 的答案下标）
-//   - 回调签名: add(index, state), remove(index, state), answer(state, query)
+// ============================================================================
+// 【普通莫队与带修莫队离线区间查询算法 Mo's Algorithm (mo.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 询问结构体签名（0-based 左闭右开区间 [l, r)）：
+//    - struct MoQuery { int l, r, id; };
+//    - struct ModifiedMoQuery { int l, r, time, id; };
+// 2. 普通莫队函数签名：
+//    template <typename Query, typename State, typename Add, typename Remove, typename Answer>
+//    auto mo_algorithm(std::vector<Query> queries, int n, State& state,
+//                      Add add, Remove remove, Answer answer, int block = 0)
+//    回调签名：`void add(int idx, State& st)`, `void remove(int idx, State& st)`, `Result answer(const State& st, const Query& q)`。
+//    复杂度：O((n + q) sqrt(n))。
+// 3. 带修莫队函数签名：
+//    template <typename Query, typename Update, typename State, typename Add, typename Remove,
+//              typename Apply, typename Rollback, typename Answer>
+//    auto mo_with_modify(std::vector<Query> queries, int n, const std::vector<Update>& updates,
+//                        State& state, Add add, Remove remove, Apply apply, Rollback rollback,
+//                        Answer answer, int block = 0)
+//    额外回调：`void apply(const Update& u, int l, int r, State& st)` 与逆操作 `rollback`。复杂度 O((n + q) * n^(2/3))。
+// ============================================================================
 
 struct MoQuery {
 	int l, r, id;
@@ -23,12 +38,7 @@ struct ModifiedMoQuery {
 	int l, r, time, id;
 };
 
-// All ranges are [l,r). Query may be any type with l,r,id members;
-// id must be a permutation of [0, queries.size()).
-// State may be any type; answer(state, query) returns the result type.
-// add/remove(index, state) maintain an order-independent window aggregate.
-// Callbacks may capture the underlying array; the supplied State is initially
-// the aggregate of the empty window. It is passed by reference, without copies.
+// 普通离线莫队：所有询问区间均为 0-based 半开区间 [l, r)，id 为 [0, q) 的排列，State 引用传递。
 template <typename Query, typename State, typename Add, typename Remove, typename Answer>
 auto mo_algorithm(std::vector<Query> queries, int n, State& state,
 	Add add, Remove remove, Answer answer, int block = 0) {
@@ -62,11 +72,7 @@ auto mo_algorithm(std::vector<Query> queries, int n, State& state,
 	return result;
 }
 
-// Query also has time = number of preceding updates.
-// apply(update,l,r,state), rollback(update,l,r,state) must update the array
-// AND the window aggregate if update.pos is in [l,r). They are exact inverses.
-// Array and state must start at time zero. Result type is inferred from answer.
-// Array/state are left at the final processed window/time when this returns.
+// 带修莫队：Query 额外包含生效修改数 time，apply/rollback 需互为逆操作并在修改位置处于 [l, r) 内时同步更新窗口状态。
 template <typename Query, typename Update, typename State, typename Add, typename Remove,
 	typename Apply, typename Rollback, typename Answer>
 auto mo_with_modify(std::vector<Query> queries, int n, const std::vector<Update>& updates,

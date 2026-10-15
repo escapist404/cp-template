@@ -6,10 +6,17 @@
 #include <vector>
 #include "geometry_base.hpp"
 
-// 【二维几何距离与投影 (dist.hpp)】
-// - 点到直线垂直投影 project(p, l)、对称点 reflect(p, l)
-// - 点到直线距离、点到线段最短距离、两条线段之间的最短距离计算
+// ============================================================================
+// 【平面最近点对距离平方（分治算法）Closest Pair of Points (dist.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   inline Real closest_pair_distance_squared(std::vector<Point> points)
+// 参数与返回值详解：
+//   - 输入平面点集 points（长度 n），返回任意两点间欧氏距离平方的最小值（n < 2 时返回 +infinity；若需欧氏距离请取 std::sqrt）。
+//   - 时间复杂度 O(n log n)，空间复杂度 O(n)。
+// ============================================================================
 
+// inline Real closest_pair_distance_squared(std::vector<Point> points) — 功能：参数与返回值详解：
 inline Real closest_pair_distance_squared(std::vector<Point> points) {
     if (points.size() < 2) {
         return std::numeric_limits<Real>::infinity();

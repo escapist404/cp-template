@@ -5,11 +5,19 @@
 #include <string>
 #include <vector>
 
-// 【小写字母字典树 Trie (trie.hpp)】
-// - 仅支持 26 个小写英文字母 'a'-'z'，单次插入/查询时间复杂度 O(|s|)
-// - insert(s)     : 向字典树中插入字符串 s（允许重复插入，终点计数累加）
-// - count(s)      : 返回字符串 s 作为完整单词被插入的精确次数
-// - prefix_count(s): 返回以 s 为前缀的已插入单词总数
+// ============================================================================
+// 【26 小写字母字典树 Trie (trie.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class Trie
+//   维护小写英文字母集 ('a' - 'z') 上的多重字符串集合（根节点编号为 0）。
+// 成员函数签名详解：
+//   - void insert(const std::string& s)
+//     功能：将仅含小写字母 'a'-'z' 的字符串 s 插入字典树，并将终点状态的尾标记计数 count 加 1。
+//     复杂度：时间复杂度 O(|s|)，每个新增节点空间 O(26)。
+//   - int query(const std::string& s) const
+//     功能：查询字符串 s 在字典树中作为【完整单词】被插入的次数（若路径不存在或仅作为前缀出现则返回 0）。
+//     复杂度：时间复杂度 O(|s|)。
+// ============================================================================
 
 class Trie {
 	struct Node {
@@ -22,6 +30,7 @@ class Trie {
 	std::vector<Node> trie{{}};
 
 public:
+	// void insert(const std::string& s) — 功能：将仅含小写字母 'a'-'z' 的字符串 s 插入字典树，并将终点状态的尾标记计数 count 加 1。
 	void insert(const std::string& s) {
 		int cur = 0;
 		for (char ch : s) {
@@ -36,6 +45,7 @@ public:
 		}
 	}
 
+	// int query(const std::string& s) const — 功能：查询字符串 s 在字典树中作为【完整单词】被插入的次数（若路径不存在或仅作为前缀出现则返回 0）。
 	int query(const std::string& s) const {
 		int cur = 0;
 		for (char ch : s) {

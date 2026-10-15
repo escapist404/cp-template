@@ -6,14 +6,32 @@
 #include <utility>
 #include <vector>
 
-// 【线性筛素数、最小质因子与积性函数 (sieve.hpp)】
-// - 在 O(n) 时间内完成 [0..n] 范围内的素数与积性函数预处理：
-// - sieve(n)           : 返回 [0..n] 是否为素数的 bool 数组
-// - sieve_prime(n)     : 返回 <= n 的所有素数升序列表
-// - sieve_factor(n)    : 返回每个数的最小质因子数组 min_p[x]
-// - sieve_phi / sieve_mu / sieve_divisor(n): 线性筛返回欧拉函数 phi、莫比乌斯函数 mu、约数个数 d 数组
-// - sieve_arithmetic(n, f_prime, f_coprime, f_power): 通用积性函数线性筛框架
+// ============================================================================
+// 【欧拉线性筛：素数表与积性数论函数预处理 Linear Sieve (sieve.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与返回值详解（所有函数均处理闭区间 [1, n] 或 [0, n]，时间与空间复杂度严格线性 O(n)）：
+//   1. template <typename OnPrime, typename OnComposite>
+//      std::vector<int> sieve(int n, OnPrime on_prime, OnComposite on_composite)
+//      功能：通用线性筛骨架，返回 <= n 的升序素数列表 primes。
+//      回调签名：
+//        - void on_prime(int p)：当发现新素数 p 时调用；
+//        - void on_composite(int i, int prime, int multiple, bool divisible)：
+//          当用最小质因子 prime 筛去合数 multiple = i * prime 时调用，divisible == (i % prime == 0)。
+//   2. std::vector<int> sieve_prime(int n)
+//      功能：返回 [2, n] 内所有素数的升序列表（n < 2 时返回空向量）。O(n)。
+//   3. std::pair<std::vector<int>, std::vector<int>> sieve_phi(int n)
+//      功能：返回 {primes, phi}，其中 phi[x] (1 <= x <= n) 为欧拉函数值（phi[0] = 0, phi[1] = 1）。O(n)。
+//   4. std::pair<std::vector<int>, std::vector<int>> sieve_mu(int n)
+//      功能：返回 {primes, mu}，其中 mu[x] (1 <= x <= n) 为莫比乌斯函数值（取 -1, 0, 1；mu[1] = 1）。O(n)。
+//   5. std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> sieve_arithmetic(int n)
+//      功能：单次遍历同时筛出并返回 {primes, phi, mu} 三元组。O(n)。
+//   6. std::tuple<std::vector<int>, std::vector<int>, std::vector<long long>> sieve_divisor(int n)
+//      功能：返回 {primes, tau, sigma}，其中 tau[x] 为正整数 x 的正约数个数 d(x)，sigma[x] 为正约数之和 sigma_1(x)。O(n)。
+//   7. std::pair<std::vector<int>, std::vector<int>> sieve_min_prime(int n)
+//      功能：返回 {primes, min_prime}，其中 min_prime[x] (x >= 2) 为 x 的最小质因子（可用于 O(log x) 快速质因数分解）。O(n)。
+// ============================================================================
 
+// template <typename OnPrime, typename OnComposite> std::vector<int> sieve(int n, OnPrime on_prime, OnComposite on_composite) — 功能：通用线性筛骨架，返回 <= n 的升序素数列表 primes。
 template <typename OnPrime, typename OnComposite>
 std::vector<int> sieve(int n, OnPrime on_prime, OnComposite on_composite) {
 	if (n < 2) return {};
@@ -36,10 +54,12 @@ std::vector<int> sieve(int n, OnPrime on_prime, OnComposite on_composite) {
 	return primes;
 }
 
+// std::vector<int> sieve_prime(int n) — 功能：返回 [2, n] 内所有素数的升序列表（n < 2 时返回空向量）。O(n)。
 std::vector<int> sieve_prime(int n) {
 	return sieve(n, [](int) {}, [](int, int, int, bool) {});
 }
 
+// std::pair<std::vector<int>, std::vector<int>> sieve_phi(int n) — 功能：返回 {primes, phi}，其中 phi[x] (1 <= x <= n) 为欧拉函数值（phi[0] = 0, phi[1] = 1）。O(n)。
 std::pair<std::vector<int>, std::vector<int>> sieve_phi(int n) {
 	assert(n >= 1);
 	if (n < 1) return {};
@@ -56,6 +76,7 @@ std::pair<std::vector<int>, std::vector<int>> sieve_phi(int n) {
 	return {std::move(primes), std::move(phi)};
 }
 
+// std::pair<std::vector<int>, std::vector<int>> sieve_mu(int n) — 功能：返回 {primes, mu}，其中 mu[x] (1 <= x <= n) 为莫比乌斯函数值（取 -1, 0, 1；mu[1] = 1）。O(n)。
 std::pair<std::vector<int>, std::vector<int>> sieve_mu(int n) {
 	assert(n >= 1);
 	if (n < 1) return {};
@@ -71,6 +92,7 @@ std::pair<std::vector<int>, std::vector<int>> sieve_mu(int n) {
 }
 
 std::tuple<std::vector<int>, std::vector<int>, std::vector<int>>
+// std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> sieve_arithmetic(int n) — 功能：单次遍历同时筛出并返回 {primes, phi, mu} 三元组。O(n)。
 sieve_arithmetic(int n) {
 	assert(n >= 1);
 	if (n < 1) return {};
@@ -95,6 +117,7 @@ sieve_arithmetic(int n) {
 }
 
 std::tuple<std::vector<int>, std::vector<int>, std::vector<long long>>
+// std::tuple<std::vector<int>, std::vector<int>, std::vector<long long>> sieve_divisor(int n) — 功能：返回 {primes, tau, sigma}，其中 tau[x] 为正整数 x 的正约数个数 d(x)，sigma[x] 为正约数之和 sigma_1(x)。O(n)。
 sieve_divisor(int n) {
 	assert(n >= 1);
 	if (n < 1) return {};

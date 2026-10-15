@@ -6,9 +6,15 @@
 #include <vector>
 #include "inter.hpp"
 
-// 【圆的几何性质、切线与圆交集 (circle.hpp)】
-// - 三点外接圆 circumcircle、三角形内切圆 incircle
-// - 直线与圆交点、两圆交点、过圆外一点求圆的切线、两圆公切线及两圆相交面积
+// ============================================================================
+// 【直线与圆交点、两圆交点求解 Circle Intersections (circle.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解：
+//   1. inline std::vector<Point> line_circle_intersection(const Line& line, const Circle& circle)
+//      求直线与圆的交点列表：相离返回 {}，相切返回 {切点}，相交返回两个交点。O(1)。
+//   2. inline std::vector<Point> circle_circle_intersection(const Circle& a, const Circle& b)
+//      求两圆交点列表：同心/外离/内含返回 {}，内切/外切返回 {切点}，相交返回两个交点。O(1)。
+// ============================================================================
 
 inline std::vector<Point> line_circle_intersection(const Line& line, const Circle& circle) {
     const Point foot = line.projection(circle.center);

@@ -7,9 +7,17 @@
 #include <utility>
 #include <vector>
 
-// 【0-1 BFS 最短路 (zero_one_bfs.hpp)】
-// - 0-based 邻接表 adj[u] = {{v, weight}, ...}，要求所有边权严格为 0 或 1，时间复杂度严格线性 O(n + m)
-// - 返回从 source 出发的最短距离数组，不可达顶点距离为 INT_MAX
+// ============================================================================
+// 【0-1 BFS 双端队列最短路 (zero_one_bfs.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   std::vector<int> zero_one_bfs(const std::vector<std::vector<std::pair<int, int>>>& adj, int source)
+// 参数与返回值详解：
+//   - adj：0-based 邻接表，adj[u] 存储 {to, weight}；【前置条件】所有边权 weight 必须严格为 0 或 1（否则触发 assert）。
+//   - source：源点编号（要求 0 <= source < adj.size()）。
+//   - 返回值 std::vector<int>：长度为 n 的最短路数组，不可达顶点距离为 INT_MAX。
+// 复杂度：每个顶点和边最多入队一次，时间和空间复杂度均为严格线性 O(n + m)。
+// ============================================================================
 
 std::vector<int> zero_one_bfs(
 		const std::vector<std::vector<std::pair<int, int>>>& adj, int source) {

@@ -16,13 +16,13 @@ jobs:
       - name: Install PDF fonts and dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y fonts-noto-cjk fonts-dejavu-core
+          sudo apt-get install -y fonts-wqy-microhei fonts-wqy-zenhei fonts-noto-cjk fonts-dejavu-core
           python -m pip install pygments reportlab
       - name: Run C++ tests
         run: make test
       - name: Test PDF generator
         run: make test-code2pdf
-      - name: Build combined Code + Docs PDF
+      - name: Build Codebook PDF
         run: make pdf
       - name: Upload codebook.pdf artifact
         uses: actions/upload-artifact@v4

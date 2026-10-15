@@ -4,11 +4,28 @@
 #include <functional>
 #include <utility>
 
-// 【左偏树 / 可并堆 (leftist_heap.hpp)】
-// - 支持 O(log n) 插入、弹出与堆合并的左偏树 LeftistHeap<T, Compare>，禁用拷贝
-// - 比较器约定: Compare(a, b) 为 true 表示 a 比 b 更靠近堆顶；因此默认 std::less<T> 为【小根堆】，大根堆请传 std::greater<T>
-// - push(key) / top() / pop() / empty() / size(): 标准优先队列操作（top/pop 要求非空）
-// - merge(other): O(log n) 将另一个左偏树 other 合并入当前堆，并将 other 清空
+// ============================================================================
+// 【左偏树 / 可并堆 Leftist Heap (leftist_heap.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T = int, typename Compare = std::less<T>> class LeftistHeap
+//   支持 O(log n) 合并的优先队列，禁用拷贝构造与拷贝赋值。
+//   【比较器方向约定】Compare(a, b) 为 true 表示 a 比 b 优先级更高（更靠近堆顶）：
+//   - 默认 Compare = std::less<T> 为【小根堆】（top() 返回最小值）；
+//   - 若需【大根堆】，请实例化为 LeftistHeap<T, std::greater<T>>。
+// 构造函数与成员函数签名详解：
+//   - LeftistHeap() / LeftistHeap(const Compare& compare)
+//     功能：构造空左偏树。O(1)。
+//   - bool empty() const / int size() const
+//     功能：判空 / 返回堆中当前元素个数。O(1)。
+//   - const T& top() const
+//     功能：返回堆顶最优元素的常引用（要求 !empty()，空堆调用触发 assert）。O(1)。
+//   - void push(const T& key)
+//     功能：新建单节点并与当前根合并，插入元素 key。时间复杂度 O(log n)。
+//   - void pop()
+//     功能：合并根的左右子树并释放原堆顶节点（要求 !empty()）。时间复杂度 O(log n)。
+//   - void merge(LeftistHeap& other)
+//     功能：将另一个左偏树 other 的全部节点合并入当前堆，并将 other 置为空堆（支持 &other == this 自合并保护）。O(log n)。
+// ============================================================================
 
 template <typename T = int, typename Compare = std::less<T>>
 class LeftistHeap {
@@ -58,8 +75,10 @@ class LeftistHeap {
 	}
 
 public:
+	// LeftistHeap() — 功能：构造空左偏树。O(1)。
 	LeftistHeap() = default;
 
+	// LeftistHeap(const Compare& compare) — 功能：构造空左偏树。O(1)。
 	LeftistHeap(const Compare& compare)
 		: compare(compare) {}
 
@@ -70,23 +89,28 @@ public:
 		clear(root);
 	}
 
+	// bool empty() const — 功能：判空 / 返回堆中当前元素个数。O(1)。
 	bool empty() const {
 		return root == nullptr;
 	}
 
+	// int size() const — 功能：判空 / 返回堆中当前元素个数。O(1)。
 	int size() const {
 		return heap_size;
 	}
 
+	// const T& top() const — 功能：返回堆顶最优元素的常引用（要求 !empty()，空堆调用触发 assert）。O(1)。
 	const T& top() const {
 		return root->key;
 	}
 
+	// void push(const T& key) — 功能：新建单节点并与当前根合并，插入元素 key。时间复杂度 O(log n)。
 	void push(const T& key) {
 		root = merge_nodes(root, new Node(key));
 		++heap_size;
 	}
 
+	// void pop() — 功能：合并根的左右子树并释放原堆顶节点（要求 !empty()）。时间复杂度 O(log n)。
 	void pop() {
 		Node* old_root = root;
 		root = merge_nodes(root->left, root->right);

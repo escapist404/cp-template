@@ -8,18 +8,38 @@
 #include <utility>
 #include <vector>
 
-// 【Dinic 最大流与最小割 (max_flow.hpp)】
-// - ACL 风格 0-based 有向网络最大流 MaxFlow<Cap>，时间复杂度 O(V^2 E)（单位网络 O(E sqrt(V))）
-// - add_edge(from, to, cap)   : 添加容量为 cap 的有向边（cap >= 0），返回边的 0-based 编号
-// - flow(s, t, flow_limit)    : 计算并增广从 s 到 t 的最大流（可多次调用在残量网络上继续增广）
-// - min_cut(s)                : 在跑完 flow(s, t) 后调用，返回长度 n 的 bool 数组表示残量网络中从 s 可达的最小割 S 集
-// - get_edge(i) / edges() / change_edge(i, new_cap, new_flow): 查询或动态修改边容量与流量
+// ============================================================================
+// 【Dinic 最大流与最小割 Max Flow (max_flow.hpp)】
+// ----------------------------------------------------------------------------
+// 模板结构体签名：template <typename Cap> struct MaxFlow
+//   ACL 风格有向网络最大流，顶点编号为 0-based [0, n)，容量类型 Cap 需为有符号算术类型。
+// 内部边信息结构体签名：
+//   struct edge { int from, to; Cap cap, flow; }; // 起点、终点、原始容量 cap、当前流量 flow
+// 构造函数与成员函数签名详解：
+//   - MaxFlow() / MaxFlow(int n)
+//     功能：构造 0 个或 n 个顶点的空流网络。O(n)。
+//   - int add_edge(int from, int to, Cap cap)
+//     功能：添加有向边 from -> to，容量为 cap（要求 0 <= from, to < n 且 cap >= 0，支持自环），返回该边的 0-based 编号。O(1)。
+//   - Cap flow(int s, int t)
+//   - Cap flow(int s, int t, Cap flow_limit)
+//     功能：在当前残量网络上从源点 s 到汇点 t 增广最大流（最多再增广 flow_limit 流量，要求 s != t），返回本次新增流量。
+//     复杂度：一般网络 O(V^2 E)，二分图匹配等单位网络 O(E sqrt(V))。
+//   - std::vector<bool> min_cut(int s) const
+//     功能：在跑完 flow(s, t) 后调用，返回长度为 n 的 bool 数组，visited[v] == true 表示残量网络中从 s 可达（属于最小割 S 集）。O(V + E)。
+//   - edge get_edge(int i) const / std::vector<edge> edges() const
+//     功能：按边编号 i 查询单条边或导出全部边的 {from, to, cap, flow} 状态。
+//   - void change_edge(int i, Cap new_cap, Cap new_flow)
+//     功能：动态将第 i 条边的容量与流量直接调整为 new_cap 和 new_flow（要求 0 <= new_flow <= new_cap）。O(1)。
+// ============================================================================
 
 template <typename Cap>
 struct MaxFlow {
+	// MaxFlow() — 功能：构造 0 个或 n 个顶点的空流网络。O(n)。
 	MaxFlow() : n(0) {}
+	// MaxFlow(int n) — 功能：构造 0 个或 n 个顶点的空流网络。O(n)。
 	MaxFlow(int n) : n(n), graph(n) {}
 
+	// int add_edge(int from, int to, Cap cap) — 功能：添加有向边 from -> to，容量为 cap（要求 0 <= from, to < n 且 cap >= 0，支持自环），返回该边的 0-based 编号。O(1)。
 	int add_edge(int from, int to, Cap cap) {
 		assert(0 <= from && from < n);
 		assert(0 <= to && to < n);
@@ -39,6 +59,7 @@ struct MaxFlow {
 		Cap cap, flow;
 	};
 
+	// edge get_edge(int i) const — 功能：按边编号 i 查询单条边或导出全部边的 {from, to, cap, flow} 状态。
 	edge get_edge(int i) const {
 		assert(0 <= i && i < (int)positions.size());
 		const auto [from, id] = positions[i];
@@ -47,12 +68,14 @@ struct MaxFlow {
 		return {from, e.to, e.cap + reverse.cap, reverse.cap};
 	}
 
+	// std::vector<edge> edges() const — 功能：按边编号 i 查询单条边或导出全部边的 {from, to, cap, flow} 状态。
 	std::vector<edge> edges() const {
 		std::vector<edge> result;
 		for (int i = 0; i < (int)positions.size(); ++i) result.push_back(get_edge(i));
 		return result;
 	}
 
+	// void change_edge(int i, Cap new_cap, Cap new_flow) — 功能：动态将第 i 条边的容量与流量直接调整为 new_cap 和 new_flow（要求 0 <= new_flow <= new_cap）。O(1)。
 	void change_edge(int i, Cap new_cap, Cap new_flow) {
 		assert(0 <= i && i < (int)positions.size());
 		assert(0 <= new_flow && new_flow <= new_cap);
@@ -63,6 +86,7 @@ struct MaxFlow {
 		reverse.cap = new_flow;
 	}
 
+	// Cap flow(int s, int t, Cap flow_limit) — 功能：在当前残量网络上从源点 s 到汇点 t 增广最大流（最多再增广 flow_limit 流量，要求 s != t），返回本次新增流量。
 	Cap flow(int s, int t) {
 		return flow(s, t, std::numeric_limits<Cap>::max());
 	}
@@ -117,6 +141,7 @@ struct MaxFlow {
 		return result;
 	}
 
+	// std::vector<bool> min_cut(int s) const — 功能：在跑完 flow(s, t) 后调用，返回长度为 n 的 bool 数组，visited[v] == true 表示残量网络中从 s 可达（属于最小割 S 集）。O(V + E)。
 	std::vector<bool> min_cut(int s) const {
 		assert(0 <= s && s < n);
 		std::vector<bool> visited(n);

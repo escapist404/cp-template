@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import date
+import glob
 import os
 import sys
 import unicodedata
@@ -42,9 +43,12 @@ DEFAULT_EXTENSIONS = {
 }
 DEFAULT_EXCLUDES = {".git", ".idea", ".vscode", "build", "dist", "target", "node_modules"}
 FONT = "Courier"
+FONT_BOLD = "Courier-Bold"
 CJK_FONT = None
+CJK_BOLD_FONT = None
+CJK_STYLE = "auto"
 FONT_SIZE = 8.5
-LINE_HEIGHT = 11.0
+LINE_HEIGHT = 11.5
 TITLE_SIZE = 16.0
 MARGIN = 36.0
 HEADER_GAP = 28.0
@@ -55,23 +59,44 @@ AUTHOR = "evilayuria"
 FILE_LABELS: dict[Path, str] = {}
 
 
-def configure_font() -> None:
-    """Use a real monospace font, plus a separate CJK fallback font."""
-    global FONT, CJK_FONT
+def _find_macos_asset_font(filename: str) -> list[str]:
+    """Locate system TrueType CJK fonts stored in macOS AssetsV2."""
+    pattern = f"/System/Library/AssetsV2/com_apple_MobileAsset_Font*/**/{filename}"
+    return sorted(glob.glob(pattern, recursive=True))
 
-    def register_ttf(name: str, candidates: tuple[str, ...], needs_cjk: bool = False) -> str | None:
-        for candidate in candidates:
+
+def configure_font(cjk_style: str | None = None) -> None:
+    """Register monospace code fonts (Regular/Bold) and Simplified Chinese fonts (Regular/Bold)."""
+    global FONT, FONT_BOLD, CJK_FONT, CJK_BOLD_FONT
+    style_choice = (cjk_style or CJK_STYLE or "auto").strip()
+
+    def register_ttf(
+        name: str,
+        candidates: tuple[str | tuple[str, int], ...],
+        needs_cjk: bool = False,
+    ) -> str | None:
+        for item in candidates:
+            if isinstance(item, tuple):
+                candidate, explicit_indices = item[0], (item[1],)
+            else:
+                candidate = item
+                explicit_indices = range(8) if candidate.lower().endswith(".ttc") else (0,)
             if not os.path.isfile(candidate):
                 continue
-            indices = range(8) if candidate.lower().endswith(".ttc") else (0,)
-            for index in indices:
+            for index in explicit_indices:
                 try:
-                    font_name = f"{name}{index}"
+                    font_name = f"{name}_{abs(hash((candidate, index))) % 100000}_{index}"
                     pdfmetrics.registerFont(TTFont(font_name, candidate, subfontIndex=index))
                     face = pdfmetrics.getFont(font_name).face
-                    if needs_cjk and ord("中") not in face.charWidths:
-                        continue
-                    if not needs_cjk:
+                    if needs_cjk:
+                        if ord("中") not in face.charWidths:
+                            continue
+                        ps_name = getattr(face, "name", "") or ""
+                        if not isinstance(item, tuple) and any(
+                            tag in ps_name for tag in ("TC", "B5", "HK")
+                        ):
+                            continue
+                    else:
                         widths = face.charWidths
                         if not all(widths.get(ord(a)) == widths.get(ord("M")) for a in "Mi "):
                             continue
@@ -81,30 +106,101 @@ def configure_font() -> None:
         return None
 
     mono = register_ttf("CodeBookMono", (
-        "/System/Library/Fonts/Menlo.ttc",
+        ("/System/Library/Fonts/Menlo.ttc", 0),
         "/System/Library/Fonts/SFNSMono.ttf",
-        "/System/Library/Fonts/Supplemental/PTMono.ttc",
+        ("/System/Library/Fonts/Supplemental/PTMono.ttc", 0),
         "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
         "/usr/local/share/fonts/DejaVuSansMono.ttf",
     ))
     if mono:
         FONT = mono
 
-    CJK_FONT = register_ttf("CodeBookCJK", (
-        "/System/Library/Fonts/STHeiti Light.ttc",
-        "/System/Library/Fonts/STHeiti Medium.ttc",
-        "/System/Library/Fonts/Hiragino Sans GB.ttc",
-        "/System/Library/Fonts/PingFang.ttc",
-        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    mono_bold = register_ttf("CodeBookMonoBold", (
+        ("/System/Library/Fonts/Menlo.ttc", 1),
+        ("/System/Library/Fonts/Supplemental/PTMono.ttc", 1),
+        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+        "/usr/local/share/fonts/DejaVuSansMono-Bold.ttf",
+    ))
+    FONT_BOLD = mono_bold or FONT
+
+    lanting_paths = [
+        "/Library/Fonts/Lantinghei.ttc",
+        "/System/Library/Fonts/Supplemental/Lantinghei.ttc",
+        *_find_macos_asset_font("Lantinghei.ttc"),
+    ]
+    yuanti_paths = [
+        "/Library/Fonts/Yuanti.ttc",
+        "/System/Library/Fonts/Supplemental/Yuanti.ttc",
+        *_find_macos_asset_font("Yuanti.ttc"),
+    ]
+    kaiti_paths = [
+        "/Library/Fonts/Kaiti.ttc",
+        "/System/Library/Fonts/Supplemental/Kaiti.ttc",
+        *_find_macos_asset_font("Kaiti.ttc"),
+    ]
+    songti_path = "/System/Library/Fonts/Supplemental/Songti.ttc"
+    heiti_med_path = "/System/Library/Fonts/STHeiti Medium.ttc"
+    linux_cjk = (
+        "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+        "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+        "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
+        "/usr/share/fonts/truetype/arphic/uming.ttc",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-    ), needs_cjk=True)
+    )
+
+    presets_regular: dict[str, list[str | tuple[str, int]]] = {
+        "lanting": [(p, 1) for p in lanting_paths] + [(p, 0) for p in lanting_paths],
+        "songti": [(songti_path, 6), (songti_path, 4)],
+        "yuanti": [(p, 0) for p in yuanti_paths],
+        "kaiti": [(p, 0) for p in kaiti_paths],
+        "heiti": [(heiti_med_path, 1)],
+    }
+    presets_bold: dict[str, list[str | tuple[str, int]]] = {
+        "lanting": [(p, 0) for p in lanting_paths] + [(p, 2) for p in lanting_paths],
+        "songti": [(songti_path, 1), (songti_path, 0)],
+        "yuanti": [(p, 2) for p in yuanti_paths],
+        "kaiti": [(p, 3) for p in kaiti_paths],
+        "heiti": [(heiti_med_path, 1)],
+    }
+
+    default_regular = (
+        *presets_regular["lanting"],
+        *presets_regular["yuanti"],
+        *presets_regular["songti"],
+        *presets_regular["heiti"],
+        *linux_cjk,
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    )
+    default_bold = (
+        *presets_bold["lanting"],
+        *presets_bold["yuanti"],
+        *presets_bold["songti"],
+        *presets_bold["heiti"],
+        *linux_cjk,
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    )
+
+    key = style_choice.lower()
+    if key in presets_regular:
+        reg_candidates = tuple(presets_regular[key]) + default_regular
+        bold_candidates = tuple(presets_bold[key]) + default_bold
+    elif style_choice != "auto" and os.path.isfile(style_choice):
+        reg_candidates = (style_choice, *default_regular)
+        bold_candidates = (style_choice, *default_bold)
+    else:
+        reg_candidates = default_regular
+        bold_candidates = default_bold
+
+    CJK_FONT = register_ttf("CodeBookCJK", reg_candidates, needs_cjk=True)
     if CJK_FONT is None:
         try:
             pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
             CJK_FONT = "STSong-Light"
         except Exception:
             CJK_FONT = FONT
+
+    CJK_BOLD_FONT = register_ttf("CodeBookCJKBold", bold_candidates, needs_cjk=True) or CJK_FONT
 
 
 def parse_args() -> argparse.Namespace:
@@ -118,6 +214,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--config", "-c", metavar="FILE",
         help="config file listing files to include and their order (supports 'file.hpp | 中文标题')",
+    )
+    parser.add_argument(
+        "--cjk-font", default="auto",
+        help="Chinese font preset ('auto', 'lanting', 'songti', 'yuanti', 'kaiti', 'heiti') or .ttf/.ttc path",
     )
     parser.add_argument(
         "--orientation", choices=("portrait", "landscape"), default="portrait",
@@ -240,13 +340,15 @@ def lexer_for(path: Path):
 
 def token_color(token) -> colors.Color:
     if not COLOR_OUTPUT:
+        if token in Token.Comment:
+            return colors.HexColor("#333333")
         return colors.black
     value = PYGMENTS_STYLE.style_for_token(token).get("color")
     return colors.HexColor(f"#{value}") if value else colors.HexColor("#24292e")
 
 
 def wide_character(char: str) -> bool:
-    return unicodedata.east_asian_width(char) in "WF"
+    return unicodedata.east_asian_width(char) in "WF" or char in "—“”‘’…"
 
 
 def has_wide(text: str) -> bool:
@@ -263,33 +365,52 @@ def roman(number: int) -> str:
     return "".join(result)
 
 
-def draw_mixed_fixed(canvas: Canvas, text: str, x: float, y: float, size: float) -> float:
+def _select_fonts(bold: bool = False) -> tuple[str, str]:
+    cjk = (CJK_BOLD_FONT or CJK_FONT) if bold else CJK_FONT
+    latin = (FONT_BOLD or FONT) if bold else FONT
+    return cjk, latin
+
+
+def draw_mixed_fixed(
+    canvas: Canvas, text: str, x: float, y: float, size: float, bold: bool = False
+) -> float:
     """Keep code monospaced while drawing CJK runs at their natural width."""
+    cjk, latin = _select_fonts(bold)
     cursor = x
     for wide, characters in groupby(text, key=wide_character):
         run = "".join(characters)
-        font = CJK_FONT if wide else FONT
+        font = cjk if wide else latin
         canvas.setFont(font, size)
         canvas.drawString(cursor, y, run)
         cursor += stringWidth(run, font, size)
     return cursor
 
 
-def mixed_proportional_width(text: str, size: float) -> float:
+def mixed_proportional_width(text: str, size: float, bold: bool = False) -> float:
+    cjk, latin = _select_fonts(bold)
     return sum(
-        stringWidth(run, CJK_FONT if wide else FONT, size)
+        stringWidth(run, cjk if wide else latin, size)
         for wide, characters in groupby(text, key=wide_character)
         for run in ("".join(characters),)
     )
 
 
-def draw_mixed_proportional(canvas: Canvas, text: str, x: float, y: float, size: float) -> float:
-    return draw_mixed_fixed(canvas, text, x, y, size)
+def draw_mixed_proportional(
+    canvas: Canvas, text: str, x: float, y: float, size: float, bold: bool = False
+) -> float:
+    return draw_mixed_fixed(canvas, text, x, y, size, bold=bold)
 
 
-def draw_mixed_centered(canvas: Canvas, text: str, center: float, y: float, size: float) -> None:
+def draw_mixed_centered(
+    canvas: Canvas, text: str, center: float, y: float, size: float, bold: bool = False
+) -> None:
     draw_mixed_proportional(
-        canvas, text, center - mixed_proportional_width(text, size) / 2, y, size
+        canvas,
+        text,
+        center - mixed_proportional_width(text, size, bold=bold) / 2,
+        y,
+        size,
+        bold=bold,
     )
 
 
@@ -437,6 +558,7 @@ def build_pdf(
     author: str = AUTHOR,
     columns: int = 1,
     max_pages: int | None = None,
+    cjk_font: str | None = None,
 ) -> int:
     global COLOR_OUTPUT, PYGMENTS_STYLE
     COLOR_OUTPUT = color
@@ -444,7 +566,7 @@ def build_pdf(
         PYGMENTS_STYLE = get_style_by_name(style)
     except Exception as exc:
         raise SystemExit(f"Unknown Pygments style: {style}") from exc
-    configure_font()
+    configure_font(cjk_font)
     page_width, page_height = A4 if orientation == "portrait" else landscape(A4)
     contents = toc_layout(root, files, sections, page_width, page_height)
     if columns == 2:
@@ -488,16 +610,19 @@ def build_pdf(
             canvas.setFont("Helvetica-Bold", header_size)
             canvas.drawCentredString(page_width / 2, page_height - MARGIN, header)
         else:
-            header_size = min(TITLE_SIZE, (page_width - 2 * MARGIN) / mixed_proportional_width(header, 1))
-            draw_mixed_centered(canvas, header, page_width / 2, page_height - MARGIN, header_size)
+            header_size = min(
+                TITLE_SIZE,
+                (page_width - 2 * MARGIN) / mixed_proportional_width(header, 1, bold=bold),
+            )
+            draw_mixed_centered(canvas, header, page_width / 2, page_height - MARGIN, header_size, bold=bold)
         canvas.setStrokeGray(0.55)
         canvas.setLineWidth(0.5)
         canvas.line(MARGIN, page_height - MARGIN - 10, page_width - MARGIN, page_height - MARGIN - 10)
         draw_page_number(label, total)
 
     canvas.setFillColor(colors.black)
-    cover_size = min(24, (page_width - 2 * MARGIN) / mixed_proportional_width(title, 1))
-    draw_mixed_centered(canvas, title, page_width / 2, page_height * 0.60, cover_size)
+    cover_size = min(24, (page_width - 2 * MARGIN) / mixed_proportional_width(title, 1, bold=True))
+    draw_mixed_centered(canvas, title, page_width / 2, page_height * 0.60, cover_size, bold=True)
     draw_mixed_centered(canvas, author, page_width / 2, page_height * 0.49, 12)
     canvas.setFont("Helvetica", 12)
     today = date.today().strftime("%B %d, %Y").replace(" 0", " ")
@@ -517,7 +642,7 @@ def build_pdf(
             canvas.setFillGray(0)
             if is_section:
                 if has_wide(text):
-                    draw_mixed_proportional(canvas, text, x, y, FONT_SIZE + 1)
+                    draw_mixed_proportional(canvas, text, x, y, FONT_SIZE + 1, bold=True)
                 else:
                     canvas.setFont("Helvetica-Bold", FONT_SIZE + 1)
                     canvas.drawString(x, y, text)
@@ -531,22 +656,24 @@ def build_pdf(
         canvas.setFillGray(0.35)
         draw_mixed_fixed(canvas, prefix, x, y, FONT_SIZE)
         cursor = x + stringWidth(prefix, FONT, FONT_SIZE)
-        tokens = lex(text, lexer) if color else [(Token.Text, text)]
+        tokens = lex(text, lexer) if (color or "//" in text or "/*" in text) else [(Token.Text, text)]
         for token, value in tokens:
             value = value.rstrip("\r\n")
+            if not value:
+                continue
             canvas.setFillColor(token_color(token))
             cursor = draw_mixed_fixed(canvas, value, cursor, y, FONT_SIZE)
 
     if columns == 2:
         lexers = {path: lexer_for(path) for path in files}
         for page_index, rows in enumerate(body, 1):
-            new_page(title, str(page_index), str(body_total))
+            new_page(title, str(page_index), str(body_total), bold=True)
             canvas.setStrokeGray(0.75)
             canvas.line(page_width / 2, page_height - MARGIN - HEADER_GAP, page_width / 2, MARGIN)
             for x, y, prefix, text, path, is_heading in rows:
                 if is_heading:
                     canvas.setFillColor(colors.black)
-                    draw_mixed_fixed(canvas, text, x, y, FONT_SIZE)
+                    draw_mixed_fixed(canvas, text, x, y, FONT_SIZE, bold=True)
                     canvas.line(x, y - 2, x + (page_width - 2 * MARGIN - 18) / 2, y - 2)
                 else:
                     draw_row(x, y, prefix, text, lexers[path])
@@ -569,7 +696,8 @@ def build_pdf(
 
 def main() -> None:
     args = parse_args()
-    global FONT_SIZE, LINE_HEIGHT, TITLE_SIZE, MARGIN, HEADER_GAP
+    global FONT_SIZE, LINE_HEIGHT, TITLE_SIZE, MARGIN, HEADER_GAP, CJK_STYLE
+    CJK_STYLE = args.cjk_font
     if args.compact:
         FONT_SIZE, LINE_HEIGHT = 7.0, 9.0
         TITLE_SIZE, MARGIN, HEADER_GAP = 15.0, 30.0, 24.0
@@ -607,8 +735,11 @@ def main() -> None:
         files = source_files(root, not args.no_recursive, extensions, excludes, output.resolve(), excluded_files)
 
     title = args.title or DEFAULT_TITLE
-    pages = build_pdf(root, output, title, files, sections, not args.no_line_numbers,
-                      args.orientation, args.color, args.style, args.author, args.columns, args.max_pages)
+    pages = build_pdf(
+        root, output, title, files, sections, not args.no_line_numbers,
+        args.orientation, args.color, args.style, args.author,
+        args.columns, args.max_pages, args.cjk_font,
+    )
     print(f"Wrote {output} ({len(files)} source files, {pages} pages)")
 
 

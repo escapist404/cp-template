@@ -12,12 +12,29 @@
 #include "types.hpp"
 #include "bit.hpp"
 
-// 【快速数论变换 NTT、快速傅里叶变换 FFT 与多项式卷积 (polynomial.hpp)】
-// - ntt(a, inverse)         : O(n log n) 对 ModInt 数组原地执行 NTT / INTT（要求长度为 2 次幂且模数支持该长度原根，如 998244353）
-// - fft(a, inverse)         : O(n log n) 对复数数组原地执行 FFT / IFFT
-// - convolution(a, b)       : O(n log n) 计算两个 ModInt 向量（用 NTT）或两个整数向量（用复数 FFT 四舍五入为 i64）的卷积
-// - 需要多项式逆、ln、exp、pow、sqrt 等高层形式幂级数运算时，请包含 formal_power_series.hpp
+// ============================================================================
+// 【数论变换 (NTT) 与快速傅里叶变换 (FFT) 多项式卷积 (polynomial.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 编译期原根与 NTT 正逆变换函数签名：
+//    - template <typename T> constexpr T polynomial_primitive_root(T mod)
+//    - template <typename T> constexpr T primitive_root_constexpr(T mod)
+//      功能：编译期计算素数模 mod 的最小正原根（如 998244353 -> 3）。
+//    - template <typename T, T mod, T root = primitive_root_constexpr(mod)>
+//      void ntt(std::vector<ModInt<T, mod>>& a, bool inverse = false)
+//      功能：对长度为 2 次幂的系数向量 a 原地执行正 NTT (inverse = false) 或逆 NTT (inverse = true)。O(n log n)。
+//    - template <typename T, T mod, T root = primitive_root_constexpr(mod)>
+//      std::vector<ModInt<T, mod>> convolution(
+//          const std::vector<ModInt<T, mod>>& a, const std::vector<ModInt<T, mod>>& b)
+//      功能：计算两个多项式 a 与 b 在模 mod 下的精确卷积 c[k] = sum_{i+j=k} a[i]*b[j]，
+//            返回长度为 a.size() + b.size() - 1 的系数向量（任一输入为空则返回空向量）。时间复杂度 O((n + m) log(n + m))。
+// 2. 复数 FFT 与整数卷积函数签名：
+//    - inline void fft(std::vector<Complex>& a, bool inverse = false)
+//      功能：对长度为 2 次幂的复数向量 a 原地执行正/逆快速傅里叶变换。O(n log n)。
+//    - inline std::vector<i64> convolution(const std::vector<i64>& a, const std::vector<i64>& b)
+//      功能：利用复数 FFT 计算两个整数向量 a 与 b 的卷积并四舍五入为 i64（注意结果及浮点精度需在 double 53 位尾数安全范围内）。O((n + m) log(n + m))。
+// ============================================================================
 
+// - template <typename T> constexpr T polynomial_primitive_root(T mod) — 功能：template <typename T> constexpr T polynomial_primitive_root(T mod)
 template <typename T>
 constexpr T polynomial_primitive_root(T mod) {
 	if (mod == 2) {

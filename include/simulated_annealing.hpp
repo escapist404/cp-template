@@ -9,9 +9,22 @@
 
 #include "types.hpp"
 
-// 【模拟退火启发式搜索 (simulated_annealing.hpp)】
-// - simulated_annealing(initial_state, energy, neighbor, schedule): 按温度衰减表接受更优解或以 Metropolis 概率 exp(-delta / T) 接受劣解
+// ============================================================================
+// 【模拟退火启发式搜索 Simulated Annealing (simulated_annealing.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename State, typename Score, typename Neighbor>
+//   State simulated_annealing(
+//       State initial, Score score, Neighbor neighbor,
+//       Real initial_temperature = 1E3, Real cooling = 0.995,
+//       int iterations = 100000, u64 seed = 0)
+// 回调签名与方向约定（固定为【最大化】score(state)）：
+//   - `ScoreType score(const State& s)`                         ：评估状态得分（越大越优；若求最小化请返回负代价）；
+//   - `State neighbor(const State& cur, std::mt19937_64& rng)`  ：生成随机邻近状态。
+//   返回整个退火过程中访问过的最高分状态 best。
+// ============================================================================
 
+// template <typename State, typename Score, typename Neighbor> State simulated_annealing( — 功能：State simulated_annealing(
 template <typename State, typename Score, typename Neighbor>
 State simulated_annealing(State initial, Score score, Neighbor neighbor,
                           Real initial_temperature = 1E3, Real cooling = 0.995,

@@ -4,10 +4,23 @@
 #include <algorithm>
 #include <vector>
 
-// 【扩展 KMP / ExKMP (exkmp.hpp)】
-// - exkmp(pattern, text): O(|pattern| + |text|) 返回文本串每个后缀 text[i..m) 与模式串 pattern 的 LCP 长度数组 extend
-// - 注意参数顺序: pattern 在前，text 在后；内部复用 z_algorithm(pattern)
+// ============================================================================
+// 【扩展 KMP 算法 Extended KMP / ExKMP (exkmp.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解（Sequence 可为 std::string 或 std::vector<T>）：
+//   1. template <typename Sequence>
+//      std::vector<int> exkmp_z(const Sequence& sequence)
+//      功能：计算序列 sequence（长度为 n）的 Z 函数数组 z，其中 z[i] = LCP(sequence, sequence[i..n))；
+//      【注意约定】与 z_algo.hpp 不同，exkmp_z 在 n > 0 时定义 z[0] == n。时间复杂度 O(n)。
+//   2. template <typename Sequence>
+//      std::vector<int> exkmp(const Sequence& pattern, const Sequence& text)
+//      功能：计算文本串 text（长度 m）的每个后缀 text[i..m) 与模式串 pattern（长度 n）的最长公共前缀长度。
+//      【参数顺序】pattern 在前，text 在后。
+//      返回：长度为 m 的数组 extend，其中 extend[i] = LCP(pattern, text[i..m))（若 pattern 或 text 为空则全为 0）。
+//      复杂度：时间与空间复杂度均为 O(|pattern| + |text|)。
+// ============================================================================
 
+// template <typename Sequence> std::vector<int> exkmp_z(const Sequence& sequence) — 功能：计算序列 sequence（长度为 n）的 Z 函数数组 z，其中 z[i] = LCP(sequence, sequence[i..n))；
 template <typename Sequence>
 std::vector<int> exkmp_z(const Sequence& sequence) {
 	const int n = sequence.size();
@@ -22,7 +35,7 @@ std::vector<int> exkmp_z(const Sequence& sequence) {
 	return z;
 }
 
-// Return extend[i] = LCP(pattern, text[i..]).
+// 计算扩展 KMP 数组：返回 extend[i] = LCP(pattern, text[i..n-1])。
 template <typename Sequence>
 std::vector<int> exkmp(const Sequence& pattern, const Sequence& text) {
 	const int n = pattern.size(), m = text.size();

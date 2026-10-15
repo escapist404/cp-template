@@ -5,9 +5,19 @@
 #include <vector>
 #include "geometry_base.hpp"
 
-// 【二维直线与线段相交判定及交点 (inter.hpp)】
-// - 两直线交点 line_intersection(l1, l2)
-// - 两线段规范相交 / 非规范相交判定与线段交点求解
+// ============================================================================
+// 【二维直线位置关系、直线交点与线段相交判定 (inter.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解：
+//   1. inline int line_relation(const Line& a, const Line& b)
+//      判定两直线关系：相交于唯一一点返回 1；平行不重合返回 0；完全重合返回 -1。O(1)。
+//   2. inline Point line_intersection(const Line& a, const Line& b)
+//      求两条不平行直线 a 与 b 的唯一交点（平行时触发 assert）。O(1)。
+//   3. inline bool on_segment(Point point, const Segment& segment)
+//      判断点 point 是否在线段 segment 上（含两端点）。O(1)。
+//   4. inline bool segment_intersect(const Segment& a, const Segment& b)
+//      判断两条闭线段 a 与 b 是否相交（含规范相交、端点接触及共线部分重叠）。O(1)。
+// ============================================================================
 
 inline int line_relation(const Line& a, const Line& b) {
     if (dcmp(cross(a.end - a.start, b.end - b.start)) != 0) {

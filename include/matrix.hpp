@@ -11,10 +11,27 @@
 #include <stdexcept>
 #include <utility>
 
-// 【动态与静态维度矩阵类 (matrix.hpp)】
-// - Matrix<T, R, C>: 当 R=0, C=0 时为运行期动态尺寸矩阵 Matrix<T>(n, m)；当 R>0, C>0 时为编译期定长栈数组矩阵
-// - 支持矩阵 +、-、*（朴素 O(n^3) 乘法）、power(I, A, exp) 矩阵快速幂以及 rank() 高斯消元求秩
-// - rank(is_zero) : O(min(n, m) * n * m) 返回矩阵的秩（要求元素类型支持域上除法）
+// ============================================================================
+// 【动态大小与编译期静态大小矩阵类 Matrix (matrix.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：template <typename T, size_t R = 0, size_t C = 0> class Matrix
+//   - 当 R == 0 && C == 0 时特化为【运行期动态维度矩阵 Matrix<T, 0, 0>】（简写为 Matrix<T>）；
+//   - 当 R > 0 && C > 0 时为【编译期固定维度矩阵 Matrix<T, R, C>】（底层为栈上 std::array，适合小矩阵快速幂）。
+// 1. 动态矩阵 Matrix<T, 0, 0> 构造与成员函数签名：
+//    - Matrix(size_t row, size_t column) / Matrix(size_t row, size_t column, std::initializer_list<T> info)
+//      功能：构造 row 行 column 列的矩阵（要求 row > 0 && column > 0）。O(row * column)。
+//    - size_t rows() const / size_t columns() const / void resize(size_t row, size_t column)
+//      功能：获取行数 / 获取列数 / 调整矩阵尺寸并保留重叠区域元素。
+//    - T* operator[](size_t index) / const T* operator[](size_t index) const
+//    - T& at(size_t row, size_t column) / const T& at(size_t row, size_t column) const
+//      功能：0-based 下标访问 mat[i][j] 或带边界检查的 mat.at(i, j)。O(1)。
+//    - template <typename IsZero = MatrixRankZero<T>> int rank(IsZero is_zero = IsZero{}) const
+//      功能：在域上通过高斯消元计算当前矩阵的秩（不修改原矩阵）。时间复杂度 O(R * C * min(R, C))。
+//    - 算术运算：operator*=, operator+=, operator+, operator*（矩阵乘耗时 O(R * K * C)，已做 i-k-j 缓存友好循环重排及零元素跳过优化）。
+// 2. 静态矩阵 Matrix<T, R, C> 构造与成员函数签名：
+//    - Matrix() / Matrix(std::initializer_list<T> info) / rows() / columns() / rank() / operator[] / operator+, operator*。
+//    - 支持静态矩阵与动态矩阵混合相乘、流式输入输出 operator>>, operator<<，并可直接传入 modint.hpp 的 power() 做矩阵快速幂。
+// ============================================================================
 
 template <typename T, size_t R = 0, size_t C = 0>
 class Matrix;
@@ -34,12 +51,14 @@ private:
 	std::vector<T> data;
 
 public:
+	// - Matrix(size_t row, size_t column) — 功能：Matrix(size_t row, size_t column) / Matrix(size_t row, size_t column, std::initializer_list<T> info)
 	Matrix(size_t row, size_t column) : R(row), C(column), data(row * column) {
 		if (R == 0 || C == 0) {
 			throw std::invalid_argument("Dynamic matrix must have non-zero size");
 		}
 	}
 
+	// Matrix(size_t row, size_t column, std::initializer_list<T> info) 功能：构造 row 行 column 列的矩阵（要求 row > 0 && column > 0）。O(row * column)。 — 功能：Matrix(size_t row, size_t column) / Matrix(size_t row, size_t column, std::initializer_list<T> info)
 	Matrix(size_t row, size_t column, std::initializer_list<T> info) : R(row), C(column), data(row * column) {
 		if (R == 0 || C == 0) {
 			throw std::invalid_argument("Dynamic matrix must have non-zero size");
@@ -294,4 +313,4 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T, R, C>& A) {
 	return os;
 }
 
-#endif // MATRIX_HPP
+#endif

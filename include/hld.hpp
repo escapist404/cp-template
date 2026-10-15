@@ -6,12 +6,31 @@
 #include <algorithm>
 #include <utility>
 
-// 【重链剖分 Heavy-Light Decomposition (hld.hpp)】
-// - 0-based 顶点编号 [0, n)，建树与剖分 O(n)，lca 查询 O(log n)，路径最多拆分为 O(log n) 段连续区间
-// - 使用流程: 先调用 add_edge(u, v) 加边，再调用 prework(root) 完成剖分
-// - pos(u)          : 返回顶点 u 在重链优先 DFS 序中的 0-based 下标；重链顶 head(u) 到 u 对应闭区间 [pos(head(u)), pos(u)]
-// - subtree_range(u): 返回以 u 为根的子树对应的左闭右开 DFS 序区间 [l, r)
-// - parent(u) / depth_of(u) / head(u) / lca(u, v): 查询父节点（根为 -1）、深度、所在重链顶与最近公共祖先
+// ============================================================================
+// 【重链剖分 / 树链剖分 Heavy-Light Decomposition (hld.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class HeavyLightDecomposition
+//   将 0-based 连通有根树剖分为重链，使任意两点路径可拆分为 O(log n) 段连续 DFS 序区间，且每棵子树对应单个连续区间。
+// 构造函数与成员函数签名详解：
+//   - HeavyLightDecomposition(int n = 0)
+//     功能：初始化包含 n 个顶点 [0, n) 的空树结构。O(n)。
+//   - void add_edge(int u, int v)
+//     功能：添加一条连接 u 与 v (0 <= u, v < n) 的无向树边。O(1)。
+//   - void prework(int root)
+//     功能：【必须在加完所有边后调用一次】以 root 为根执行两次 DFS，计算父节点、深度、重儿子、链顶 head 与 DFS 序 pos。O(n)。
+//   - int parent(int u) const
+//     功能：返回顶点 u 的父节点编号（根节点 root 的父节点为 -1）。O(1)。
+//   - int depth_of(int u) const
+//     功能：返回顶点 u 的深度（根节点深度为 0）。O(1)。
+//   - int head(int u) const
+//     功能：返回顶点 u 所在重链的链顶（该重链上深度最小的顶点）编号。O(1)。
+//   - int pos(int u) const
+//     功能：返回顶点 u 在重链优先 DFS 序中的 0-based 下标 in [0, n)；同条重链从链顶 head(u) 到 u 对应连续闭区间 [pos(head(u)), pos(u)]。O(1)。
+//   - std::pair<int, int> subtree_range(int u) const
+//     功能：返回以 u 为根的子树在 pos 序中对应的【左闭右开区间 [l, r)】（即 {pos(u), pos(u) + size[u]}）。O(1)。
+//   - int lca(int u, int v) const
+//     功能：沿重链跳转到同一条重链上求 u 与 v 的最近公共祖先。时间复杂度 O(log n)。
+// ============================================================================
 
 class HeavyLightDecomposition {
 	int n;
@@ -51,12 +70,15 @@ class HeavyLightDecomposition {
 	}
 
 public:
+	// HeavyLightDecomposition(int n = 0) — 功能：初始化包含 n 个顶点 [0, n) 的空树结构。O(n)。
 	HeavyLightDecomposition(int n = 0) : n(n), adj(n) {}
 
+	// void add_edge(int u, int v) — 功能：添加一条连接 u 与 v (0 <= u, v < n) 的无向树边。O(1)。
 	void add_edge(int u, int v) {
 		adj[u].push_back(v), adj[v].push_back(u);
 	}
 
+	// void prework(int root) — 功能：【必须在加完所有边后调用一次】以 root 为根执行两次 DFS，计算父节点、深度、重儿子、链顶 head 与 DFS 序 pos。O(n)。
 	void prework(int root) {
 		depth = size = std::vector<int>(n);
 		father = heavy = top = position = std::vector<int>(n, -1);
@@ -68,10 +90,12 @@ public:
 	int depth_of(int u) const { return depth[u]; }
 	int head(int u) const { return top[u]; }
 	int pos(int u) const { return position[u]; }
+	// std::pair<int, int> subtree_range(int u) const — 功能：返回以 u 为根的子树在 pos 序中对应的【左闭右开区间 [l, r)】（即 {pos(u), pos(u) + size[u]}）。O(1)。
 	std::pair<int, int> subtree_range(int u) const {
 		return {position[u], position[u] + size[u]};
 	}
 
+	// int lca(int u, int v) const — 功能：沿重链跳转到同一条重链上求 u 与 v 的最近公共祖先。时间复杂度 O(log n)。
 	int lca(int u, int v) const {
 		while (top[u] != top[v]) {
 			if (depth[top[u]] < depth[top[v]])

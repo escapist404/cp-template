@@ -7,12 +7,22 @@
 #include <utility>
 #include <vector>
 
-// 【Prufer 序列与无根树双射 (prufer.hpp)】
-// - 0-based 标号无根树 [0, n)，时间与空间复杂度均为 O(n)（内部使用线性时间指针扫描法）
-// - tree_to_prufer(adj)  : 将 n 个点的连通无向树编码为长度 max(0, n - 2) 的 Prufer 序列（每次删标号最小的叶节点）
-// - prufer_to_tree(code) : 将长度 n - 2 的 Prufer 序列还原为 n 个点的无根树边集 std::vector<std::pair<int, int>>
-// - prufer_degrees(code) : 根据 Prufer 序列直接返回每个顶点的度数 degree[u] = 出现次数 + 1
+// ============================================================================
+// 【Prufer 序列与带标号无根树线性双射 (prufer.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解（顶点编号均为 0-based [0, n)，全部采用线性时间指针扫描法，时空复杂度严格 O(n)）：
+//   1. inline std::vector<int> prufer_degrees(const std::vector<int>& code)
+//      功能：根据长度为 n - 2 的 Prufer 序列 code 直接计算还原后树中每个顶点的度数 degree[u] = 出现次数 + 1。O(n)。
+//   2. inline std::vector<int> tree_to_prufer(const std::vector<std::vector<int>>& graph)
+//      功能：输入 n 个点的连通无向树邻接表 graph，每次剥离标号最小的叶子并记录其唯一邻居，
+//            返回长度为 max(0, n - 2) 的 Prufer 序列（n <= 2 时返回空向量 {}）。时间复杂度严格 O(n)。
+//   3. inline std::vector<std::pair<int, int>> prufer_to_tree(const std::vector<int>& code, int n = -1)
+//      功能：将 Prufer 序列 code 还原为无根树的 n - 1 条无向边列表 {{u, v}, ...}。
+//      参数约定：当 n >= 2 时要求 code.size() == n - 2；当传入默认 n = -1 时，若 code 非空自动按 n = code.size() + 2 还原，
+//                但若需还原 n = 0, 1, 2 的空/单点/双点树（此时 code 均为空），必须显式传入对应的 n。时间复杂度严格 O(n)。
+// ============================================================================
 
+// inline std::vector<int> prufer_degrees(const std::vector<int>& code) — 功能：根据长度为 n - 2 的 Prufer 序列 code 直接计算还原后树中每个顶点的度数 degree[u] = 出现次数 + 1。O(n)。
 inline std::vector<int> prufer_degrees(const std::vector<int>& code) {
     int n = code.size() + 2;
     std::vector<int> degree(n, 1);
@@ -59,7 +69,7 @@ inline std::vector<int> tree_to_prufer(const std::vector<std::vector<int>>& grap
     return code;
 }
 
-// Empty code represents n=2 by default; pass n=0 or n=1 explicitly for those trees.
+// 空 Prufer 序列默认对应 n = 2 的树；若需构造 n = 0 或 n = 1 的退化树请显式传入 vertex_count。
 inline std::vector<std::pair<int, int>> prufer_to_tree(const std::vector<int>& code, int n = -1) {
     if (n == -1) {
         n = code.size() + 2;

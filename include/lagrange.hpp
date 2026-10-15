@@ -6,9 +6,25 @@
 
 #include "comb.hpp"
 
-// 【拉格朗日插值 (lagrange.hpp)】
-// - lagrange_interpolate(xs, ys, k): 给定 n 个横坐标两两不同的采样点 (xs[i], ys[i])，O(n^2) 计算 n-1 次多项式在 k 处的取值
-// - lagrange_interpolate_iota(y, k): 专用于横坐标为连续整数 0, 1, ..., n-1 的情况，通过前后缀积在严格 O(n) 时间内求 f(k)
+// ============================================================================
+// 【拉格朗日多项式插值（一般横坐标 O(n^2) 与连续整数横坐标 O(n)）(lagrange.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解：
+//   1. template <typename T, T mod>
+//      ModInt<T, mod> lagrange_evaluate(
+//          const std::vector<ModInt<T, mod>>& x,
+//          const std::vector<ModInt<T, mod>>& y,
+//          ModInt<T, mod> at)
+//      功能：给定 n 个横坐标两两不同（模 mod 下互不同余）的采样点 (x[i], y[i])，
+//            在 O(n^2) 时间内直接计算唯一确定的 < n 次多项式 f 在横坐标 at 处的函数值 f(at)。
+//   2. template <typename T, T mod>
+//      ModInt<T, mod> lagrange_evaluate_consecutive(
+//          const std::vector<ModInt<T, mod>>& y,
+//          ModInt<T, mod> x)
+//      功能：专用于采样横坐标固定为连续整数 0, 1, ..., n - 1（即 y[i] = f(i)）的情形，
+//            通过预处理前后缀积与阶乘逆元在【严格线性 O(n) 时间】内求 f(x)。
+//      【前置条件】要求采样点数 n < mod 且 mod 为素数（以保证 0! .. (n-1)! 均可逆）。
+// ============================================================================
 
 template <typename T, T mod>
 ModInt<T, mod> lagrange_evaluate(
@@ -30,8 +46,7 @@ ModInt<T, mod> lagrange_evaluate(
 	return result;
 }
 
-// Evaluate the polynomial with values y[i] at x = i in O(n).
-// This requires n < mod so that all factorials are invertible.
+// 取值点为连续整数 x = 0, 1, ..., n-1 时的 O(n) 拉格朗日插值，要求 n < mod 以保证阶乘可逆。
 template <typename T, T mod>
 ModInt<T, mod> lagrange_evaluate_consecutive(
 		const std::vector<ModInt<T, mod>>& y,

@@ -4,9 +4,17 @@
 #include <vector>
 #include "inter.hpp"
 
-// 【多边形面积、点定位与凸性判定 (poly.hpp)】
-// - 多边形有向面积 polygon_area（逆时针为正）、凸多边形判定
-// - 点在多边形内部/边界/外部判定（射线法 / 环绕数法）
+// ============================================================================
+// 【多边形有向面积、面积与点在多边形内判定 Polygon (poly.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解：
+//   1. inline Real polygon_signed_area(const std::vector<Point>& polygon)
+//      计算简单多边形有向面积（逆时针为正，顺时针为负）。O(n)。
+//   2. inline Real polygon_area(const std::vector<Point>& polygon)
+//      返回简单多边形的面积绝对值。O(n)。
+//   3. inline bool point_in_polygon(const std::vector<Point>& polygon, Point point)
+//      射线法判断点 point 是否在简单多边形（凸或凹、顺时针或逆时针均可）的【内部或边界上】。O(n)。
+// ============================================================================
 
 inline Real polygon_signed_area(const std::vector<Point>& polygon) {
     Real area_twice = 0;
@@ -20,7 +28,7 @@ inline Real polygon_area(const std::vector<Point>& polygon) {
     return std::fabs(polygon_signed_area(polygon));
 }
 
-// Includes the boundary. Works for clockwise and counter-clockwise polygons.
+// 多边形面积两倍：支持顺时针或逆时针顶点序。
 inline bool point_in_polygon(const std::vector<Point>& polygon, Point point) {
     bool inside = false;
     for (int i = 0, j = polygon.size() - 1; i < (int)polygon.size(); j = i++) {

@@ -7,12 +7,25 @@
 #include <utility>
 #include <vector>
 
+// ============================================================================
 // 【Hopcroft-Karp 二分图最大匹配 (bipartite_matching.hpp)】
-// - 左部点 0-based [0, n_left)，右部点 0-based [0, n_right)，时间复杂度 O(E sqrt(V))
-// - bipartite_matching(n_left, n_right, edges): 返回 BipartiteMatchingResult{matching, left_match, right_match}
-//   - matching        : 最大匹配对列表 {{u, v}, ...}
-//   - left_match[u]   : 左部点 u 匹配的右部点编号（未匹配为 -1）
-//   - right_match[v]  : 右部点 v 匹配的左部点编号（未匹配为 -1）
+// ----------------------------------------------------------------------------
+// 结果结构体签名：
+//   struct BipartiteMatchingResult {
+//       int size = 0;            // 最大匹配边数
+//       std::vector<int> left;   // 长度为 left_size，left[u] 为左部点 u 匹配的右部点编号（未匹配为 -1）
+//       std::vector<int> right;  // 长度为 right_size，right[v] 为右部点 v 匹配的左部点编号（未匹配为 -1）
+//   };
+// 求解函数签名：
+//   BipartiteMatchingResult bipartite_matching(
+//       const std::vector<std::vector<int>>& adj, int right_size)
+// 参数与返回值详解：
+//   - adj：左部点邻接表，左部点个数 left_size = adj.size()（0-based [0, left_size)），
+//          adj[u] 存储左部点 u 连向的所有右部点编号 v（要求 0 <= v < right_size）。
+//   - right_size：右部点总个数（0-based [0, right_size)，要求 right_size >= 0）。
+//   - 返回值 BipartiteMatchingResult{size, left, right}。
+// 复杂度：时间复杂度 O(E sqrt(V))，空间复杂度 O(V + E)。
+// ============================================================================
 
 struct BipartiteMatchingResult {
 	int size = 0;

@@ -6,12 +6,22 @@
 #include <queue>
 #include <vector>
 
-// 【带花树一般无向图最大匹配 (blossom.hpp)】
-// - 0-based 顶点编号 [0, n)，Edmonds 带花树算法处理含奇环的一般无向图，时间复杂度 O(n^3)
-// - GeneralMatching(n): 构造后调用 add_edge(u, v) 添加无向边
-// - solve()           : 返回最大匹配对数
-// - mate_of(u)        : 返回与顶点 u 匹配的伙伴顶点编号（未匹配返回 -1）
-// - pairs()           : 返回所有满足 u < v 的匹配点对列表 std::vector<std::pair<int, int>>
+// ============================================================================
+// 【Edmonds 带花树一般无向图最大匹配 (blossom.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class GeneralMatching
+//   通过奇环缩花（Blossom）在含奇环的一般无向图上求最大匹配，顶点编号为 0-based [0, n)。
+// 构造函数与成员函数签名详解：
+//   - GeneralMatching(int n)
+//     功能：初始化包含 n 个顶点 [0, n) 的空无向图。时间复杂度 O(n)。
+//   - void add_edge(int u, int v)
+//     功能：添加一条连接 u 与 v 的无向边（要求 0 <= u, v < n 且 u != v，不支持自环）。O(1)。
+//   - int max_matching()
+//     功能：运行带花树增广算法求解最大匹配，返回最大匹配对数。时间复杂度 O(n^3)，空间复杂度 O(n + m)。
+//   - const std::vector<int>& matching()
+//     功能：【在调用 max_matching() 后使用】返回长度为 n 的匹配数组 match：
+//           若顶点 u 已匹配，则 match[u] 为其配对顶点 v（且满足 match[v] == u）；若未匹配则为 -1。O(1)。
+// ============================================================================
 
 class GeneralMatching {
 	int n;
@@ -78,14 +88,17 @@ class GeneralMatching {
 	}
 
 public:
+	// GeneralMatching(int n) — 功能：初始化包含 n 个顶点 [0, n) 的空无向图。时间复杂度 O(n)。
 	GeneralMatching(int n) : n(n), graph(n), match(n, -1) {}
 
+	// void add_edge(int u, int v) — 功能：添加一条连接 u 与 v 的无向边（要求 0 <= u, v < n 且 u != v，不支持自环）。O(1)。
 	void add_edge(int u, int v) {
 		assert(0 <= u && u < n && 0 <= v && v < n && u != v);
 		graph[u].push_back(v);
 		graph[v].push_back(u);
 	}
 
+	// int max_matching() — 功能：运行带花树增广算法求解最大匹配，返回最大匹配对数。时间复杂度 O(n^3)，空间复杂度 O(n + m)。
 	int max_matching() {
 		std::fill(match.begin(), match.end(), -1);
 		int result = 0;

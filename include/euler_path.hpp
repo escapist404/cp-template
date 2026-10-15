@@ -6,19 +6,33 @@
 #include <utility>
 #include <vector>
 
-// 【有向图 / 无向图欧拉路径与欧拉回路 (euler_path.hpp)】
-// - 0-based 顶点编号 [0, n)，支持重边、自环与指定起点 start（传 -1 表示自动选择合法起点），复杂度 O(n + m)
-// - euler_path(n, edges, directed, start): 返回 EulerPath{exists, vertices, edges}
-//   - exists  : 是否存在经过所有边恰好一次的欧拉路
-//   - vertices: 按序经过的顶点序列（长度 m + 1）
-//   - edges   : 按序经过的边在输入 edges 数组中的 0-based 下标序列（长度 m）
+// ============================================================================
+// 【有向图 / 无向图欧拉路径与欧拉回路 Hierholzer 算法 (euler_path.hpp)】
+// ----------------------------------------------------------------------------
+// 结果结构体签名：
+//   struct EulerPath {
+//       bool exists = false;        // 是否存在经过所有边恰好一次的欧拉路径
+//       std::vector<int> vertices;  // 按行进顺序经过的顶点序列（有解时长度为 m + 1）
+//       std::vector<int> edges;     // 按行进顺序经过的边在输入 edges 数组中的 0-based 下标序列（长度为 m）
+//   };
+// 求解函数签名：
+//   EulerPath euler_path(int n, const std::vector<std::pair<int, int>>& edges,
+//                        bool directed = false, int start = -1)
+// 参数与返回值详解：
+//   - n：顶点数，顶点编号为 0-based [0, n)。
+//   - edges：边列表，第 id 项为 {u, v}（支持平行重边与自环）。
+//   - directed：false 表示无向图（默认），true 表示有向图。
+//   - start：指定起点编号；传入默认 -1 时自动寻找合法起点（若有奇度点/出度大1点则选之，否则选首个非孤立点）。
+//   - 返回值 EulerPath：若不存在欧拉路径，返回 exists == false；若存在，返回 exists == true 及完整的顶点序列与边编号序列。
+// 复杂度：时间与空间复杂度均为严格线性 O(n + m)。
+// ============================================================================
 
 struct EulerPath {
 	bool exists = false;
 	std::vector<int> vertices, edges;
 };
 
-// Edge IDs are indices in edges. Supports parallel edges and self-loops.
+// Hierholzer 欧拉路径/回路算法：边编号对应 edges 数组下标 [0, m)，支持重边与自环。
 EulerPath euler_path(int n, const std::vector<std::pair<int, int>>& edges,
 		bool directed = false, int start = -1) {
 	assert(n >= 0);

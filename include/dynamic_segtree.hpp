@@ -6,12 +6,34 @@
 #include <vector>
 #include "binary_search.hpp"
 
-// 【动态开点线段树与线段树合并 (dynamic_segtree.hpp)】
-// - 维护左闭右开大值域 [low, high) 上的动态开点线段树森林，单次操作 O(log(high - low))
-// - 每棵树由 int root = 0 标识（0 表示全 e() 的空树）；set(root, p, v) / add(root, p, v) 按引用更新 root
-// - prod(root, l, r) / get(root, p) / all_prod(root): 区间查询、单点查询与全区间聚合
-// - max_right(root, l, f) / min_left(root, r, f)    : 大值域树上二分（要求 f(e()) == true）
-// - merge(a, b): 原地合并两棵树并返回新根（叶子按 op(val_a, val_b) 合并；合并后旧树 b 节点被复用，不可再访问）
+// ============================================================================
+// 【动态开点线段树与线段树合并 Dynamic Segment Tree (dynamic_segtree.hpp)】
+// ----------------------------------------------------------------------------
+// 模板类签名：
+//   template <class V, auto op, auto e, class Index = long long> class DynamicSegmentTree
+//   在共享节点池上维护定义域均为左闭右开 [low, high) 的多棵动态开点线段树。
+//   每棵树由一个整型根句柄 int root 标识（root == 0 代表全为 e() 的空树）。
+// 构造函数与成员函数签名详解：
+//   - DynamicSegmentTree(Index low, Index high)
+//     功能：指定全局左闭右开坐标域 [low, high)（要求 low <= high）并初始化 0 号空节点。O(1)。
+//   - void set(int& root, Index p, V value)
+//     功能：在以 root 为根的树中将位置 p (low <= p < high) 设为 value，并通过引用更新 root。O(log(high - low))。
+//   - void add(int& root, Index p, V value)
+//     功能：将位置 p 更新为 op(get(root, p), value)，并通过引用更新 root。O(log(high - low))。
+//   - V prod(int root, Index l, Index r)
+//     功能：查询树 root 在子区间 [l, r) (low <= l <= r <= high) 上的聚合值；未开点部分视为 e()。O(log(high - low))。
+//   - V get(int root, Index p)
+//     功能：查询树 root 在单点 p (low <= p < high) 处的值（未访问过返回 e()）。O(log(high - low))。
+//   - V all_prod(int root)
+//     功能：返回树 root 在整个值域 [low, high) 上的聚合结果。时间复杂度 O(1)。
+//   - template <class F> Index max_right(int root, Index l, F f)
+//     功能：在树 root 上从 l (low <= l <= high) 向右二分（要求 f(e()) == true），返回最大的 r in [l, high]。O(log(high - low))。
+//   - template <class F> Index min_left(int root, Index r, F f)
+//     功能：在树 root 上从 r (low <= r <= high) 向左二分（要求 f(e()) == true），返回最小的 l in [low, r]。O(log(high - low))。
+//   - void merge(int& a, int& b)
+//     功能：将树 b 原地合并入树 a（对应位置按 op(val_a, val_b) 合并），合并后将 b 置为 0（原树 b 不可再独立使用）。
+//     复杂度：单次为两树公共节点数，n 棵单点树两两合并到底的总时间复杂度为 O(n log(high - low))。
+// ============================================================================
 
 template <class V, auto op, auto e, class Index = long long>
 class DynamicSegmentTree {
@@ -114,34 +136,41 @@ class DynamicSegmentTree {
     }
 
 public:
+    // DynamicSegmentTree(Index low, Index high) — 功能：指定全局左闭右开坐标域 [low, high)（要求 low <= high）并初始化 0 号空节点。O(1)。
     DynamicSegmentTree(Index low, Index high)
         : low(low), high(high), nodes{Node(e())} {
         assert(low < high);
     }
 
+    // void set(int& root, Index p, V value) — 功能：在以 root 为根的树中将位置 p (low <= p < high) 设为 value，并通过引用更新 root。O(log(high - low))。
     void set(int& root, Index p, V value) {
         assert(low <= p && p < high);
         root = set_node(root, low, high, p, value);
     }
 
+    // void add(int& root, Index p, V value) — 功能：将位置 p 更新为 op(get(root, p), value)，并通过引用更新 root。O(log(high - low))。
     void add(int& root, Index p, V value) {
         set(root, p, op(get(root, p), value));
     }
 
+    // V prod(int root, Index l, Index r) — 功能：查询树 root 在子区间 [l, r) (low <= l <= r <= high) 上的聚合值；未开点部分视为 e()。O(log(high - low))。
     V prod(int root, Index l, Index r) {
         assert(low <= l && l <= r && r <= high);
         return prod_node(root, low, high, l, r);
     }
 
+    // V get(int root, Index p) — 功能：查询树 root 在单点 p (low <= p < high) 处的值（未访问过返回 e()）。O(log(high - low))。
     V get(int root, Index p) {
         assert(low <= p && p < high);
         return prod_node(root, low, high, p, p + 1);
     }
 
+    // V all_prod(int root) — 功能：返回树 root 在整个值域 [low, high) 上的聚合结果。时间复杂度 O(1)。
     V all_prod(int root) {
         return nodes[root].value;
     }
 
+    // template <class F> Index max_right(int root, Index l, F f) — 功能：在树 root 上从 l (low <= l <= high) 向右二分（要求 f(e()) == true），返回最大的 r in [l, high]。O(log(high - low))。
     template <class F>
     Index max_right(int root, Index l, F f) {
         assert(low <= l && l <= high && f(e()));
@@ -150,6 +179,7 @@ public:
         return max_right_node(root, low, high, l, sum, f).first;
     }
 
+    // template <class F> Index min_left(int root, Index r, F f) — 功能：在树 root 上从 r (low <= r <= high) 向左二分（要求 f(e()) == true），返回最小的 l in [low, r]。O(log(high - low))。
     template <class F>
     Index min_left(int root, Index r, F f) {
         assert(low <= r && r <= high && f(e()));
@@ -158,8 +188,9 @@ public:
         return min_left_node(root, low, high, r, sum, f).first;
     }
 
-    // For associative commutative op (e.g. sum/min/max).
+    // 单点增量更新：a[p] = op(a[p], value)，要求 op 满足结合律与交换律（如加法/最值）。
 
+    // void merge(int& a, int& b) — 功能：将树 b 原地合并入树 a（对应位置按 op(val_a, val_b) 合并），合并后将 b 置为 0（原树 b 不可再独立使用）。
     void merge(int& a, int& b) {
         assert(&a != &b && (!a || a != b));
         a = merge_nodes(a, b, low, high);

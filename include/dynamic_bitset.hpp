@@ -7,13 +7,36 @@
 
 #include "bit.hpp"
 
-// 【动态长度位集 (dynamic_bitset.hpp)】
-// - 按 64 位块压缩的 0-based 动态位集，位运算与统计复杂度均为 O(n / 64)
-// - set(p, val): 将第 p 位设为 val（若 p >= size() 会自动扩容至 p + 1）
-// - reset(p) / reset(): 清零单比特（不扩容）或清零全部位
-// - test(p) / operator[](p): 只读查询第 p 位布尔值（越界返回 false）
-// - count() / any() / none(): 统计 1 的个数、是否非全 0、是否全 0
-// - 位运算 |=, ^= 自动扩展为较大长度；&= 自动收缩为较小长度
+// ============================================================================
+// 【64 位分块动态位集 Dynamic Bitset (dynamic_bitset.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class DynamicBitset
+//   按 uint64_t（64 位）分块压缩存储的 0-based 动态长度位集，始终保持最高块多余高位清零。
+// 构造函数与成员函数签名详解：
+//   - DynamicBitset() / DynamicBitset(std::size_t n, bool value = false)
+//     功能：构造空位集，或长度为 n、初始全部比特为 value 的位集。时间复杂度 O(n / 64)。
+//   - std::size_t size() const / bool empty() const
+//     功能：返回当前逻辑比特位数 n / 判断是否为空（n == 0）。O(1)。
+//   - void resize(std::size_t new_size, bool value = false)
+//     功能：调整位集长度为 new_size，新增的高位比特填充为 value。O(new_size / 64)。
+//   - void push_back(bool value)
+//     功能：在末尾追加一个比特 value（下标为原 size()）。均摊 O(1)。
+//   - void set(std::size_t p, bool value = true)
+//     功能：将第 p 位设为 value；【注意】若 p >= size()，会自动扩容至 p + 1 并中间补 0。
+//   - void reset(std::size_t p) / void reset()
+//     功能：将第 p 位清零（p >= size() 时不扩容无操作） / 将所有现有位全部清零。
+//   - bool test(std::size_t p) const / bool operator[](std::size_t p) const
+//     功能：只读查询第 p 位布尔值（若 p >= size() 安全返回 false，不扩容）。O(1)。
+//   - std::size_t count() const / bool any() const / bool none() const
+//     功能：统计二进制 1 的总个数 / 是否存在至少一个 1 / 是否全为 0。时间复杂度 O(n / 64)。
+//   - DynamicBitset& operator|=(const DynamicBitset& other)
+//   - DynamicBitset& operator^=(const DynamicBitset& other)
+//     功能：按位或 / 按位异或复合赋值，结果长度自动扩展为 max(size(), other.size())。O(n / 64)。
+//   - DynamicBitset& operator&=(const DynamicBitset& other)
+//     功能：按位与复合赋值，结果长度自动收缩为 min(size(), other.size())。O(n / 64)。
+//   - friend DynamicBitset operator|(lhs, rhs) / operator&(lhs, rhs) / operator^(lhs, rhs)
+//   - friend bool operator==(lhs, rhs) / operator!=(lhs, rhs)
+// ============================================================================
 
 class DynamicBitset {
 	using Block = std::uint64_t;
@@ -40,19 +63,24 @@ class DynamicBitset {
 	}
 
 public:
+	// DynamicBitset() — 功能：构造空位集，或长度为 n、初始全部比特为 value 的位集。时间复杂度 O(n / 64)。
 	DynamicBitset() = default;
+	// DynamicBitset(std::size_t n, bool value = false) — 功能：构造空位集，或长度为 n、初始全部比特为 value 的位集。时间复杂度 O(n / 64)。
 	DynamicBitset(std::size_t n, bool value = false) : n(n), data(blocks(n), value ? ~Block() : Block()) {
 		trim();
 	}
 
+	// std::size_t size() const — 功能：返回当前逻辑比特位数 n / 判断是否为空（n == 0）。O(1)。
 	std::size_t size() const {
 		return n;
 	}
 
+	// bool empty() const — 功能：返回当前逻辑比特位数 n / 判断是否为空（n == 0）。O(1)。
 	bool empty() const {
 		return n == 0;
 	}
 
+	// void resize(std::size_t new_size, bool value = false) — 功能：调整位集长度为 new_size，新增的高位比特填充为 value。O(new_size / 64)。
 	void resize(std::size_t new_size, bool value = false) {
 		const std::size_t old_size = n;
 		data.resize(blocks(new_size));
@@ -65,12 +93,14 @@ public:
 		trim();
 	}
 
+	// void push_back(bool value) — 功能：在末尾追加一个比特 value（下标为原 size()）。均摊 O(1)。
 	void push_back(bool value) {
 		const std::size_t p = n;
 		resize(n + 1);
 		set(p, value);
 	}
 
+	// void set(std::size_t p, bool value = true) — 功能：将第 p 位设为 value；【注意】若 p >= size()，会自动扩容至 p + 1 并中间补 0。
 	void set(std::size_t p, bool value = true) {
 		ensure(p);
 		const Block mask = Block(1) << (p % block_bits);
@@ -81,24 +111,29 @@ public:
 		}
 	}
 
+	// void reset(std::size_t p) — 功能：将第 p 位清零（p >= size() 时不扩容无操作） / 将所有现有位全部清零。
 	void reset(std::size_t p) {
 		if (p < n) {
 			data[p / block_bits] &= ~(Block(1) << (p % block_bits));
 		}
 	}
 
+	// void reset() — 功能：将第 p 位清零（p >= size() 时不扩容无操作） / 将所有现有位全部清零。
 	void reset() {
 		std::fill(data.begin(), data.end(), Block());
 	}
 
+	// bool test(std::size_t p) const — 功能：只读查询第 p 位布尔值（若 p >= size() 安全返回 false，不扩容）。O(1)。
 	bool test(std::size_t p) const {
 		return p < n && (data[p / block_bits] >> (p % block_bits) & 1);
 	}
 
+	// bool operator[](std::size_t p) const — 功能：只读查询第 p 位布尔值（若 p >= size() 安全返回 false，不扩容）。O(1)。
 	bool operator[](std::size_t p) const {
 		return test(p);
 	}
 
+	// std::size_t count() const — 功能：统计二进制 1 的总个数 / 是否存在至少一个 1 / 是否全为 0。时间复杂度 O(n / 64)。
 	std::size_t count() const {
 		std::size_t result = 0;
 		for (const Block block : data) {
@@ -107,10 +142,12 @@ public:
 		return result;
 	}
 
+	// bool any() const — 功能：统计二进制 1 的总个数 / 是否存在至少一个 1 / 是否全为 0。时间复杂度 O(n / 64)。
 	bool any() const {
 		return count() != 0;
 	}
 	
+	// bool none() const — 功能：统计二进制 1 的总个数 / 是否存在至少一个 1 / 是否全为 0。时间复杂度 O(n / 64)。
 	bool none() const {
 		return !any();
 	}
@@ -123,6 +160,7 @@ public:
 		return *this;
 	}
 
+	// DynamicBitset& operator&=(const DynamicBitset& other) — 功能：按位与复合赋值，结果长度自动收缩为 min(size(), other.size())。O(n / 64)。
 	DynamicBitset& operator&=(const DynamicBitset& other) {
 		const std::size_t limit = std::min(n, other.n);
 		resize(limit);
@@ -132,6 +170,7 @@ public:
 		return *this;
 	}
 
+	// DynamicBitset& operator^=(const DynamicBitset& other) — 功能：按位或 / 按位异或复合赋值，结果长度自动扩展为 max(size(), other.size())。O(n / 64)。
 	DynamicBitset& operator^=(const DynamicBitset& other) {
 		resize(std::max(n, other.n));
 		for (std::size_t i = 0; i < other.data.size(); ++i) {

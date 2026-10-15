@@ -8,9 +8,22 @@
 
 #include "bit.hpp"
 
-// 【树上倍增求最近公共祖先 (binary_lifting_lca.hpp)】
-// - 0-based 顶点编号 [0, n)，调用 add_edge(u, v) 加满树边后必须调用一次 prework(root)
-// - 预处理时空复杂度 O(n log n)，单次 lca(u, v) 查询时间复杂度 O(log n)
+// ============================================================================
+// 【树上倍增求最近公共祖先 Binary Lifting LCA (binary_lifting_lca.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class BinaryLiftingLCA
+//   预处理 2^i 级祖先表求解有根树上的最近公共祖先，顶点编号为 0-based [0, n)。
+// 构造函数与成员函数签名详解：
+//   - BinaryLiftingLCA(int n = 0)
+//     功能：初始化 n 个顶点的树结构，倍增层数 logn = bit_width(n)。时间复杂度 O(n)。
+//   - void add_edge(int u, int v)
+//     功能：添加一条连接 u 与 v (0 <= u, v < n) 的无向树边。O(1)。
+//   - void prework(int root)
+//     功能：【加完所有树边后必须调用一次】以 root 为根 DFS 预处理每个点的深度与 2^i 级祖先（越过根的祖先记为 -1）。
+//     复杂度：时间与空间复杂度均为 O(n log n)。
+//   - int lca(int u, int v) const
+//     功能：查询顶点 u 与 v 的最近公共祖先编号。单次查询时间复杂度 O(log n)。
+// ============================================================================
 
 class BinaryLiftingLCA {
 	int n, logn;
@@ -32,18 +45,22 @@ class BinaryLiftingLCA {
 	}
 
 public:
+	// BinaryLiftingLCA(int n = 0) — 功能：初始化 n 个顶点的树结构，倍增层数 logn = bit_width(n)。时间复杂度 O(n)。
 	BinaryLiftingLCA(int n = 0) : n(n), logn(n ? bit_width(n) : 1), adj(n) {}
 
+	// void add_edge(int u, int v) — 功能：添加一条连接 u 与 v (0 <= u, v < n) 的无向树边。O(1)。
 	void add_edge(int u, int v) {
 		adj[u].push_back(v), adj[v].push_back(u);
 	}
 
+	// void prework(int root) — 功能：【加完所有树边后必须调用一次】以 root 为根 DFS 预处理每个点的深度与 2^i 级祖先（越过根的祖先记为 -1）。
 	void prework(int root) {
 		depth = std::vector<int>(n);
 		anc = std::vector<std::vector<int>>(n, std::vector<int>(logn, -1));
 		dfs(root, -1);
 	}
 
+	// int lca(int u, int v) const — 功能：查询顶点 u 与 v 的最近公共祖先编号。单次查询时间复杂度 O(log n)。
 	int lca(int u, int v) const {
 		if (depth[u] > depth[v])
 			std::swap(u, v);

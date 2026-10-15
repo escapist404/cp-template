@@ -4,11 +4,26 @@
 #include <cassert>
 #include <vector>
 
-// 【快速沃尔什变换 FWT 位运算卷积 (fwt.hpp)】
-// - 在 O(n log n) 时间内计算长度为 2 次幂的按位异或 (XOR)、按位或 (OR)、按位与 (AND) 下标卷积：
-// - fwt_xor(a, inv) / fwt_or(a, inv) / fwt_and(a, inv): 原地正/逆变换（要求 a.size() 为非零 2 次幂）
-// - convolution_xor(a, b) / convolution_or(a, b) / convolution_and(a, b): 自动补齐至 2 次幂并返回位运算卷积结果
+// ============================================================================
+// 【快速沃尔什变换 Fast Walsh-Hadamard Transform / FWT 位运算卷积 (fwt.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解（所有输入向量长度 n 必须为 0 或 2 的整数次幂，时间复杂度均为 O(n log n)）：
+//   1. template <typename T, typename Update>
+//      void fwt_transform(std::vector<T>& a, Update update)
+//      功能：通用蝴蝶变换骨架，对长度 n = 2^k 的数组 a 按位分层调用 update(low_half, high_half)。
+//   2. template <typename T> void fwt_xor(std::vector<T>& a, bool inverse = false)
+//      功能：按位异或 (XOR) 正/逆变换（逆变换需除以 n，故 T 为 ModInt 时要求 n 在模意义下可逆）。
+//   3. template <typename T> void fwt_or(std::vector<T>& a, bool inverse = false)
+//      功能：按位或 (OR / 子集前缀和) 正/逆变换（仅含加减法，无需除法）。
+//   4. template <typename T> void fwt_and(std::vector<T>& a, bool inverse = false)
+//      功能：按位与 (AND / 超集后缀和) 正/逆变换（仅含加减法，无需除法）。
+//   5. template <typename T, void (*Transform)(std::vector<T>&, bool)>
+//      std::vector<T> fwt_convolution(std::vector<T> a, std::vector<T> b)
+//      功能：计算等长 2 次幂数组 a 与 b 在指定变换 Transform（传入 fwt_xor<T>、fwt_or<T> 或 fwt_and<T>）下的位运算下标卷积：
+//            c[k] = sum_{i op j == k} a[i] * b[j]。时间复杂度 O(n log n)。
+// ============================================================================
 
+// template <typename T, typename Update> void fwt_transform(std::vector<T>& a, Update update) — 功能：通用蝴蝶变换骨架，对长度 n = 2^k 的数组 a 按位分层调用 update(low_half, high_half)。
 template <typename T, typename Update>
 void fwt_transform(std::vector<T>& a, Update update) {
 	int n = a.size();
@@ -20,6 +35,7 @@ void fwt_transform(std::vector<T>& a, Update update) {
 }
 
 
+// template <typename T> void fwt_xor(std::vector<T>& a, bool inverse = false) — 功能：按位异或 (XOR) 正/逆变换（逆变换需除以 n，故 T 为 ModInt 时要求 n 在模意义下可逆）。
 template <typename T>
 void fwt_xor(std::vector<T>& a, bool inverse = false) {
 	int n = a.size();
@@ -31,6 +47,7 @@ void fwt_xor(std::vector<T>& a, bool inverse = false) {
 	if (inverse) for (T& x : a) x /= n;
 }
 
+// template <typename T> void fwt_or(std::vector<T>& a, bool inverse = false) — 功能：按位或 (OR / 子集前缀和) 正/逆变换（仅含加减法，无需除法）。
 template <typename T>
 void fwt_or(std::vector<T>& a, bool inverse = false) {
 	fwt_transform(a, [inverse](T& x, T& y) {
@@ -39,6 +56,7 @@ void fwt_or(std::vector<T>& a, bool inverse = false) {
 	});
 }
 
+// template <typename T> void fwt_and(std::vector<T>& a, bool inverse = false) — 功能：按位与 (AND / 超集后缀和) 正/逆变换（仅含加减法，无需除法）。
 template <typename T>
 void fwt_and(std::vector<T>& a, bool inverse = false) {
 	fwt_transform(a, [inverse](T& x, T& y) {

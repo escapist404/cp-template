@@ -5,12 +5,24 @@
 #include <vector>
 #include "types.hpp"
 
-// 【Berlekamp-Massey 最短线性递推与 Bostan-Mori 远项求值 (linear_recurrence.hpp)】
-// - berlekamp_massey(s): O(n^2) 从数列前若干项 s 中反演出最短常系数齐次线性递推系数 c = {c_1, ..., c_d}，
-//   满足对所有 i >= d 有 s[i] = c_1 * s[i-1] + c_2 * s[i-2] + ... + c_d * s[i-d]
-// - bostan_mori(P, Q, k): O(d log d log k) 求有理生成函数 [x^k] P(x) / Q(x)
-// - linear_recurrence_kth(init, trans, k) / guess_kth(sample, k): 求线性递推数列的 0-based 第 k 项
+// ============================================================================
+// 【Berlekamp-Massey 最短线性递推反演与常系数线性递推远项求值 (linear_recurrence.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名与接口详解：
+//   1. template <typename T>
+//      std::vector<T> berlekamp_massey(const std::vector<T>& sequence)
+//      功能：给定数列前若干项 sequence = {s[0], ..., s[m-1]}（要求 T 为域类型如素数模 ModInt），
+//            在 O(m^2) 时间内反演出最短常系数齐次线性递推系数 c = {c[0], ..., c[k-1]}，使得对所有 n >= k 有：
+//            s[n] = c[0] * s[n - 1] + c[1] * s[n - 2] + ... + c[k - 1] * s[n - k]（全 0 输入返回空向量 {}）。
+//   2. template <typename T>
+//      T linear_recurrence_nth(const std::vector<T>& initial,
+//                              const std::vector<T>& recurrence,
+//                              u64 n)
+//      功能：已知初值 initial = {s[0], ..., s[k-1]}（要求 initial.size() >= recurrence.size()）与递推系数 recurrence，
+//            使用多项式取模快速幂在 O(k^2 log n) 时间内求 0-based 第 n 项 s[n]（仅要求 T 为环类型）。
+// ============================================================================
 
+// template <typename T> std::vector<T> berlekamp_massey(const std::vector<T>& sequence) — 功能：给定数列前若干项 sequence = {s[0], ..., s[m-1]}（要求 T 为域类型如素数模 ModInt），
 template <typename T>
 std::vector<T> berlekamp_massey(const std::vector<T>& sequence) {
     std::vector<T> current{T(1)}, previous{T(1)};
@@ -50,7 +62,7 @@ std::vector<T> berlekamp_massey(const std::vector<T>& sequence) {
     return current;
 }
 
-// Ring T; initial has at least k elements. O(k^2 log n). n is zero-based.
+// 结合 Berlekamp-Massey 与 Fiduccia 算法的常系数齐次线性递推第 n 项求解（0-based）。
 template <typename T>
 T linear_recurrence_nth(const std::vector<T>& initial, const std::vector<T>& recurrence, u64 n) {
     int k = recurrence.size();

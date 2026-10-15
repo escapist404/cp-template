@@ -5,10 +5,19 @@
 #include <cassert>
 #include <vector>
 
-// 【决策单调性分治 DP 优化 (divide_conquer_dp.hpp)】
-// - 求解形如 dp_next[i] = min_{0 <= j <= i} cost(j, i) 的单层转移，要求最优决策点 opt[i] 关于 i 单调不降
-// - divide_conquer_dp(n, max_opt, cost): 在 O(n log n) 次 cost 调用内返回整层最优值与最优决策点
+// ============================================================================
+// 【决策单调性分治优化 DP Divide and Conquer DP (divide_conquer_dp.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   template <typename T, typename Cost>
+//   std::vector<T> divide_conquer_dp(int groups, int n, Cost cost, T infinity)
+// 参数与返回值详解：
+//   - 求解分层划分 DP：dp[g][i] = min_{g - 1 <= j < i} { dp[g - 1][j] + cost(j, i) }（1 <= g <= groups, 0 <= i <= n），
+//     要求代价回调 `T cost(int j, int i)` 使得每层最优决策点关于 i 单调不降。
+//   - 返回长度为 n + 1 的第 groups 层最优值数组 dp[groups][0..n]。总时间复杂度 O(groups * n log n)。
+// ============================================================================
 
+// template <typename T, typename Cost> std::vector<T> divide_conquer_dp(int groups, int n, Cost cost, T infinity) — 功能：参数与返回值详解：
 template <typename T, typename Cost>
 std::vector<T> divide_conquer_dp(int groups, int n, Cost cost, T infinity) {
 	assert(groups >= 0 && n >= 0);

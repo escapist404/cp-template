@@ -7,17 +7,33 @@
 #include <vector>
 #include "bit.hpp"
 
-// 【ST 表与猫树静态区间表 (sparse_table.hpp)】
-// - 0-based 左闭右开非空区间 [l, r) 静态查询（要求 0 <= l < r <= n），预处理 O(n log n)，单次查询严格 O(1)
-// - SparseTable<T, Op>        : 要求 Op 满足结合律与幂等律（如 max / min / gcd，默认 SparseTableMax 求最大值）
-// - DisjointSparseTable<T, Op>: 猫树实现，仅要求 Op 满足结合律（无需幂等律或交换律，支持区间求和、矩阵乘等）
+// ============================================================================
+// 【ST 表与猫树静态区间查询表 Sparse Table & Disjoint Sparse Table (sparse_table.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 默认算子结构体签名：
+//    - template <typename T> struct SparseTableMax { T operator()(T a, T b); };
+//      返回 std::max(a, b)，作为 SparseTable 与 DisjointSparseTable 的默认合并算子。
+// 2. 经典 ST 表类签名：template <typename T, typename Op = SparseTableMax<T>> class SparseTable
+//    要求二元运算 Op 同时满足【结合律与幂等律】（如 max, min, gcd, 按位与/或）。
+//    - SparseTable(std::vector<T> a, Op op = Op())
+//      功能：预处理长度为 n 的静态数组 a。时间与空间复杂度均为 O(n log n)。
+//    - T query(int l, int r)
+//      功能：查询 0-based 左闭右开【非空】区间 [l, r)（要求 0 <= l < r <= n，空区间触发 assert）。
+//      返回：op(a[l], ..., a[r - 1])，单次查询严格 O(1)。
+// 3. 猫树（不相交稀疏表）类签名：template <typename T, typename Op = SparseTableMax<T>> class DisjointSparseTable
+//    仅要求二元运算 Op 满足【结合律】（无需幂等律或交换律，可用于区间求和、模乘、矩阵乘法、线性函数复合等）。
+//    - DisjointSparseTable(std::vector<T> a, Op op = Op())
+//      功能：分治预处理中心前后缀聚合表。时间与空间复杂度 O(n log n)。
+//    - T query(int l, int r)
+//      功能：查询 0-based 左闭右开【非空】区间 [l, r)（要求 0 <= l < r <= n）。单次查询严格 O(1)。
+// ============================================================================
 
 template <typename T>
 struct SparseTableMax {
 	T operator()(T a, T b) { return std::max(a, b); }
 };
 
-// 0-based, nonempty [l, r). Op must be associative and idempotent.
+// 稀疏表区间查询 [l, r)（0-based 非空半开区间）：要求 Op 满足结合律与幂等律（O(1) 查询）。
 template <typename T, typename Op = SparseTableMax<T>>
 class SparseTable {
 	int n;
@@ -40,7 +56,7 @@ public:
 	}
 };
 
-// Any associative operation, including noncommutative ones. Query is O(1).
+// 结合律运算（无需幂等律，如矩阵乘法/模乘）的 Disjoint Sparse Table，支持 O(1) 区间查询 [l, r)。
 template <typename T, typename Op = SparseTableMax<T>>
 class DisjointSparseTable {
 	int n;

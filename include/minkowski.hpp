@@ -6,9 +6,17 @@
 #include <utility>
 #include "hull.hpp"
 
-// 【凸包闵可夫斯基和 Minkowski Sum (minkowski.hpp)】
-// - 给定两个按逆时针排列的凸包 P 和 Q，在 O(|P| + |Q|) 时间内归并边向量，返回点集 {p + q} 的逆时针凸包
+// ============================================================================
+// 【二维凸包闵可夫斯基和 Minkowski Sum of Convex Polygons (minkowski.hpp)】
+// ----------------------------------------------------------------------------
+// 函数签名：
+//   inline std::vector<Point> minkowski_sum(std::vector<Point> a, std::vector<Point> b)
+// 参数与返回值详解：
+//   - 输入两个平面点集 a, b（内部自动先调用 convex_hull 提取严格逆时针凸包），
+//     归并边向量后返回闵可夫斯基和 { p + q | p in a, q in b } 的逆时针严格凸包顶点列表。O((n + m) log(n + m))。
+// ============================================================================
 
+// inline std::vector<Point> minkowski_sum(std::vector<Point> a, std::vector<Point> b) — 功能：参数与返回值详解：
 inline std::vector<Point> minkowski_sum(std::vector<Point> a,
                                         std::vector<Point> b) {
     a = convex_hull(std::move(a));

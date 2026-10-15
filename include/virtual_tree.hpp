@@ -8,11 +8,22 @@
 
 #include "bit.hpp"
 
-// 【虚树 Virtual Tree (virtual_tree.hpp)】
-// - 0-based 连通无向树，预处理 O(n log n)，对给定的 k 个关键点构造虚树耗时 O(k log k)
-// - build(keys): 传入关键点列表（自动去重并按 DFS 序排序，固定包含整棵树的根 root），返回 pair{vertices, edges}
-//   - vertices : 虚树中包含的所有顶点（关键点及其两两 LCA，按 DFS 序排列，vertices[0] == root）
-//   - edges    : 虚树的有向树边列表 {parent_in_vt, child_in_vt}
+// ============================================================================
+// 【虚树构建器 Virtual Tree (virtual_tree.hpp)】
+// ----------------------------------------------------------------------------
+// 1. 虚树返回结构体签名：
+//    struct VirtualTree {
+//        std::vector<int> vertices;                  // 虚树包含的所有顶点（关键点及两两 LCA，按 DFS 序升序去重排列）
+//        std::vector<std::pair<int, int>> edges;     // 虚树中的有向树边列表 {祖先 u, 后代 v}
+//    };
+// 2. 构建器类签名：class VirtualTreeBuilder
+//    - VirtualTreeBuilder(const std::vector<std::vector<int>>& graph, int root = 0)
+//      功能：对 0-based 连通无向树 graph 以 root 为根预处理 DFS 序区间 [tin, tout) 与倍增 LCA 表。
+//      复杂度：预处理时间与空间均为 O(n log n)。
+//    - VirtualTree build(std::vector<int> nodes) const
+//      功能：传入本次询问的关键点列表 nodes（可含重复点，无需预先排序；空列表返回空虚树），
+//            使用单调栈在 O(k log k) 时间内构造只含 O(k) 个节点的浓缩虚树 VirtualTree{vertices, edges}。
+// ============================================================================
 
 struct VirtualTree {
 	std::vector<int> vertices;

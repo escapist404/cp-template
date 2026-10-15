@@ -10,15 +10,33 @@
 #include "sieve.hpp"
 #include "types.hpp"
 
-// 【Min_25 筛亚线性积性函数前缀和 (min25.hpp)】
-// - 在 O(n^(3/4) / log n) 时间与 O(sqrt(n)) 空间内计算 10^10 ~ 10^11 规模的素数个数、素数和及一般积性函数前缀和
-// - Min25(n)               : 构造并预处理 <= n 的所有整除分块商点上的素数个数与素数和
-// - prime_count() / prime_sum(): O(1) 返回 <= n 的素数个数 pi(n) 与素数总和
-// - quotients()            : 按升序返回所有不同的 floor(n / x) 值
-// - sum(a, b, prime_power) : 计算满足 f(1)=1、素数处 f(p) = a*p + b、素数幂处为 prime_power(p, e, p^e) 的积性函数前缀和
+// ============================================================================
+// 【Min_25 筛：亚线性积性函数前缀和 (min25.hpp)】
+// ----------------------------------------------------------------------------
+// 类签名：class Min25
+//   在 O(n^(3/4) / log n) 时间与 O(sqrt(n)) 空间内计算 n <= 10^11 规模的素数个数、素数和及一般积性函数前缀和。
+// 构造函数与成员函数签名详解：
+//   - Min25(i64 n)
+//     功能：给定正整数上界 n (n >= 1)，第一阶段递推预处理所有整除分块点 v = floor(n / k) 处的素数个数 pi(v) 与素数和。
+//     复杂度：时间复杂度 O(n^(3/4) / log n)，空间复杂度 O(sqrt(n))。
+//   - i64 prime_count() const
+//     功能：返回 [1, n] 内的素数总个数 pi(n)。时间复杂度 O(1)。
+//   - i64 prime_sum() const
+//     功能：返回 [1, n] 内所有素数的总和（若超出 i64 范围会触发 assert）。时间复杂度 O(1)。
+//   - std::vector<i64> quotients() const
+//     功能：按严格升序返回所有不同的整除分块商值 floor(n / k)。时间复杂度 O(sqrt(n))。
+//   - template <typename PrimePower>
+//     i64 sum(i64 a, i64 b, const PrimePower& prime_power) const
+//     功能：计算一般积性函数 f(x) 的前缀和 sum_{i=1}^n f(i)，要求：
+//       1. f(1) == 1；
+//       2. 在素数 p 处满足一次多项式形式：f(p) = a * p + b；
+//       3. 在素数幂 p^e (e >= 1) 处由回调函数 `i64 prime_power(i64 p, int e, i64 power)` 给出 f(p^e)（其中第三个参数 power == p^e）。
+//     复杂度：时间复杂度 O(n^(3/4) / log n)。
+// ============================================================================
 
 class Min25 {
 public:
+	// Min25(i64 n) — 功能：给定正整数上界 n (n >= 1)，第一阶段递推预处理所有整除分块点 v = floor(n / k) 处的素数个数 pi(v) 与素数和。
 	Min25(i64 n) : n(n) {
 		assert(n >= 1);
 		root = floor_sqrt(n);
@@ -52,6 +70,7 @@ public:
 	i64 prime_count() const { return counts.front(); }
 	i64 prime_sum() const { return narrow(sums.front()); }
 
+	// std::vector<i64> quotients() const — 功能：按严格升序返回所有不同的整除分块商值 floor(n / k)。时间复杂度 O(sqrt(n))。
 	std::vector<i64> quotients() const {
 		return std::vector<i64>(values.rbegin(), values.rend());
 	}
@@ -70,7 +89,7 @@ private:
 	std::vector<std::size_t> small, large;
 	std::vector<i128> sums, prefix;
 
-	// x must be one of floor(n / k), as in all recursive calls.
+	// 查询整除分块位置 x = floor(n / k) 在 primes_le_sqrt 阶段完成后的素数前缀和 F_prime(x)。
 	std::size_t index(i64 x) const {
 		return x <= root ? small[x] : large[n / x];
 	}
