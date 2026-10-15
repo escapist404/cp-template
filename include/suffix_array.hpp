@@ -7,7 +7,13 @@
 #include <numeric>
 #include <vector>
 
-// O(n log n) doubling with counting sort. Supports strings and ordered sequences.
+// 【倍增后缀数组与高度数组 (suffix_array.hpp)】
+// - 构造时间复杂度 O(n log n)，支持 std::string 或任意可比较序列 BasicSuffixArray<Sequence>
+// - sa[i]     : 字典序第 i 小（0-based）的后缀起始下标
+// - rk[i]     : 起始于下标 i 的后缀在所有后缀中的 0-based 字典序排名（满足 sa[rk[i]] == i）
+// - height[i] : 排名相邻的两个后缀 sa[i] 与 sa[i + 1] 的最长公共前缀 (LCP) 长度（长度为 max(0, n - 1)）
+// - lcp(i, j) : O(1) 返回原串两个【起始位置 i 与 j】（注意不是排名！）的后缀的 LCP 长度（内部结合 SparseTable 维护）
+
 class SuffixArray {
     std::vector<int> sa, rank, height, logarithm;
     std::vector<std::vector<int>> rmq;

@@ -8,10 +8,9 @@
 #include <utility>
 #include <vector>
 
-// Coordinates are fixed, sorted and compressed internally. Compare selects
-// the better value (std::less = minimum, std::greater = maximum).
-// Function must be default constructible and callable as value = f(x);
-// any pair of functions must switch order at most once on the coordinates.
+// 【李超线段树 Li Chao Tree (lichao.hpp)】
+// - 在离散或连续横坐标集合上动态插入一次函数 y = m * x + b（或线段），支持 O(log n) 单点查询极值（默认求最小值，可配置最大值）
+
 template <typename X, typename Function, typename Compare = std::less<>>
 class LiChaoTree {
     using Value = std::decay_t<decltype(std::declval<Function>()(std::declval<X>()))>;

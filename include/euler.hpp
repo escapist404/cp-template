@@ -8,7 +8,9 @@
 #include "bigint.hpp"
 #include "modular_arithmetic.hpp"
 
-// Euler totient phi(n) in O(sqrt(n)) and linear sieve phi table on [0, n].
+// 【欧拉函数 phi 与线性筛欧拉函数表 (euler.hpp)】
+// - euler_phi(n)      : O(sqrt(n)) 单点计算正整数 n 的欧拉函数值 phi(n)
+// - euler_phi_table(n): O(n) 线性筛预处理并返回下标 [0..n] 的欧拉函数数组 phi
 
 inline i64 euler_phi(i64 n) {
 	assert(n > 0);

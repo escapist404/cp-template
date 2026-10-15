@@ -7,6 +7,11 @@
 #include <vector>
 #include "bit.hpp"
 
+// 【ST 表与猫树静态区间表 (sparse_table.hpp)】
+// - 0-based 左闭右开非空区间 [l, r) 静态查询（要求 0 <= l < r <= n），预处理 O(n log n)，单次查询严格 O(1)
+// - SparseTable<T, Op>        : 要求 Op 满足结合律与幂等律（如 max / min / gcd，默认 SparseTableMax 求最大值）
+// - DisjointSparseTable<T, Op>: 猫树实现，仅要求 Op 满足结合律（无需幂等律或交换律，支持区间求和、矩阵乘等）
+
 template <typename T>
 struct SparseTableMax {
 	T operator()(T a, T b) { return std::max(a, b); }

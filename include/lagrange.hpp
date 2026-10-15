@@ -6,7 +6,10 @@
 
 #include "comb.hpp"
 
-// Evaluate the unique polynomial through (x[i], y[i]) at at in O(n^2).
+// 【拉格朗日插值 (lagrange.hpp)】
+// - lagrange_interpolate(xs, ys, k): 给定 n 个横坐标两两不同的采样点 (xs[i], ys[i])，O(n^2) 计算 n-1 次多项式在 k 处的取值
+// - lagrange_interpolate_iota(y, k): 专用于横坐标为连续整数 0, 1, ..., n-1 的情况，通过前后缀积在严格 O(n) 时间内求 f(k)
+
 template <typename T, T mod>
 ModInt<T, mod> lagrange_evaluate(
 		const std::vector<ModInt<T, mod>>& x,

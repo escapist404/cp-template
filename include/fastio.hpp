@@ -8,7 +8,11 @@
 #include <string>
 #include <type_traits>
 
-// Buffered fread/fwrite fast I/O. Do not mix input with std::cin or scanf.
+// 【快速输入输出 (fastio.hpp)】
+// - 基于固定大小 fread / fwrite 缓冲区的高速 I/O 类 OptimizedIO<Len>（通常设 Len = 1 << 20）
+// - 读入 (>>) 支持: char（不跳过空白）、std::string、所有有符号/无符号整型（含 i128）、浮点型及 ModInt
+// - 输出 (<<) 支持: char、C 风格字符串 (const char* / char*)、所有整型（含 i128）
+// - 注意: 析构时自动刷新输出缓冲；启用后切勿在同一程序中与 std::cin / scanf 混用输入
 
 template <int Len>
 class OptimizedIO {

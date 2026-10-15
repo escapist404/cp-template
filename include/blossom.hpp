@@ -6,7 +6,13 @@
 #include <queue>
 #include <vector>
 
-// Edmonds' blossom algorithm for maximum matching in a general graph.
+// 【带花树一般无向图最大匹配 (blossom.hpp)】
+// - 0-based 顶点编号 [0, n)，Edmonds 带花树算法处理含奇环的一般无向图，时间复杂度 O(n^3)
+// - GeneralMatching(n): 构造后调用 add_edge(u, v) 添加无向边
+// - solve()           : 返回最大匹配对数
+// - mate_of(u)        : 返回与顶点 u 匹配的伙伴顶点编号（未匹配返回 -1）
+// - pairs()           : 返回所有满足 u < v 的匹配点对列表 std::vector<std::pair<int, int>>
+
 class GeneralMatching {
 	int n;
 	std::vector<std::vector<int>> graph;

@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <utility>
 
-// Usage: unordered_map<long long, int, CustomHash> mp;
+// 【防卡哈希仿函数 (hash.hpp)】
+// - 结合 64 位 SplitMix64 混淆与高精度运行期时钟随机种子，防止 unordered_map / unordered_set 被构造数据卡至 O(n)
+// - 原生支持所有可转为 uint64_t 的标量类型以及 std::pair<A, B>
+// - 用法: std::unordered_map<long long, int, CustomHash> mp;
+
 struct CustomHash {
     static std::uint64_t mix(std::uint64_t x) {
         x += 0x9e3779b97f4a7c15;

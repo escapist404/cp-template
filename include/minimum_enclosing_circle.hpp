@@ -8,6 +8,9 @@
 
 #include "geometry_base.hpp"
 
+// 【随机增量法最小圆覆盖 (minimum_enclosing_circle.hpp)】
+// - minimum_enclosing_circle(points): 在期望严格线性 O(n) 时间内计算覆盖平面上所有给定点的最小圆 Circle{center, radius}
+
 inline Circle circumcircle(Point a, Point b, Point c) {
 	const Real determinant = 2 * cross(b - a, c - a);
 	if (dcmp(determinant) == 0) {

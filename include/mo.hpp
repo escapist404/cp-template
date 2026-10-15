@@ -10,6 +10,12 @@
 
 #include "bit.hpp"
 
+// 【莫队算法离线区间查询 (mo.hpp)】
+// - 0-based 左闭右开查询区间 [l, r)，时间复杂度 O(n sqrt(q))
+// - mo_algorithm(queries, n, state, add, remove, answer, block):
+//   - Query 结构体必须包含 l, r, id 三个字段（id 为 0..q-1 的答案下标）
+//   - 回调签名: add(index, state), remove(index, state), answer(state, query)
+
 struct MoQuery {
 	int l, r, id;
 };

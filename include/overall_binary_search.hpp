@@ -6,12 +6,9 @@
 #include <vector>
 #include "binary_search.hpp"
 
-// Stable partition of a chronological event sequence over inclusive [low, high].
-// route(event, mid) returns true for the left half. It may apply updates and
-// reduce a query's remaining rank when routed right. rollback() restores the
-// temporary data structure after EACH partition, before either child runs.
-// finish(event, value) records query answers; it may ignore update events.
-// Event and value types are generic. Include a sentinel in the domain if needed.
+// 【整体二分 Overall Binary Search (overall_binary_search.hpp)】
+// - 基于事件流分治的整体二分框架 overall_binary_search(events, low, high, route, rollback, finish)
+// - route(event, mid) 将修改与询问按 mid 路由到左半（返回 true）或右半（返回 false）；每次划分后调用 rollback() 清空临时数据结构
 
 template <typename Event, typename Integer, typename Route, typename Rollback, typename Finish>
 void overall_binary_search(std::vector<Event> events, Integer low, Integer high,

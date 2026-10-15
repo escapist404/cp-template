@@ -126,21 +126,12 @@ with TemporaryDirectory() as directory:
             raise AssertionError('Expected the page limit to reject this book')
         canvas_factory.assert_not_called()
 
-    # Test --with-docs and --docs-only interleaving and section index remapping
-    docs_dir = root / 'docs'
-    docs_dir.mkdir()
-    doc0 = docs_dir / 'file000.md'
-    doc1 = docs_dir / 'file001.md'
-    doc0.write_text('# File 000 Doc\nUsage details\n')
-    doc1.write_text('# File 001 Doc\nUsage details\n')
-    interleaved_files, interleaved_sections = module.apply_docs_mode(
-        [files[0], files[1]], [('Sec A', 0), ('Sec B', 1)], docs_dir, False
-    )
-    assert interleaved_files == [doc0, files[0], doc1, files[1]]
-    assert interleaved_sections == [('Sec A', 0), ('Sec B', 2)]
-    docs_only_files, docs_only_sections = module.apply_docs_mode(
-        [files[0], files[1]], [('Sec A', 0), ('Sec B', 1)], docs_dir, True
-    )
-    assert docs_only_files == [doc0, doc1]
-    assert docs_only_sections == [('Sec A', 0), ('Sec B', 1)]
+    # Test Chinese config labels and Chinese section headers in codebook.conf
+    cfg = root / 'codebook.conf'
+    cfg.write_text('[基础数据结构]\nfile000.hpp | 并查集 (file000.hpp)\nfile001.hpp | 线段树 (file001.hpp)\n', encoding='utf-8')
+    cfg_files, cfg_sections = module.read_config_file(cfg, root)
+    assert cfg_files == [files[0], files[1]]
+    assert cfg_sections == [('基础数据结构', 0)]
+    assert module.display_path(files[0], root) == '并查集 (file000.hpp)'
+    module.FILE_LABELS.clear()
 print('Pagination, overflow, and printed TOC page references passed')

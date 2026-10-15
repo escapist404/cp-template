@@ -6,6 +6,13 @@
 #include <map>
 #include <vector>
 
+// 【后缀自动机 Suffix Automaton / SAM (suffix_automaton.hpp)】
+// - 在线构建字符串的所有子串状态图，状态数 <= 2n - 1，转移数 <= 3n - 4，构建复杂度 O(n log sigma)
+// - Node 字段 : length（最长子串长度）、link（后缀链接，根 0 的 link = -1）、first_position（首次出现的结束位置）、terminals（endpos 大小）
+// - extend(c) : 在末尾追加一个字符 c
+// - accumulate(): 按长度降序沿后缀链接树自底向上累加 terminals，调用后 nodes[u].terminals 即为状态 u 对应子串在原串中的出现次数
+// - distinct_substrings(): O(状态数) 返回原串本质不同非空子串的总数 sum(length[u] - length[link[u]])
+
 template <typename Symbol = char, typename Compare = std::less<Symbol>>
 class SuffixAutomaton {
 public:

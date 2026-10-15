@@ -10,8 +10,13 @@
 
 #include "matrix.hpp"
 
-// Maximize c*x subject to A*x <= b and x >= 0.
-// Returns {objective, x}; objective is -INF if infeasible and INF if unbounded.
+// 【单纯形法求解线性规划 (simplex.hpp)】
+// - 求解标准型线性规划: 在 A * x <= b, x >= 0 约束下，最大化目标函数 c^T * x
+// - simplex(A, b, c): 返回 SimplexResult{status, value, solution}
+//   - status  : 0 表示无可行解 (Infeasible)，1 表示存在有限最优解 (Optimal)，2 表示目标函数无界 (Unbounded)
+//   - value   : 最优目标函数值（仅当 status == 1 时有效）
+//   - solution: 最优决策变量向量 x
+
 template <typename T, size_t R, size_t C>
 std::pair<T, std::vector<T>> simplex(const Matrix<T, R, C>& A,
 		const std::vector<T>& b, const std::vector<T>& c) {

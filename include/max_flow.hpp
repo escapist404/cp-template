@@ -8,7 +8,12 @@
 #include <utility>
 #include <vector>
 
-// 0-based Dinic maximum flow and minimum s-t cut (ACL interface).
+// 【Dinic 最大流与最小割 (max_flow.hpp)】
+// - ACL 风格 0-based 有向网络最大流 MaxFlow<Cap>，时间复杂度 O(V^2 E)（单位网络 O(E sqrt(V))）
+// - add_edge(from, to, cap)   : 添加容量为 cap 的有向边（cap >= 0），返回边的 0-based 编号
+// - flow(s, t, flow_limit)    : 计算并增广从 s 到 t 的最大流（可多次调用在残量网络上继续增广）
+// - min_cut(s)                : 在跑完 flow(s, t) 后调用，返回长度 n 的 bool 数组表示残量网络中从 s 可达的最小割 S 集
+// - get_edge(i) / edges() / change_edge(i, new_cap, new_flow): 查询或动态修改边容量与流量
 
 template <typename Cap>
 struct MaxFlow {

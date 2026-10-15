@@ -4,8 +4,12 @@
 #include <functional>
 #include <utility>
 
-// Mergeable leftist heap. Compare(a, b) means that a has higher priority
-// than b; the default therefore keeps the smallest key at the top.
+// 【左偏树 / 可并堆 (leftist_heap.hpp)】
+// - 支持 O(log n) 插入、弹出与堆合并的左偏树 LeftistHeap<T, Compare>，禁用拷贝
+// - 比较器约定: Compare(a, b) 为 true 表示 a 比 b 更靠近堆顶；因此默认 std::less<T> 为【小根堆】，大根堆请传 std::greater<T>
+// - push(key) / top() / pop() / empty() / size(): 标准优先队列操作（top/pop 要求非空）
+// - merge(other): O(log n) 将另一个左偏树 other 合并入当前堆，并将 other 清空
+
 template <typename T = int, typename Compare = std::less<T>>
 class LeftistHeap {
 	struct Node {
@@ -90,7 +94,7 @@ public:
 		--heap_size;
 	}
 
-	// Merge other into this heap and leave other empty.
+	// 将另一个左偏树合并入当前堆，并将 other 清空
 	void merge(LeftistHeap& other) {
 		if (this == &other) {
 			return;

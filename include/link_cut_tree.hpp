@@ -5,7 +5,14 @@
 #include <cassert>
 #include <vector>
 
-// 1-based Link-Cut Tree maintaining dynamic forest connectivity and path sums in amortized O(log n).
+// 【动态树 Link-Cut Tree (link_cut_tree.hpp)】
+// - 基于 Splay 与实链剖分维护动态森林连通性与路径点权和，所有操作均摊 O(log n)
+// - 索引约定: 顶点编号严格为【1-based】的 [1, n]（0 号节点内部保留为空哨兵），点权加法需满足交换律与结合律
+// - set_value(x, val) / value(x): 修改或读取顶点 x 的点权
+// - connected(x, y)             : 判断 x 与 y 是否在同一棵树中
+// - link(x, y)                  : 连接无向边 (x, y)；若已连通则拒绝连边并返回 false
+// - cut(x, y)                   : 断开直接无向边 (x, y)；若不存在直接边则返回 false
+// - path_query(x, y)            : 查询连通点对 x 到 y 路径上的点权和
 
 template <typename T>
 class LinkCutTree {

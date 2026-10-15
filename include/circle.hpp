@@ -6,7 +6,9 @@
 #include <vector>
 #include "inter.hpp"
 
-// Circle primitives: circumcircle, incircle, tangent lines, circle-line/circle-circle intersections, and intersection area.
+// 【圆的几何性质、切线与圆交集 (circle.hpp)】
+// - 三点外接圆 circumcircle、三角形内切圆 incircle
+// - 直线与圆交点、两圆交点、过圆外一点求圆的切线、两圆公切线及两圆相交面积
 
 inline std::vector<Point> line_circle_intersection(const Line& line, const Circle& circle) {
     const Point foot = line.projection(circle.center);

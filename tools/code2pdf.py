@@ -43,8 +43,6 @@ DEFAULT_EXTENSIONS = {
 DEFAULT_EXCLUDES = {".git", ".idea", ".vscode", "build", "dist", "target", "node_modules"}
 FONT = "Courier"
 CJK_FONT = None
-# These are deliberately conservative A4 values for a paper codebook.
-# The compact profile remains available for people who need fewer pages.
 FONT_SIZE = 8.5
 LINE_HEIGHT = 11.0
 TITLE_SIZE = 16.0
@@ -52,7 +50,9 @@ MARGIN = 36.0
 HEADER_GAP = 28.0
 COLOR_OUTPUT = False
 PYGMENTS_STYLE = get_style_by_name("friendly")
+DEFAULT_TITLE = "算法竞赛模板库"
 AUTHOR = "evilayuria"
+FILE_LABELS: dict[Path, str] = {}
 
 
 def configure_font() -> None:
@@ -113,19 +113,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("root", nargs="?", default=".", help="source directory (default: current directory)")
     parser.add_argument("-o", "--output", default="codebook.pdf", help="output PDF path")
-    parser.add_argument("--title", help="PDF title (default: source directory name)")
+    parser.add_argument("--title", default=DEFAULT_TITLE, help=f"PDF title (default: {DEFAULT_TITLE})")
     parser.add_argument("--author", default=AUTHOR, help=f"cover author (default: {AUTHOR})")
     parser.add_argument(
         "--config", "-c", metavar="FILE",
-        help="config file listing files to include and their order (one path per line, # for comments)",
-    )
-    parser.add_argument(
-        "--with-docs", nargs="?", const="docs", metavar="DIR",
-        help="interleave matching Markdown docs from DIR (default: docs/) before each header file",
-    )
-    parser.add_argument(
-        "--docs-only", nargs="?", const="docs", metavar="DIR",
-        help="print only Markdown docs from DIR (default: docs/), preserving config section order if -c is given",
+        help="config file listing files to include and their order (supports 'file.hpp | 中文标题')",
     )
     parser.add_argument(
         "--orientation", choices=("portrait", "landscape"), default="portrait",
@@ -165,93 +157,53 @@ def parse_args() -> argparse.Namespace:
 
 
 def display_path(path: Path, root: Path) -> str:
-    """Return a clean relative path even when files span multiple sibling directories."""
+    """Return configured Chinese title if present, else relative path."""
+    if path in FILE_LABELS:
+        return FILE_LABELS[path]
     try:
         return path.relative_to(root).as_posix()
     except ValueError:
-        try:
-            return path.relative_to(root.parent).as_posix()
-        except ValueError:
-            return path.name
-
-
-def resolve_docs_dir(docs_arg: str, root: Path) -> Path:
-    docs_path = Path(docs_arg).expanduser()
-    if docs_path.is_absolute():
-        return docs_path.resolve()
-    cwd_candidate = (Path.cwd() / docs_path).resolve()
-    if cwd_candidate.is_dir():
-        return cwd_candidate
-    parent_candidate = (root.parent / docs_path).resolve()
-    if parent_candidate.is_dir():
-        return parent_candidate
-    return (root / docs_path).resolve()
-
-
-def apply_docs_mode(
-    files: list[Path],
-    sections: list[tuple[str, int]],
-    docs_dir: Path,
-    docs_only: bool,
-) -> tuple[list[Path], list[tuple[str, int]]]:
-    """Transform file list and section indices for --with-docs or --docs-only."""
-    section_at = {index: name for name, index in sections}
-    new_files: list[Path] = []
-    new_sections: list[tuple[str, int]] = []
-
-    for index, path in enumerate(files):
-        if index in section_at:
-            new_sections.append((section_at[index], len(new_files)))
-        doc_file = docs_dir / f"{path.stem}.md"
-        if docs_only:
-            if doc_file.is_file():
-                new_files.append(doc_file)
-            elif path.suffix.lower() == ".md" and path.is_file():
-                new_files.append(path)
-            else:
-                print(f"Warning: Doc file not found for {path.name}: {doc_file}", file=sys.stderr)
-        else:
-            if doc_file.is_file() and doc_file != path:
-                new_files.append(doc_file)
-            new_files.append(path)
-
-    return new_files, new_sections
+        return path.name
 
 
 def read_config_file(config_path: Path, root: Path) -> tuple[list[Path], list[tuple[str, int]]] | None:
     """Read config file and return list of file paths and sections in order.
 
-    Returns (files, sections) where sections is [(section_name, file_index), ...]
-    Returns None if config file doesn't exist or is invalid.
-    Config format:
-    - one file path per line, # for comments, blank lines ignored
-    - [Section Name] for section headers
-    Paths are relative to root directory.
+    Supports optional Chinese display titles via:
+    filename.hpp | 中文标题
     """
     if not config_path.is_file():
         return None
 
     files = []
     sections = []
+    FILE_LABELS.clear()
     try:
         for line in config_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
-            # Skip comments and empty lines
             if not line or line.startswith("#"):
                 continue
 
-            # Check for section header [Section Name]
             if line.startswith("[") and line.endswith("]"):
                 section_name = line[1:-1].strip()
                 sections.append((section_name, len(files)))
                 continue
 
-            # Resolve path relative to root
-            file_path = root / line
+            label = None
+            if "|" in line:
+                rel_part, label_part = line.split("|", 1)
+                rel_name = rel_part.strip()
+                label = label_part.strip()
+            else:
+                rel_name = line
+
+            file_path = root / rel_name
             if file_path.is_file():
                 files.append(file_path)
+                if label:
+                    FILE_LABELS[file_path] = label
             else:
-                print(f"Warning: File not found in config: {line}", file=sys.stderr)
+                print(f"Warning: File not found in config: {rel_name}", file=sys.stderr)
     except Exception as e:
         print(f"Error reading config file: {e}", file=sys.stderr)
         return None
@@ -295,6 +247,10 @@ def token_color(token) -> colors.Color:
 
 def wide_character(char: str) -> bool:
     return unicodedata.east_asian_width(char) in "WF"
+
+
+def has_wide(text: str) -> bool:
+    return any(wide_character(c) for c in text)
 
 
 def roman(number: int) -> str:
@@ -362,11 +318,9 @@ def source_pages(text: str, width: float, height: float, line_numbers: bool):
     pages = [[]]
     y = start_y
     for number, line in enumerate(text.splitlines(), 1):
-        # Reserve a gutter even without numbers to identify wrapped rows.
         prefix = f"{number:>5}  " if line_numbers else "  "
         available = width - 2 * MARGIN - stringWidth(prefix, FONT, FONT_SIZE)
         chunks = wrap_fixed(line.expandtabs(4), available)
-        # Keep a source line together when it fits on a fresh page.
         span = (len(chunks) - 1) * LINE_HEIGHT
         if y - span < bottom and start_y - span >= bottom and pages[-1]:
             pages.append([])
@@ -402,7 +356,6 @@ def column_pages(root: Path, files: list[Path], width: float, height: float, lin
         nonlocal y
         text = display_path(path, root) + (" (cont.)" if continued else "")
         chunks = wrap_fixed(text, col_width)
-        # Keep the file heading with at least the first source row.
         if y - len(chunks) * LINE_HEIGHT < bottom:
             advance()
         x = MARGIN + column * (col_width + gap)
@@ -413,9 +366,8 @@ def column_pages(root: Path, files: list[Path], width: float, height: float, lin
     for path in files:
         heading(path, False)
         file_page_map[path] = len(pages)
-        use_numbers = line_numbers and path.suffix.lower() != ".md"
         for number, line in enumerate(read_source(path).splitlines(), 1):
-            prefix = f"{number:>5}  " if use_numbers else "  "
+            prefix = f"{number:>5}  " if line_numbers else "  "
             chunks = wrap_fixed(line.expandtabs(4), col_width - stringWidth(prefix, FONT, FONT_SIZE))
             for index, chunk in enumerate(chunks):
                 if y < bottom:
@@ -456,7 +408,7 @@ def toc_layout(root: Path, files: list[Path], sections: list[tuple[str, int]], w
                 column = 0
             y = start_y
             if not name and current_section:
-                name = current_section + " (cont.)"
+                name = current_section + ("（续）" if has_wide(current_section) else " (cont.)")
         x = MARGIN + column * (col_width + MARGIN)
         if name:
             current_section = section_at.get(index, current_section)
@@ -499,10 +451,7 @@ def build_pdf(
         body, file_page_map = column_pages(root, files, page_width, page_height, line_numbers)
         body_total = len(body)
     else:
-        sources = [
-            source_pages(read_source(p), page_width, page_height, line_numbers and p.suffix.lower() != ".md")
-            for p in files
-        ]
+        sources = [source_pages(read_source(p), page_width, page_height, line_numbers) for p in files]
         file_page_map = {}
         next_page = 1
         for path, pages in zip(files, sources):
@@ -534,7 +483,7 @@ def build_pdf(
             canvas.showPage()
         physical_page += 1
         canvas.setFillColor(colors.black)
-        if bold:
+        if bold and not has_wide(header):
             header_size = min(TITLE_SIZE, (page_width - 2 * MARGIN) / stringWidth(header, "Helvetica-Bold", 1))
             canvas.setFont("Helvetica-Bold", header_size)
             canvas.drawCentredString(page_width / 2, page_height - MARGIN, header)
@@ -553,13 +502,12 @@ def build_pdf(
     canvas.setFont("Helvetica", 12)
     today = date.today().strftime("%B %d, %Y").replace(" 0", " ")
     canvas.drawCentredString(page_width / 2, page_height * 0.45, today)
-    # Finish the cover and leave its reverse side intentionally blank.
     canvas.showPage()
     physical_page = 2
 
     for index, entries in enumerate(contents):
         new_page(
-            "Table of Contents" if index == 0 else "Table of Contents (cont.)",
+            "目录" if index == 0 else "目录（续）",
             roman(index + 1).lower(),
             roman(toc_total).lower(),
             bold=True,
@@ -568,8 +516,11 @@ def build_pdf(
         for x, y, text, path, is_section in entries:
             canvas.setFillGray(0)
             if is_section:
-                canvas.setFont("Helvetica-Bold", FONT_SIZE + 1)
-                canvas.drawString(x, y, text)
+                if has_wide(text):
+                    draw_mixed_proportional(canvas, text, x, y, FONT_SIZE + 1)
+                else:
+                    canvas.setFont("Helvetica-Bold", FONT_SIZE + 1)
+                    canvas.drawString(x, y, text)
             else:
                 draw_mixed_proportional(canvas, text, x, y, FONT_SIZE)
             if path is not None:
@@ -630,8 +581,6 @@ def main() -> None:
         raise SystemExit("Use font size 5-20 pt and line height between font size and 40 pt")
     if args.max_pages is not None and args.max_pages < 1:
         raise SystemExit("Page limit must be positive")
-    if args.with_docs and args.docs_only:
-        raise SystemExit("Choose either --with-docs or --docs-only, not both")
     root = Path(args.root).expanduser().resolve()
     if not root.is_dir():
         raise SystemExit(f"Not a directory: {root}")
@@ -640,7 +589,6 @@ def main() -> None:
         output = Path.cwd() / output
     output.parent.mkdir(parents=True, exist_ok=True)
 
-    # Check if config file is specified
     sections = []
     if args.config:
         config_path = Path(args.config).expanduser()
@@ -650,30 +598,15 @@ def main() -> None:
         if result is None:
             raise SystemExit(f"Could not read config file: {config_path}")
         files, sections = result
-        if args.with_docs or args.docs_only:
-            docs_dir = resolve_docs_dir(args.docs_only or args.with_docs, root)
-            files, sections = apply_docs_mode(files, sections, docs_dir, bool(args.docs_only))
-            if args.docs_only:
-                root = docs_dir
-            else:
-                root = Path(os.path.commonpath([str(root), str(docs_dir)]))
         if not files:
             raise SystemExit(f"No valid files found in config: {config_path}")
     else:
-        if args.docs_only:
-            root = resolve_docs_dir(args.docs_only, root)
-            extensions = {".md"}
-        else:
-            extensions = DEFAULT_EXTENSIONS | {e.lower() if e.startswith(".") else f".{e.lower()}" for e in (args.ext or [])}
+        extensions = DEFAULT_EXTENSIONS | {e.lower() if e.startswith(".") else f".{e.lower()}" for e in (args.ext or [])}
         excludes = DEFAULT_EXCLUDES | set(args.exclude or [])
         excluded_files = {Path(__file__).resolve(), Path(__file__).with_name("code2pdf").resolve()}
         files = source_files(root, not args.no_recursive, extensions, excludes, output.resolve(), excluded_files)
-        if args.with_docs:
-            docs_dir = resolve_docs_dir(args.with_docs, root)
-            files, sections = apply_docs_mode(files, sections, docs_dir, False)
-            root = Path(os.path.commonpath([str(root), str(docs_dir)]))
 
-    title = args.title or root.name
+    title = args.title or DEFAULT_TITLE
     pages = build_pdf(root, output, title, files, sections, not args.no_line_numbers,
                       args.orientation, args.color, args.style, args.author, args.columns, args.max_pages)
     print(f"Wrote {output} ({len(files)} source files, {pages} pages)")

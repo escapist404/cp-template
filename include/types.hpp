@@ -4,7 +4,11 @@
 #include <complex>
 #include <iostream>
 
-// Common fixed-width integer/float/complex aliases and std::ostream operator<< for i128.
+// 【基础类型别名与 128 位整数输出 (types.hpp)】
+// - i64 / u64 : 64 位有符号 / 无符号整数
+// - i128 / u128: GCC/Clang 128 位整数（无字面量，需通过 (i128)x 转换；常用于大模数防溢出乘法）
+// - Real / Complex: 双精度浮点数与复数类型（用于计算几何与 FFT）
+// - operator<< : 支持 std::cout 直接输出任意正负 i128 整数；读入 i128 可使用 fastio.hpp
 
 using i64 = long long;
 using u64 = unsigned long long;

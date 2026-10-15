@@ -3,7 +3,11 @@
 
 #include <cstdint>
 
-// XOR linear basis over 63-bit non-negative integers [0, 2^63). O(log V) insert/contains/max_xor.
+// 【异或线性基 (linear_basis.hpp)】
+// - 维护 63 位非负整数 [0, 2^63) 的异或线性基（最高位 max_bit = 62），单次操作 O(log V)
+// - insert(val)  : 尝试将非负整数 val 插入线性基
+// - contains(val): 判断 val 能否由基中元素异或表出（注意 0 恒返回 true）
+// - max_xor(val) : 返回初始值 val 与基中子集异或能取得的最大值（默认 val = 0 即子集最大异或和）
 
 class LinearBasis {
 	static constexpr int max_bit = 62;

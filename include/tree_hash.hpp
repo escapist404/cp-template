@@ -6,8 +6,11 @@
 #include <cstdint>
 #include <vector>
 
-// Probabilistic, unlabelled tree isomorphism. Compare hashes with the SAME seed.
-// All traversals are iterative. solve(root) is rooted; solve() is unrooted.
+// 【有根树与无根树同构哈希 (tree_hash.hpp)】
+// - 0-based 连通无向树，基于 SplitMix64 混淆，比较两棵树同构时必须使用相同的随机种子 seed
+// - centers()  : O(n) 返回无根树的 1 或 2 个中心顶点
+// - solve(root): 传入 0 <= root < n 时计算以 root 为根的有根树哈希；传入默认 root = -1 时通过中心化计算无根树同构哈希。复杂度 O(n log n)
+
 class TreeHash {
     using u64 = std::uint64_t;
     u64 seed;

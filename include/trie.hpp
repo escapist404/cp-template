@@ -5,8 +5,11 @@
 #include <string>
 #include <vector>
 
-// Replace std::unordered_map to other containers,
-// if there is enough memory but not enough time.
+// 【小写字母字典树 Trie (trie.hpp)】
+// - 仅支持 26 个小写英文字母 'a'-'z'，单次插入/查询时间复杂度 O(|s|)
+// - insert(s)     : 向字典树中插入字符串 s（允许重复插入，终点计数累加）
+// - count(s)      : 返回字符串 s 作为完整单词被插入的精确次数
+// - prefix_count(s): 返回以 s 为前缀的已插入单词总数
 
 class Trie {
 	struct Node {

@@ -7,7 +7,9 @@
 #include <utility>
 #include <vector>
 
-// 0-based single-source shortest paths for graphs with edge weights in {0, 1} in O(n + m).
+// 【0-1 BFS 最短路 (zero_one_bfs.hpp)】
+// - 0-based 邻接表 adj[u] = {{v, weight}, ...}，要求所有边权严格为 0 或 1，时间复杂度严格线性 O(n + m)
+// - 返回从 source 出发的最短距离数组，不可达顶点距离为 INT_MAX
 
 std::vector<int> zero_one_bfs(
 		const std::vector<std::vector<std::pair<int, int>>>& adj, int source) {

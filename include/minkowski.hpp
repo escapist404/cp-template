@@ -6,8 +6,8 @@
 #include <utility>
 #include "hull.hpp"
 
-// Returns the Minkowski sum of two convex polygons. Input order and starting
-// vertices are arbitrary; collinear boundary points are removed in the result.
+// 【凸包闵可夫斯基和 Minkowski Sum (minkowski.hpp)】
+// - 给定两个按逆时针排列的凸包 P 和 Q，在 O(|P| + |Q|) 时间内归并边向量，返回点集 {p + q} 的逆时针凸包
 
 inline std::vector<Point> minkowski_sum(std::vector<Point> a,
                                         std::vector<Point> b) {

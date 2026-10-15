@@ -6,7 +6,17 @@
 #include <limits>
 #include <type_traits>
 
-// Integer bit manipulation, power-of-two rounding, log2, and exact integer sqrt utilities.
+// 【整数位运算与精确平方根工具 (bit.hpp)】
+// - lowbit(x)         : 返回最低位 1 对应的值 x & -x（x = 0 返回 0）
+// - highbit / floor_pow2(x): 返回 <= x 的最大 2 次幂（要求 x >= 0，x = 0 返回 0）
+// - ceil_pow2(x)      : 返回 >= x 的最小 2 次幂（要求 x >= 0，x <= 1 返回 1）
+// - floor_log2(x)     : 返回 floor(log2(x))（要求 x > 0，传入 0 会触发 assert）
+// - ceil_log2(x)      : 返回满足 2^k >= x 的最小非负整数 k（要求 x >= 0，x <= 1 返回 0）
+// - bit_width(x)      : 返回二进制有效位宽（x = 0 返回 0，x > 0 返回 floor_log2(x) + 1）
+// - is_pow2(x)        : 判断无符号意义下是否为严格正的 2 次幂
+// - floor_sqrt / ceil_sqrt(x): 64 位精确整数平方根下/上取整（无浮点舍入误差，要求 x >= 0）
+// - popcount(x)       : 二进制 1 的个数（支持 <= 64 位整型）
+// - bit_reverse(x, w) : 将低 w 位前后翻转（高出 w 的位丢弃）
 
 template <typename T>
 using unsigned_integer_t = std::make_unsigned_t<T>;

@@ -7,7 +7,13 @@
 
 #include "bit.hpp"
 
-// Dynamic-length bitset backed by 64-bit blocks. O(n / 64) bitwise operations and popcount.
+// 【动态长度位集 (dynamic_bitset.hpp)】
+// - 按 64 位块压缩的 0-based 动态位集，位运算与统计复杂度均为 O(n / 64)
+// - set(p, val): 将第 p 位设为 val（若 p >= size() 会自动扩容至 p + 1）
+// - reset(p) / reset(): 清零单比特（不扩容）或清零全部位
+// - test(p) / operator[](p): 只读查询第 p 位布尔值（越界返回 false）
+// - count() / any() / none(): 统计 1 的个数、是否非全 0、是否全 0
+// - 位运算 |=, ^= 自动扩展为较大长度；&= 自动收缩为较小长度
 
 class DynamicBitset {
 	using Block = std::uint64_t;

@@ -5,7 +5,10 @@
 
 #include "modint.hpp"
 
-// Binomial coefficients C(n, k) and factorials modulo prime using O(N) precomputation and O(1) queries.
+// 【模素数排列组合预处理 (comb.hpp)】
+// - 模板参数 Combinatorics<Z>，其中 Z 为 ModInt<T, mod>（要求 mod 为素数），支持自动按需倍增扩容阶乘与阶乘逆元表
+// - fact(n) / inv_fact(n): O(1)（均摊）返回 n! 与 (n!)^-1
+// - comb(n, k)           : O(1) 返回组合数 C(n, k)；当 k < 0 或 k > n 时安全返回 0
 
 template <typename Z>
 class Combinatorics {

@@ -7,7 +7,10 @@
 #include "exgcd.hpp"
 #include "types.hpp"
 
-// Solve x = remainder (mod modulus); modulus == 0 means the equations conflict.
+// 【中国剩余定理与扩展中国剩余定理 exCRT (crt.hpp)】
+// - 求解同余方程组 x === remainders[i] (mod moduli[i])，支持模数两两【不互质】的一般情况
+// - crt(remainders, moduli): 返回 pair{r, m}，表示通解为 x === r (mod m)，其中 0 <= r < m = lcm(moduli)
+// - 无解判定: 若同余方程组存在矛盾无解，返回 {0, 0}（即通过检查返回值 second == 0 判定无解）
 
 inline std::pair<i64, i64> crt(
     const std::vector<std::pair<i64, i64>>& equations) {

@@ -6,8 +6,11 @@
 #include <utility>
 #include <vector>
 
-// Rectangular complete weighted bipartite graph, left <= right.
-// Hungarian primal-dual implementation of maximum-weight matching.
+// 【Kuhn-Munkres (KM) 二分图最大权完美匹配 (km.hpp)】
+// - 左部点 0-based [0, n)，右部点 0-based [0, m)，要求 n <= m（以保证左部每个点都能匹配），时间复杂度 O(n^2 m)
+// - kuhn_munkres(weights): weights 为 n x m 权值矩阵，返回 pair{最大总权值, match_right}
+//   - match_right[i] : 左部点 i 所匹配的右部点编号 (0 <= match_right[i] < m)
+
 template <typename T>
 struct KuhnMunkresResult {
 	T weight{};

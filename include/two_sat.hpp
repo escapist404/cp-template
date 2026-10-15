@@ -7,6 +7,13 @@
 
 #include "scc.hpp"
 
+// 【2-SAT 布尔可满足性 (two_sat.hpp)】
+// - 0-based 布尔变量编号 [0, n)，时间与空间复杂度 O(n + m)
+// - add_implication(x, xv, y, yv): 添加蕴含约束 (x == xv) => (y == yv) 及其逆否命题
+// - add_or(x, xv, y, yv)         : 添加析取子句 (x == xv) V (y == yv)
+// - add_true(x, val)             : 强制固定变量 x 取值为 val
+// - solve()                      : 判定是否有解；若有解返回 true，之后可通过 assignment()[i] 获取第 i 个变量的 0/1 赋值
+
 class TwoSat {
 	int n;
 	std::vector<std::vector<int>> graph;
@@ -15,7 +22,7 @@ class TwoSat {
 public:
 	TwoSat(int n) : n(n), graph(2 * n) {}
 
-	// (x == xv) implies (y == yv), including its contrapositive.
+	// 添加蕴含约束 (x == xv) => (y == yv) 及其逆否命题
 	void add_implication(int x, bool xv, int y, bool yv) {
 		assert(0 <= x && x < n && 0 <= y && y < n);
 		const int a = 2 * x + xv, b = 2 * y + yv;
@@ -43,7 +50,7 @@ public:
 		}
 		return true;
 	}
-	// Valid only after solve() returns true.
+	// 仅在 solve() 返回 true 后有效
 	const std::vector<int>& assignment() const {
 		return answer;
 	}

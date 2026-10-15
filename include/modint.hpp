@@ -7,6 +7,12 @@
 
 #include "types.hpp"
 
+// 【编译期模数自动取模整数类 ModInt (modint.hpp)】
+// - 模板参数: ModInt<T, mod>，其中 T 为底层有符号整型（如 int 或 i64），mod 为正模数
+// - 支持 +、-、*、/、==、!=、流式输入输出以及 power(ModInt(1), a, b) 快速幂
+// - 重要约定: 除法与 inverse() 内部使用费马小定理 a^(mod - 2)，因此【仅当 mod 为素数且除数与 mod 互质时可用】；
+//   若模数为合数，请勿使用 ModInt::operator/，应改用 exgcd.hpp 中的 mod_inverse(a, mod)
+
 template <typename S, typename T>
 S power(S begin, T base, i64 exp) {
 	S current = begin;

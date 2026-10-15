@@ -4,6 +4,10 @@
 #include <cassert>
 #include <vector>
 
+// 【CDQ 分治框架 (cdq.hpp)】
+// - cdq_divide_and_conquer(items, merge_step, leaf_step): 处理三维偏序或离线动态转静态问题，左闭右开区间 [l, r)
+// - 递归顺序为: 先递归左半 [l, m)，再调用 merge_step(items, l, m, r) 计算左半对右半的贡献，最后递归右半 [m, r)
+
 template <typename T, typename Cross, typename Leaf>
 void cdq_solve(std::vector<T>& items, Cross cross, Leaf leaf, bool cross_after_right) {
 	const auto divide = [&](int l, int r, const auto& self) -> void {

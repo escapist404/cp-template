@@ -2,7 +2,8 @@
 #define MERGE_SORT_HPP
 #include <vector>
 
-// 0 index
+// 【稳定归并排序 (merge_sort.hpp)】
+// - merge_sort(arr, l, r): 对 0-based 左闭右开区间 [l, r) 原地执行稳定归并排序，时间复杂度 O(n log n)
 
 template <typename T>
 void merge_sort(std::vector<T>& arr, int l, int r) {

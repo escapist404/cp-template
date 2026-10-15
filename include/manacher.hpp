@@ -6,7 +6,10 @@
 #include <algorithm>
 #include <string>
 
-// Manacher algorithm returning palindrome radii for odd and even centers in O(n).
+// 【Manacher 最长回文子串算法 (manacher.hpp)】
+// - manacher(s): O(n) 返回 pair{odd, even} 两个半径数组（长度均为 n）：
+//   1. odd[i] : 以位置 i 为中心的奇回文半径（包含中心自身，对应极长奇回文子串长度 2 * odd[i] - 1，区间 [i - odd[i] + 1, i + odd[i])）
+//   2. even[i]: 以位置 i - 1 与 i 之间空隙为中心的偶回文半径（对应极长偶回文子串长度 2 * even[i]，区间 [i - even[i], i + even[i])）
 
 std::vector<int> manacher(const std::string& s) {
 	std::string t = "#";

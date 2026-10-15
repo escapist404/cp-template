@@ -5,17 +5,10 @@
 
 #include "determinant.hpp"
 
-// Lindstrom-Gessel-Viennot lemma on a DAG with k distinct sources and k distinct sinks.
-// count_paths(i, j) returns the sum of path weights from source i to sink j;
-// a path's weight is the product of its edge weights (use 1 for unweighted edges).
-// Returns the signed sum over vertex-disjoint path families, with the sign of
-// the permutation matching sources to sinks. It counts source i -> sink i
-// families only when no nonidentity permutation admits a vertex-disjoint family.
-// The caller must establish these graph/endpoint conditions.
-// T must satisfy determinant's arithmetic requirements: use a field (e.g. prime
-// ModInt) or exact integral arithmetic without overflow.
-// O(k^2) callback calls, O(k^3) arithmetic operations, O(k^2) space.
-// Example: lgv<Z>(k, [&](int i, int j) { return paths(sources[i], sinks[j]); });
+// 【Lindstrom-Gessel-Viennot (LGV) 引理不相交路径计数 (lgv.hpp)】
+// - 在有向无环图 (DAG) 中，给定 k 个起点与 k 个终点，统计顶点不相交路径组的带符号权值和
+// - lgv_lemma(k, count_paths): 调用方传入回调 count_paths(i, j) 返回从第 i 个起点到第 j 个终点的路径数，O(k^3) 返回 k x k 路径矩阵的行列式
+
 template <typename T, typename PathCount>
 T lgv(int k, PathCount count_paths) {
 	assert(k >= 0);

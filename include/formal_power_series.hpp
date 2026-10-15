@@ -9,7 +9,16 @@
 
 #include "polynomial.hpp"
 
-// Polynomial over ModInt<T, mod>.
+// 【形式幂级数 / 多项式全家桶 (formal_power_series.hpp)】
+// - 定义模 NTT 素数（如 998244353）上的多项式类 Polynomial<T, mod, root>，所有截断运算复杂度均为 O(n log n)
+// - 基础算术: 支持 +、-、*（NTT 卷积）、/（多项式带余除法商）、%（余式）及 divmod(divisor)
+// - derivative() / integral(): 形式求导与形式积分（常数项为 0）
+// - inverse(n)               : 模 x^n 乘法逆元（要求常数项 a[0] != 0）
+// - logarithm(n) / log(n)    : 模 x^n 多项式对数 ln A(x)（要求常数项 a[0] == 1）
+// - exponential(n) / exp(n)  : 模 x^n 多项式指数 exp A(x)（要求常数项 a[0] == 0）
+// - power(k, n) / pow(k, n)  : 模 x^n 多项式 k 次幂 A(x)^k（要求 k >= 0，自动处理前导零平移）
+// - square_root(n) / sqrt(n) : 模 x^n 多项式开方（要求首个非零项次数为偶数且系数存在模平方根，内部含 Tonelli-Shanks）
+
 template <typename T, T mod, T root = primitive_root_constexpr(mod)>
 class Polynomial {
 public:

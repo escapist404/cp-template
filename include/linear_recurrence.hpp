@@ -5,8 +5,12 @@
 #include <vector>
 #include "types.hpp"
 
-// Field T. Returns c such that s[n] = c[0]*s[n-1] + ... + c[k-1]*s[n-k].
-// Empty c is the zero recurrence. O(sequence.size()^2).
+// 【Berlekamp-Massey 最短线性递推与 Bostan-Mori 远项求值 (linear_recurrence.hpp)】
+// - berlekamp_massey(s): O(n^2) 从数列前若干项 s 中反演出最短常系数齐次线性递推系数 c = {c_1, ..., c_d}，
+//   满足对所有 i >= d 有 s[i] = c_1 * s[i-1] + c_2 * s[i-2] + ... + c_d * s[i-d]
+// - bostan_mori(P, Q, k): O(d log d log k) 求有理生成函数 [x^k] P(x) / Q(x)
+// - linear_recurrence_kth(init, trans, k) / guess_kth(sample, k): 求线性递推数列的 0-based 第 k 项
+
 template <typename T>
 std::vector<T> berlekamp_massey(const std::vector<T>& sequence) {
     std::vector<T> current{T(1)}, previous{T(1)};

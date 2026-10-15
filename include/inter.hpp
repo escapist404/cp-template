@@ -5,7 +5,9 @@
 #include <vector>
 #include "geometry_base.hpp"
 
-// 2D line-line and segment-segment intersection tests and intersection point calculation.
+// 【二维直线与线段相交判定及交点 (inter.hpp)】
+// - 两直线交点 line_intersection(l1, l2)
+// - 两线段规范相交 / 非规范相交判定与线段交点求解
 
 inline int line_relation(const Line& a, const Line& b) {
     if (dcmp(cross(a.end - a.start, b.end - b.start)) != 0) {

@@ -5,7 +5,11 @@
 #include <utility>
 #include <vector>
 
-// 0-based coordinate compression: returns {sorted_unique_values, compressed_indices} in O(n log n).
+// 【坐标压缩 / 离散化 (coordinate_compression.hpp)】
+// - 将任意可比较类型数组映射为 0-based 紧凑排名 [0, m)，时间复杂度 O(n log n)
+// - 返回值: std::pair{unique_values, index}
+//   1. unique_values: 升序排列且去重后的原值表（长度为不同元素个数 m）
+//   2. index        : 与原数组等长的 0-based 排名数组，满足 unique_values[index[i]] == values[i]
 
 template <typename T>
 std::pair<std::vector<T>, std::vector<int>> coordinate_compress(

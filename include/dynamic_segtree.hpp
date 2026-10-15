@@ -6,9 +6,12 @@
 #include <vector>
 #include "binary_search.hpp"
 
-// Sparse segment-tree forest over [low,high). Values form a monoid.
-// A root is an int initialized to 0. All roots must belong to this pool and
-// must not share nodes. merge(a,b) consumes b; it combines equal leaves.
+// 【动态开点线段树与线段树合并 (dynamic_segtree.hpp)】
+// - 维护左闭右开大值域 [low, high) 上的动态开点线段树森林，单次操作 O(log(high - low))
+// - 每棵树由 int root = 0 标识（0 表示全 e() 的空树）；set(root, p, v) / add(root, p, v) 按引用更新 root
+// - prod(root, l, r) / get(root, p) / all_prod(root): 区间查询、单点查询与全区间聚合
+// - max_right(root, l, f) / min_left(root, r, f)    : 大值域树上二分（要求 f(e()) == true）
+// - merge(a, b): 原地合并两棵树并返回新根（叶子按 op(val_a, val_b) 合并；合并后旧树 b 节点被复用，不可再访问）
 
 template <class V, auto op, auto e, class Index = long long>
 class DynamicSegmentTree {

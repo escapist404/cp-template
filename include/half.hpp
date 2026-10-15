@@ -7,7 +7,10 @@
 #include <vector>
 #include "inter.hpp"
 
-// The kept side of each directed line is its left half-plane.
+// 【半平面交 S&I 算法 (half.hpp)】
+// - 每条有向直线 Line(s, t) 代表其【左侧】半平面（即满足 ((t - s) ^ (p - s)) >= 0 的点集）
+// - half_plane_intersection(lines): O(n log n) 按极角排序并维护双端队列，返回核区域的逆时针凸多边形顶点列表（无解或面积退化返回空）
+
 inline std::vector<Point> half_plane_intersection(std::vector<Line> lines) {
     const auto angle = [](const Line& line) {
         return std::atan2(line.end.y - line.start.y, line.end.x - line.start.x);

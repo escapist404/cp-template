@@ -8,8 +8,14 @@
 #include <utility>
 #include <vector>
 
-// Scapegoat tree (ordered multiset)
-// All operations amortized O(log n)
+// 【替罪羊树 Scapegoat Tree (scapegoat.hpp)】
+// - 基于重量平衡因子 alpha = 2/3 重构的有序多重集合，各操作均摊复杂度 O(log n)，禁用拷贝
+// - insert(key) / remove(key): 插入一个 key / 删除一个 key 副本
+// - size() / empty()         : 返回含重复元素的总元素个数 / 判空
+// - get_rank(key)            : 返回 1-based 排名（严格小于 key 的元素个数 + 1）
+// - get_value(rank)          : 返回 1-based 排名对应的元素（要求 1 <= rank <= size()）
+// - get_prev(key) / get_next(key): 严格前驱 / 严格后继（不存在返回 numeric_limits<T>::lowest() / max()）
+
 template <typename T = int, typename Compare = std::less<T>>
 class ScapegoatTree {
 	static constexpr double alpha = 2.0 / 3.0;

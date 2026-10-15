@@ -5,9 +5,10 @@
 #include <utility>
 #include "types.hpp"
 
-// solve(p) -> {count, min(original_cost + p * count)}; prefer MORE items on ties.
-// Requires discrete convex cost(count), a feasible required count, and bounds
-// bracketing it: solve(low).first >= required >= solve(high).first.
+// 【WQS 二分 / Aliens Trick 凸包带权二分 (wqs_binary_search.hpp)】
+// - 用于消除“恰好选 k 个物品”的个数限制，将问题转化为每个物品附加惩罚斜率 penalty 后的无限制最优值问题
+// - wqs_binary_search(low, high, target_count, evaluate): O(log(high - low) * T_eval) 返回消除惩罚后的原问题最优值
+
 template <typename T, typename Solve>
 T wqs_binary_search(i64 low, i64 high, int required, Solve solve) {
 	assert(low <= high && required >= 0);

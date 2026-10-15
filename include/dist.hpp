@@ -6,7 +6,9 @@
 #include <vector>
 #include "geometry_base.hpp"
 
-// Euclidean distances and projections between 2D points, lines, segments, and polygons.
+// 【二维几何距离与投影 (dist.hpp)】
+// - 点到直线垂直投影 project(p, l)、对称点 reflect(p, l)
+// - 点到直线距离、点到线段最短距离、两条线段之间的最短距离计算
 
 inline Real closest_pair_distance_squared(std::vector<Point> points) {
     if (points.size() < 2) {

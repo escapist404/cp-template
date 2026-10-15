@@ -6,7 +6,12 @@
 
 #include "bit.hpp"
 
-// T is an additive group: T{} is zero; += and subtraction are required.
+// 【二维树状数组 (fenwick2d.hpp)】
+// - 0-based 坐标，左闭右开区域，空间 O(nm)，单次修改与查询 O(log n log m)
+// - add(x, y, val)     : 单点加 a[x][y] += val (0 <= x < n, 0 <= y < m)
+// - get(x, y)          : 查询二维前缀 [0, x) x [0, y) 的元素和
+// - get(l, d, r, u)    : 查询子矩形 [l, r) x [d, u) 的元素和（注意参数顺序为：左 l, 下 d, 右 r, 上 u）
+
 template <typename T>
 class Fenwick2D {
     int n, m;
@@ -26,7 +31,7 @@ public:
         }
     }
 
-    // Prefix [0,x) x [0,y).
+    // 查询二维前缀 [0, x) x [0, y) 的和
     T get(int x, int y) const {
         assert(0 <= x && x <= n && 0 <= y && y <= m);
         T result{};

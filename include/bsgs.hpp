@@ -9,8 +9,10 @@
 #include "bit.hpp"
 #include "types.hpp"
 
-// Minimum x >= 0 such that a^x = b (mod mod), or -1 if no solution.
-// mod > 0; O(sqrt(mod)) time and memory, including non-coprime inputs.
+// 【大步小步离散对数 BSGS / exBSGS (bsgs.hpp)】
+// - 求解离散对数 a^x === b (mod m) 的最小非负整数解 x，支持 gcd(a, m) > 1 的非互质情况 (exBSGS)
+// - bsgs(a, b, m): 时间与空间复杂度均为 O(sqrt(m))；若存在非负整数解则返回最小解 x >= 0，若无解则返回 -1
+
 inline i64 bsgs(i64 a, i64 b, i64 mod) {
 	assert(mod > 0);
 	a %= mod;

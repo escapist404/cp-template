@@ -4,6 +4,10 @@
 #include <vector>
 #include "inter.hpp"
 
+// 【多边形面积、点定位与凸性判定 (poly.hpp)】
+// - 多边形有向面积 polygon_area（逆时针为正）、凸多边形判定
+// - 点在多边形内部/边界/外部判定（射线法 / 环绕数法）
+
 inline Real polygon_signed_area(const std::vector<Point>& polygon) {
     Real area_twice = 0;
     for (int i = 0; i < (int)polygon.size(); ++i) {

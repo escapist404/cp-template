@@ -4,7 +4,9 @@
 #include <algorithm>
 #include <vector>
 
-// 0-based centroid decomposition tree. parent_of(root) is -1; build is O(n log n).
+// 【树的重心分解 / 点分树 (centroid_decomposition.hpp)】
+// - 0-based 连通无向树，构造重心树（点分树）的时间复杂度为 O(n log n)，树高 O(log n)
+// - parent_of(u): 返回节点 u 在点分树上的父节点编号（整棵点分树根节点的父节点为 -1）
 
 class CentroidDecomposition {
 	std::vector<std::vector<int>> adj;

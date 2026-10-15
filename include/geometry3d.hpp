@@ -6,7 +6,9 @@
 #include <algorithm>
 #include "geometry_base.hpp"
 
-// 3D vectors, lines, planes, and spheres: dot/cross products, distances, and intersections.
+// 【三维计算几何：空间向量、直线、平面与球面 (geometry3d.hpp)】
+// - Vector3 / Point3: 三维向量加减、数乘、点积 dot、叉积 cross、混合积、模长与夹角
+// - Line3 / Plane3 / Sphere: 空间点到直线/平面距离、直线与平面交点、两平面交线、直线与球面交点计算
 
 struct Vector3 {
 	Real x, y, z;

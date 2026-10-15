@@ -8,8 +8,13 @@
 #include <utility>
 #include <vector>
 
-// Sack/DSU-on-tree with iterative traversals. add/remove(vertex,state) are
-// exact inverses; answer(state,vertex) observes the current subtree aggregate.
+// 【树上启发式合并 / Sack 算法 (dsu_on_tree.hpp)】
+// - 0-based 连通无向树，全非递归实现，每个节点作为轻子树成员最多被加入和移除 O(log n) 次
+// - solve(root, state, add, remove, answer) 回调约定:
+//   1. add(int u, State& st)         : 将顶点 u 的单点贡献加入全局状态 st
+//   2. remove(int u, State& st)      : 将顶点 u 的单点贡献从 st 中移除（必须为 add 的严格逆操作）
+//   3. answer(const State& st, int u): 当 st 中恰好包含整个子树 u 时调用，返回子树 u 的查询答案（注意参数顺序为 st 在前、u 在后）
+
 class DSUOnTree {
     std::vector<std::vector<int>> graph;
 

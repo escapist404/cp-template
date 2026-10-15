@@ -6,7 +6,14 @@
 #include <random>
 #include <utility>
 
-// FHQ Treap with duplicate keys.
+// 【旋转/分裂平衡树 Treap (treap.hpp)】
+// - 维护有序多重集合 Treap<T, Compare>（默认 std::less<T> 升序），各操作期望复杂度 O(log n)，禁用拷贝
+// - insert(key)  : 插入一个 key（重复键值合并计数）
+// - remove(key)  : 删除一个等于 key 的副本（不存在则无操作）
+// - get_rank(key): 返回 1-based 排名（严格小于 key 的元素个数 + 1）
+// - get_value(r) : 返回 1-based 排名为 r 的元素（要求 1 <= r <= 总元素数）
+// - get_prev(key) / get_next(key): 返回严格前驱 / 严格后继（不存在时返回 numeric_limits<T>::lowest() / max()）
+
 template <typename T = int, typename Compare = std::less<T>>
 class Treap {
 	struct Node {

@@ -9,7 +9,10 @@
 #include "exgcd.hpp"
 #include "modular_arithmetic.hpp"
 
-// Lucas and exLucas theorem for binomial coefficients C(n, m) mod p (prime or arbitrary square-free/composite).
+// 【Lucas 定理与扩展 Lucas 定理 exLucas (lucas.hpp)】
+// - 求解大整数 n, m 对小素数或任意合数取模的组合数 C(n, m) mod p
+// - lucas(n, m, p)   : 要求 p 为素数，时间复杂度 O(p + log_p(n))
+// - exlucas(n, m, p) : 支持 p 为任意合数（质因数分解 + 素数幂阶乘剥离 + CRT 合并）
 
 inline i64 lucas_valuation(i64 n, i64 p) {
 	i64 result = 0;

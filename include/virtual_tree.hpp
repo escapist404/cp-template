@@ -8,7 +8,11 @@
 
 #include "bit.hpp"
 
-// 0-based virtual tree (auxiliary tree) construction over key vertices in O(k log k).
+// 【虚树 Virtual Tree (virtual_tree.hpp)】
+// - 0-based 连通无向树，预处理 O(n log n)，对给定的 k 个关键点构造虚树耗时 O(k log k)
+// - build(keys): 传入关键点列表（自动去重并按 DFS 序排序，固定包含整棵树的根 root），返回 pair{vertices, edges}
+//   - vertices : 虚树中包含的所有顶点（关键点及其两两 LCA，按 DFS 序排列，vertices[0] == root）
+//   - edges    : 虚树的有向树边列表 {parent_in_vt, child_in_vt}
 
 struct VirtualTree {
 	std::vector<int> vertices;

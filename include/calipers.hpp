@@ -6,7 +6,9 @@
 #include <vector>
 #include "geometry_base.hpp"
 
-// Rotating calipers on a counter-clockwise convex hull: diameter and minimum-area/perimeter bounding rectangle.
+// 【旋转卡壳：凸包直径与最小外接矩形 (calipers.hpp)】
+// - 要求输入为按【逆时针顺序】排列的凸包顶点序列，时间复杂度 O(n)
+// - 计算凸包最远点对（直径）以及面积最小 / 周长最小的外接矩形
 
 inline Real convex_polygon_diameter_squared(const std::vector<Point>& polygon) {
     const int n = polygon.size();

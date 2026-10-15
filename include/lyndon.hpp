@@ -4,8 +4,10 @@
 #include <utility>
 #include <vector>
 
-// Return the standard factorization into non-increasing Lyndon words.
-// Each pair is a half-open interval [l, r).
+// 【Duval 算法 Lyndon 分解 (lyndon.hpp)】
+// - lyndon_factorization(s): O(n) 将字符串唯一分解为满足 w_1 >= w_2 >= ... >= w_k 的 Lyndon 串序列
+// - 返回左闭右开区间列表 std::vector<std::pair<int, int>>，每项 {l, r} 对应子串 s[l..r)
+
 template <typename Sequence>
 std::vector<std::pair<int, int>> lyndon_factorization(const Sequence& sequence) {
 	const int n = sequence.size();

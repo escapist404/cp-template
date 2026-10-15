@@ -5,8 +5,10 @@
 #include <cassert>
 #include "pollard_rho.hpp"
 
-// Smallest primitive root of a prime modulus; arbitrary composite moduli are
-// intentionally not accepted. factorize is reused from Pollard-Rho.
+// 【模意义原根、离散对数与模平方根 Tonelli-Shanks (modular_roots.hpp)】
+// - primitive_root(m)       : 求模 m 的最小原根（若 m 不存在原根则返回 -1）
+// - discrete_log(a, b, m)   : 求解 a^x === b (mod m) 的最小非负整数解（无解返回 -1）
+// - sqrt_mod(a, p)          : Tonelli-Shanks 算法求解奇素数（或 p=2）模意义下 x^2 === a (mod p) 的一个解（无解返回 -1）
 
 inline i64 primitive_root_prime(i64 prime) {
     assert(is_prime_mr(prime));

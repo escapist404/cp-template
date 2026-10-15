@@ -9,6 +9,11 @@
 #include <utility>
 #include <vector>
 
+// 【Dijkstra 最短路 (dijkstra.hpp)】
+// - 0-based 邻接表 adj[u] = {{v, weight}, ...}，要求所有边权非负 (weight >= 0)，时间复杂度 O((n + m) log m)
+// - 支持单源或多源同时出发：sources 传入初始化列表（如 {s} 或 {s1, s2}）
+// - 返回长度为 n 的距离数组：起点距离为 0，不可达顶点距离为 std::numeric_limits<T>::max()（内部自带防加权溢出保护）
+
 template <typename T>
 std::vector<T> dijkstra(
 		const std::vector<std::vector<std::pair<int, T>>>& adj,
@@ -38,8 +43,8 @@ std::vector<T> dijkstra(
 		}
 
 		for (const auto& [to, weight] : adj[from]) {
-			// Dijkstra requires non-negative edge weights.  Keep `inf` as the
-			// actual type maximum and skip only additions that would overflow.
+			// Dijkstra 要求非负边权；保留 inf 为类型最大值，
+			// 仅跳过会导致有符号加权溢出的转移
 			if (weight > T() && current_distance > inf - weight) {
 				continue;
 			}

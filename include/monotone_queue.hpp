@@ -6,7 +6,12 @@
 #include <functional>
 #include <vector>
 
-// With std::less this keeps the maximum; use std::greater for the minimum.
+// 【单调队列与滑动窗口最值 (monotone_queue.hpp)】
+// - MonotoneQueue<T, Compare>: 默认 std::less<T> 维护单调递减队列（front() 为最大值）；求最小值请传 std::greater<T>
+//   - push(index, val)      : 队尾压入元素并淘汰不优旧元素
+//   - pop_before(first_idx) : 弹出所有满足 index < first_idx 的过期队首
+//   - front() / front_index(): O(1) 获取当前极值与对应下标（要求非空）
+// - sliding_window(values, width, compare): O(n) 返回所有宽度为 width 的连续窗口极值数组
 
 template <typename T, typename Compare = std::less<T>>
 class MonotoneQueue {

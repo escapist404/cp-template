@@ -7,9 +7,9 @@
 #include <vector>
 #include "binary_search.hpp"
 
-// Queries may carry any payload. Search [low, high); high means no solution.
-// Per round: reset(); advance(mid) moves a shared state monotonically to mid;
-// check(query, mid) reads that state. No storage proportional to the domain.
+// 【并行二分查找 Parallel Binary Search (parallel_binary_search.hpp)】
+// - 同时对 q 个单调询问在时间轴 [low, high) 上二分：每轮按中点分组，从头重放一遍修改并批量检验所有询问，共 log2(high - low) 轮
+
 template <typename Query, typename Integer, typename Reset, typename Advance, typename Check>
 std::vector<Integer> parallel_binary_search(const std::vector<Query>& queries,
 	Integer low, Integer high, Reset reset, Advance advance, Check check) {

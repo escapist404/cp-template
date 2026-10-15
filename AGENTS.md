@@ -2,7 +2,7 @@ This file provides guidance to agents when working with code in this repository.
 
 Repository Overview
 
-This is a competitive programming template library (cp-template) containing 116 algorithm implementations in C++ header files and 117 Markdown documents. The library is designed for contest use, prioritizing hand-writing speed and simplicity over engineering practices.
+This is a competitive programming template library (cp-template) containing 116 algorithm implementations in C++ header files with detailed Chinese interface and complexity comments embedded directly in each header. The library is designed for contest use, prioritizing hand-writing speed and simplicity over engineering practices.
 
 Key Design Principles
 
@@ -24,7 +24,6 @@ Project Structure
 
 cp-template/
 ├── include/           # 116 algorithm header files (.hpp)
-├── docs/             # 117 markdown documentation files
 ├── tools/            # PDF generation tool
 │   └── code2pdf.py  # Generates printable PDF with table of contents
 ├── tests/            # Test files
@@ -51,11 +50,7 @@ Generate Printable PDF
 
 # Generate combined Docs + Code PDF with all 116 modules (uses codebook.conf)
 make pdf
-python3 tools/code2pdf.py include/ -o codebook.pdf -c codebook.conf --with-docs docs/ --black-and-white
-
-# Standalone Code-only or Docs-only PDFs
-make pdf-code
-make pdf-docs
+python3 tools/code2pdf.py include/ -o codebook.pdf -c codebook.conf --black-and-white
 
 # Without config (auto-discovers all files alphabetically)
 python3 tools/code2pdf.py include/ -o codebook.pdf

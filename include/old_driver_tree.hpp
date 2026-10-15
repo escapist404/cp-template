@@ -3,7 +3,11 @@
 #include <map>
 #include <vector>
 
-// 0-based Chtholly tree (ODT) maintaining interval assignments on [l, r) via std::map.
+// 【珂朵莉树 / 颜色段均摊 (old_driver_tree.hpp)】
+// - 基于 std::map 维护连续相同值区间的结构，0-based 左闭右开区间 [l, r)
+// - set(l, r, v): 将半开区间 [l, r) (0 <= l < r <= n) 推平赋值为 v
+// - get(pos)    : 查询下标 pos (0 <= pos < n) 处的当前值
+// - 仅执行 set 与 get 时，q 次操作总时间复杂度在任意数据下均摊为 O((n + q) log n)
 
 template <typename T>
 class OldDriverTree {

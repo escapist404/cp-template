@@ -8,8 +8,15 @@
 #include <utility>
 #include <vector>
 
-// 0-based sequence, [l, r). Merge is associative, identity is a two-sided unit.
-// Both directions are stored so reverse also supports noncommutative Merge.
+// 【文艺平衡树 / 按下标分裂无旋 Treap (implicit_treap.hpp)】
+// - 维护 0-based 动态序列，所有区间均为左闭右开 [l, r)，单次操作期望复杂度 O(log n)
+// - 同时维护正向 forward 与反向 backward 聚合值，即便 Merge 不满足交换律（如矩阵乘、字符串拼接），reverse 后 query 仍正确
+// - insert(pos, val) : 在下标 pos 之前插入元素 (0 <= pos <= size())
+// - erase(l, r)      : 删除区间 [l, r)
+// - reverse(l, r)    : 翻转区间 [l, r)
+// - move(l, r, p)    : 将区间 [l, r) 剪下并插入到“移除 [l, r) 后的剩余序列”的下标 p 处 (0 <= p <= size() - (r - l))
+// - set(pos, val) / get(pos) / query(l, r): 单点修改、单点读取与区间 [l, r) 聚合查询
+
 template <typename T = int, typename Merge = std::plus<T>>
 class ImplicitTreap {
 	struct Node {
@@ -114,7 +121,7 @@ public:
 		root = merge_nodes(first.first, merge_nodes(second.first, second.second));
 	}
 
-	// Insert [l, r) at position p in the sequence AFTER removing [l, r).
+	// 将区间 [l, r) 剪下并插入到移除 [l, r) 后的剩余序列下标 p 处
 	void move(int l, int r, int p) {
 		assert(0 <= l && l <= r && r <= size());
 		assert(0 <= p && p <= size() - (r - l));

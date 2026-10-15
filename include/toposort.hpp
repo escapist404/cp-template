@@ -4,7 +4,10 @@
 #include <queue>
 #include <vector>
 
-// Returns a topological order, or an empty vector if the graph has a cycle.
+// 【Kahn 拓扑排序与有向图判环 (toposort.hpp)】
+// - 0-based 有向图邻接表 adj，时间复杂度 O(n + m)
+// - 若图为有向无环图 (DAG)，返回长度为 n 的拓扑序顶点配列；若图中存在有向环（含自环），返回空向量 {}
+
 std::vector<int> topological_sort(const std::vector<std::vector<int>>& adj) {
 	std::vector<int> indegree(adj.size());
 	for (const auto& edges : adj)

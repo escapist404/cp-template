@@ -6,7 +6,11 @@
 #include <type_traits>
 #include <vector>
 
-// Fixed-width bitwise 0-1 trie multiset for unsigned integer T. O(Bits) insert/erase/max_xor/min_xor.
+// 【0-1 字典树 (binary_trie.hpp)】
+// - 固定位宽的多重集合 0-1 Trie，模板参数 T 必须为无符号整型（如 uint64_t / uint32_t），单次操作 O(Bits)
+// - insert(val) / erase(val): 插入一个 val / 删除一个已存在的 val（erase 要求 count(val) > 0）
+// - count(val) / size()     : 查询 val 的出现次数 / 集合总元素数
+// - max_xor(val) / min_xor(val): 返回集合元素与 val 异或的最大结果 / 最小结果本身（要求 size() > 0）
 
 template <typename T = std::uint64_t, int Bits = sizeof(T) * 8>
 class BinaryTrie {

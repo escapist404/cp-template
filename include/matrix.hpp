@@ -11,6 +11,11 @@
 #include <stdexcept>
 #include <utility>
 
+// 【动态与静态维度矩阵类 (matrix.hpp)】
+// - Matrix<T, R, C>: 当 R=0, C=0 时为运行期动态尺寸矩阵 Matrix<T>(n, m)；当 R>0, C>0 时为编译期定长栈数组矩阵
+// - 支持矩阵 +、-、*（朴素 O(n^3) 乘法）、power(I, A, exp) 矩阵快速幂以及 rank() 高斯消元求秩
+// - rank(is_zero) : O(min(n, m) * n * m) 返回矩阵的秩（要求元素类型支持域上除法）
+
 template <typename T, size_t R = 0, size_t C = 0>
 class Matrix;
 

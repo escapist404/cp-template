@@ -4,7 +4,12 @@
 #include <cassert>
 #include <vector>
 
-// Unsigned first kind and second kind Stirling numbers up to n.
+// 【第一类与第二类斯特林数 (stirling.hpp)】
+// - 依赖正式幂级数与 NTT 卷积，在 O(n log n) 时间内计算一行或固定列的斯特林数（模 NTT 素数）：
+// - stirling_first_row(n)      : 返回无符号第一类斯特林数第 n 行 [s(n, 0), ..., s(n, n)]
+// - stirling_second_row(n)     : 返回第二类斯特林数第 n 行 [S(n, 0), ..., S(n, n)]
+// - stirling_first_column(n, k) / stirling_second_column(n, k): 返回固定列 k、行从 0 到 n 的斯特林数
+
 template <typename Z>
 class StirlingNumbers {
 	std::vector<std::vector<Z>> first_, second_;

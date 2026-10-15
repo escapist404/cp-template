@@ -6,7 +6,12 @@
 #include <queue>
 #include <vector>
 
-// 0-based functional graph (out-degree 1) cycle decomposition and 64-bit binary lifting jump.
+// 【函数图 / 基环内向树分解与倍增跳转 (functional_graph.hpp)】
+// - 0-based 顶点编号 [0, n)，next[u] 表示 u 的唯一出边终点，构造时空复杂度 O(64 n)
+// - jump(u, steps)       : O(log steps) 返回从 u 出发走 steps 步（支持 uint64_t 步数）到达的顶点
+// - component(u)         : O(1) 返回 u 所属弱连通分量（对应唯一基环）的 0-based 编号
+// - distance_to_cycle(u) : O(1) 返回从 u 进入基环所需的最少步数（环上顶点为 0）
+// - cycle_length(u)      : O(1) 返回 u 所在分量基环的长度
 
 class FunctionalGraph {
 	enum { LOG = 64 };

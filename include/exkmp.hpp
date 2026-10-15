@@ -4,7 +4,10 @@
 #include <algorithm>
 #include <vector>
 
-// Return z[i] = LCP(sequence, sequence[i..]).
+// 【扩展 KMP / ExKMP (exkmp.hpp)】
+// - exkmp(pattern, text): O(|pattern| + |text|) 返回文本串每个后缀 text[i..m) 与模式串 pattern 的 LCP 长度数组 extend
+// - 注意参数顺序: pattern 在前，text 在后；内部复用 z_algorithm(pattern)
+
 template <typename Sequence>
 std::vector<int> exkmp_z(const Sequence& sequence) {
 	const int n = sequence.size();

@@ -8,7 +8,9 @@
 
 #include "bit.hpp"
 
-// 0-based tree LCA via binary lifting. Call prework(root) after adding all edges. O(n log n) build, O(log n) query.
+// 【树上倍增求最近公共祖先 (binary_lifting_lca.hpp)】
+// - 0-based 顶点编号 [0, n)，调用 add_edge(u, v) 加满树边后必须调用一次 prework(root)
+// - 预处理时空复杂度 O(n log n)，单次 lca(u, v) 查询时间复杂度 O(log n)
 
 class BinaryLiftingLCA {
 	int n, logn;

@@ -8,7 +8,9 @@
 
 #include "scc.hpp"
 
-// 0-based vertex-biconnected components (blocks) returned as edge lists; isolated vertices yield empty lists.
+// 【无向图点双连通分量 VDCC (vdcc.hpp)】
+// - 0-based 无向图邻接表 adj（每条无向边需双向添加），时间与空间复杂度均为 O(n + m)
+// - get_vdcc(adj): 按【边集】返回每个点双连通分量 std::vector<std::pair<int, int>>；若存在无关联边的孤立顶点，对应追加一个空边集 {}
 
 std::vector<std::vector<std::pair<int, int>>>
 get_vdcc(const std::vector<std::vector<int>>& adj) {

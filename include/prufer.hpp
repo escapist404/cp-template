@@ -7,6 +7,12 @@
 #include <utility>
 #include <vector>
 
+// 【Prufer 序列与无根树双射 (prufer.hpp)】
+// - 0-based 标号无根树 [0, n)，时间与空间复杂度均为 O(n)（内部使用线性时间指针扫描法）
+// - tree_to_prufer(adj)  : 将 n 个点的连通无向树编码为长度 max(0, n - 2) 的 Prufer 序列（每次删标号最小的叶节点）
+// - prufer_to_tree(code) : 将长度 n - 2 的 Prufer 序列还原为 n 个点的无根树边集 std::vector<std::pair<int, int>>
+// - prufer_degrees(code) : 根据 Prufer 序列直接返回每个顶点的度数 degree[u] = 出现次数 + 1
+
 inline std::vector<int> prufer_degrees(const std::vector<int>& code) {
     int n = code.size() + 2;
     std::vector<int> degree(n, 1);
@@ -17,7 +23,7 @@ inline std::vector<int> prufer_degrees(const std::vector<int>& code) {
     return degree;
 }
 
-// Requires an undirected labelled tree. Leaves are removed in increasing order.
+// 输入连通无向树，每次剥离标号最小的叶子节点生成 Prufer 序列
 inline std::vector<int> tree_to_prufer(const std::vector<std::vector<int>>& graph) {
     int n = graph.size();
     if (n <= 2) {

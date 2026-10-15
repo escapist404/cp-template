@@ -5,7 +5,11 @@
 #include <vector>
 #include <string>
 
-// Return all 0-indexed positions where pattern `s` occurs in text `t`.
+// 【KMP 字符串匹配与前缀函数 (kmp.hpp)】
+// - prefix_function(s)  : O(n) 返回前缀函数 pi，其中 pi[i] 为子串 s[0..i] 的最长相等真前后缀长度
+// - kmp(pattern, text)  : O(|pattern| + |text|) 查找模式串在文本串中的所有出现位置（注意参数顺序：pattern 在前，text 在后）
+//   返回所有匹配起点的 0-based 下标升序数组（若 pattern 为空串则返回 0..|text|）
+
 std::vector<int> kmp(const std::string& s, const std::string& t) {
 	std::vector<int> result;
 	if (s.empty()) return result;

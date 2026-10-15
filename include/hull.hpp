@@ -5,7 +5,10 @@
 #include <vector>
 #include "geometry_base.hpp"
 
-// Collinear boundary points are removed. The result is counter-clockwise.
+// 【二维凸包 Andrew 单调链算法 (hull.hpp)】
+// - convex_hull(points, strict): O(n log n) 按逆时针顺序返回凸包顶点序列（起点为字典序最小点）
+// - strict 参数控制共线点处理：strict = true 时严格剔除边内部共线点，strict = false 时保留边界上的共线点
+
 inline std::vector<Point> convex_hull(std::vector<Point> points) {
     std::sort(points.begin(), points.end(), [](Point a, Point b) {
         if (dcmp(a.x, b.x) != 0) {

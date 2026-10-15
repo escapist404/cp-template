@@ -6,7 +6,12 @@
 #include <map>
 #include <vector>
 
-// Palindromic tree (Eertree) with odd root 0 (len -1) and even root 1 (len 0). Call accumulate() for occurrences.
+// 【回文树 / 回文自动机 Palindromic Tree / Eertree (palindromic_tree.hpp)】
+// - 维护字符串的所有本质不同回文子串，状态数 <= n + 2，构建复杂度 O(n log sigma)
+// - 双根约定 : 节点 0 为奇根（length = -1, link = 0），节点 1 为偶根（length = 0, link = 0）；真实回文串状态从下标 2 开始
+// - extend(c): 在末尾追加字符并返回当前最长回文后缀所在的状态编号
+// - accumulate(): 沿后缀链接自底向上累加 occurrences，调用后 nodes[u].occurrences 即为该回文串在原串中的总出现次数
+// - distinct_palindromes(): 返回本质不同非空回文子串个数 (nodes.size() - 2)
 
 template <typename Symbol = char, typename Compare = std::less<Symbol>>
 class PalindromicTree {

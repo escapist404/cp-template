@@ -8,8 +8,13 @@
 
 #include "bit.hpp"
 
-// Static sequence. T needs only a strict weak ordering, not bit operations.
-// O(log sigma) kth/count_less/count queries, O(n log sigma) storage.
+// 【小波树 Wavelet Matrix (wavelet_tree.hpp)】
+// - 内置自动离散化的静态区间查询结构 WaveletTree<T, Compare>（T 仅需支持严格弱序比较）
+// - 建树时间 O(n log n)，空间 O(n log sigma)，单次查询 O(log sigma)，区间均为 0-based 左闭右开 [l, r)
+// - kth(l, r, k)           : 返回子区间 [l, r) 内 0-based 第 k 小元素（要求 0 <= k < r - l）
+// - count_less(l, r, val)  : 返回子区间 [l, r) 内严格小于 val 的元素个数
+// - count(l, r, low, high) : 返回子区间 [l, r) 内落在左闭右开值域 [low, high) 的元素个数（要求 low <= high）
+
 template <typename T, typename Compare = std::less<T>>
 class WaveletTree {
     int n, levels = 0;
@@ -48,7 +53,7 @@ public:
         }
     }
 
-    // Zero-based k in [0,r-l).
+    // 查询 [l, r) 内 0-based 第 k 小元素 (0 <= k < r - l)
     T kth(int l, int r, int k) const {
         assert(0 <= l && l < r && r <= n && 0 <= k && k < r - l);
         int rank = 0;
@@ -67,7 +72,7 @@ public:
         return alphabet[rank];
     }
 
-    // Count values at positions in [l, r) that are less than value.
+    // 统计 [l, r) 内严格小于 value 的元素个数
     int count_less(int l, int r, const T& value) const {
         assert(0 <= l && l <= r && r <= n);
         int rank = std::lower_bound(alphabet.begin(), alphabet.end(), value, compare) - alphabet.begin();
@@ -89,7 +94,7 @@ public:
         return result;
     }
 
-    // Count values at positions in [l, r) that are in [low, high).
+    // 统计 [l, r) 内落在 [low, high) 范围内的元素个数
     int count(int l, int r, const T& low, const T& high) const {
         assert(!compare(high, low));
         return count_less(l, r, high) - count_less(l, r, low);

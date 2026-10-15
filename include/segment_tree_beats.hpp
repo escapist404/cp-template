@@ -6,8 +6,14 @@
 #include <limits>
 #include <vector>
 
-// Signed numeric T; all values/tags fit T, all sum arithmetic fits Sum.
-// Values and tags must stay strictly inside numeric_limits<T> bounds.
+// 【吉司机线段树 Segment Tree Beats (segment_tree_beats.hpp)】
+// - 0-based 左闭右开区间 [l, r)，同时支持区间取 min、取 max、区间加与区间和/最值查询，均摊复杂度 O(log^2 n)
+// - 模板参数: SegmentTreeBeats<T, Sum>，所有元素与标记中间值必须严格处于 (numeric_limits<T>::lowest(), max()) 内部
+// - add(l, r, v)   : 区间 [l, r) 每个元素加 v
+// - chmin(l, r, v) : 区间 [l, r) 每个元素变为 min(a[i], v)
+// - chmax(l, r, v) : 区间 [l, r) 每个元素变为 max(a[i], v)
+// - sum(l, r)      : 查询 [l, r) 元素和 (0 <= l <= r <= n)
+// - min / max(l, r): 查询 [l, r) 最值（要求区间非空 0 <= l < r <= n）
 
 template <typename T = long long, typename Sum = T>
 class SegmentTreeBeats {

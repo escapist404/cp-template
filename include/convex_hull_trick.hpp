@@ -4,8 +4,9 @@
 #include <cassert>
 #include <vector>
 
-// Minimum queries with slopes inserted in nondecreasing order.
-// For maximum queries, negate both slope and intercept and negate the answer.
+// 【凸包斜率优化 Convex Hull Trick (convex_hull_trick.hpp)】
+// - 维护直线集合 y = k * x + b 的下凸壳/上凸壳，支持斜率单调插入与单调/二分查询极值，常用于斜率优化 DP
+
 template <typename T = long long>
 class ConvexHullTrick {
 	struct Line {

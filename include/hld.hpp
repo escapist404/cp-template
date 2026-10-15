@@ -6,7 +6,12 @@
 #include <algorithm>
 #include <utility>
 
-// 0-based Heavy-Light Decomposition. Call prework(root) after add_edge(); subtree_range(u) is [l, r).
+// 【重链剖分 Heavy-Light Decomposition (hld.hpp)】
+// - 0-based 顶点编号 [0, n)，建树与剖分 O(n)，lca 查询 O(log n)，路径最多拆分为 O(log n) 段连续区间
+// - 使用流程: 先调用 add_edge(u, v) 加边，再调用 prework(root) 完成剖分
+// - pos(u)          : 返回顶点 u 在重链优先 DFS 序中的 0-based 下标；重链顶 head(u) 到 u 对应闭区间 [pos(head(u)), pos(u)]
+// - subtree_range(u): 返回以 u 为根的子树对应的左闭右开 DFS 序区间 [l, r)
+// - parent(u) / depth_of(u) / head(u) / lca(u, v): 查询父节点（根为 -1）、深度、所在重链顶与最近公共祖先
 
 class HeavyLightDecomposition {
 	int n;

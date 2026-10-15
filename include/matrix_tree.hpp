@@ -6,6 +6,11 @@
 
 #include "determinant.hpp"
 
+// 【Kirchhoff 矩阵树定理生成树计数 (matrix_tree.hpp)】
+// - 0-based 顶点编号 [0, n)，时间复杂度 O(n^3)
+// - count_spanning_trees_undirected(n, edges)       : 统计无向图所有生成树的边权乘积之和（无权图传 weight = 1）
+// - count_spanning_trees_directed(n, edges, root, out): 统计以 root 为根的有向生成树数量（out=true 为外向树，false 为内向树）
+
 template <typename T>
 struct MatrixTreeEdge {
 	int u, v;

@@ -7,7 +7,11 @@
 
 #include "types.hpp"
 
-// Double-modulus polynomial rolling hash for 0-based substring [l, r) queries in O(1).
+// 【双模数多项式字符串滚动哈希 (rolling_hash.hpp)】
+// - 采用双素数模数 (1000000007, 1000000009) 防止单模数生日悖论哈希碰撞，预处理 O(n)，子串查询 O(1)
+// - get(l, r)  : 返回 0-based 左闭右开子串 s[l..r) 的 64 位组合哈希值（要求 0 <= l <= r <= n）
+// - get()      : O(1) 返回整个字符串 s[0..n) 的哈希值
+// - 比较不同 RollingHash 实例的子串哈希时，基数 base1 / base2 必须保持一致
 
 class RollingHash {
 	using Hash = u64;

@@ -4,7 +4,10 @@
 #include <cassert>
 #include <vector>
 
-// Fast Walsh-Hadamard Transform for bitwise XOR, OR, and AND convolutions in O(n log n).
+// 【快速沃尔什变换 FWT 位运算卷积 (fwt.hpp)】
+// - 在 O(n log n) 时间内计算长度为 2 次幂的按位异或 (XOR)、按位或 (OR)、按位与 (AND) 下标卷积：
+// - fwt_xor(a, inv) / fwt_or(a, inv) / fwt_and(a, inv): 原地正/逆变换（要求 a.size() 为非零 2 次幂）
+// - convolution_xor(a, b) / convolution_or(a, b) / convolution_and(a, b): 自动补齐至 2 次幂并返回位运算卷积结果
 
 template <typename T, typename Update>
 void fwt_transform(std::vector<T>& a, Update update) {

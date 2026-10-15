@@ -5,6 +5,12 @@
 #include <stack>
 #include <vector>
 
+// 【Tarjan 强连通分量与缩点 DAG (scc.hpp)】
+// - 0-based 有向图邻接表 adj，时间与空间复杂度均为 O(n + m)
+// - get_scc(adj): 返回强连通分量二维数组 components；注意各分量按【逆拓扑序】排列（汇点分量在前，源点分量在后）
+// - get_dag(adj, components): 按 components 下标构造缩点后的 DAG 邻接表（仅去除分量内部自环，跨分量平行边不去重）
+// - tarjan_traverse: 通用有向/无向图 DFS 框架，供 edcc.hpp 与 vdcc.hpp 复用
+
 template <typename EnterVertex, typename EnterTree, typename ExitTree,
 		typename BackEdge, typename FinishVertex, typename FinishRoot>
 void tarjan_traverse(const std::vector<std::vector<int>>& graph, bool undirected,
@@ -43,7 +49,7 @@ void tarjan_traverse(const std::vector<std::vector<int>>& graph, bool undirected
 }
 
 
-// 0 index
+// 0-based 索引
 
 inline std::vector<std::vector<int>> get_scc(const std::vector<std::vector<int>>& adj) {
 	const int n = adj.size();

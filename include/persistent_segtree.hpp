@@ -7,6 +7,13 @@
 
 #include "types.hpp"
 
+// 【可持久化线段树 / 主席树 (persistent_segtree.hpp)】
+// - 0-based 左闭右开值域 [0, n)（要求 n > 0），每次修改仅复制 O(log n) 个节点并返回新版本根编号
+// - 节点 0 为全 e() 的隐式空树版本；build(init) 可用长度为 n 的数组建初始版本并返回根编号
+// - set(root, p, v) / add(root, p, v): 基于版本 root 修改位置 p，返回新版本根编号（原版本不变）
+// - prod(root, l, r) / get(root, p) / all_prod(root) / max_right / min_left: 在指定版本 root 上查询或二分
+// - kth(left_root, right_root, k): 专用于权值线段树两版本作差，返回 0-based 第 k 小的值域下标
+
 template <class V, auto op, auto e>
 class PersistentSegmentTree {
 	struct Node {
@@ -154,8 +161,8 @@ public:
 		return min_left_node(root, 0, n, r, sum, f).first;
 	}
 
-	// Only for additive numeric counts with nonnegative version differences.
-	// Return the 0-indexed k-th item in right_root - left_root.
+	// 仅用于权值线段树非负频数差分：
+	// 返回 right_root - left_root 中 0-based 第 k 小的值域下标
 	int kth(int left_root, int right_root, i64 k) {
 		assert(0 <= left_root && left_root < (int)tree.size());
 		assert(0 <= right_root && right_root < (int)tree.size());

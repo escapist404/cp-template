@@ -5,8 +5,11 @@
 #include <utility>
 #include <vector>
 
-// In-order traversal follows the input order, and Compare defines the heap
-// order. Equal values keep the earlier index above the later.
+// 【笛卡尔树 (cartesian_tree.hpp)】
+// - 使用单调栈在严格 O(n) 时间内构造序列的笛卡尔树，中序遍历对应原数组 0-based 下标顺序
+// - 默认 Compare = std::less<T> 构造小根笛卡尔树（父节点 <= 子节点；相等元素保持原下标靠前者在上）
+// - 返回 CartesianTreeResult{root, left, right, father}，所有下标均为 0-based，不存在的子节点或父节点为 -1
+
 struct CartesianTreeResult {
     int root = -1;
     std::vector<int> left, right, father;

@@ -12,6 +12,7 @@
 #include "half.hpp"
 #include "minkowski.hpp"
 
-// Umbrella header including all 2D computational geometry modules.
+// 【二维计算几何聚合头文件 (geometry.hpp)】
+// - 一键包含二维计算几何全部子模块: geometry_base, dist, inter, circle, poly, hull, calipers, half, minkowski
 
 #endif

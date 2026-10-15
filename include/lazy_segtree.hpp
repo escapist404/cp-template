@@ -6,6 +6,14 @@
 
 #include "bit.hpp"
 
+// 【懒标记线段树 (lazy_segtree.hpp)】
+// - ACL 风格 0-based 左闭右开区间 [l, r) 懒标记线段树，建树 O(n)，修改/查询/树上二分均为 O(log n)
+// - 模板参数: LazySegmentTree<V, op, e, L, mapping, composition, id>
+//   1. mapping(f, x)    : 将懒标记 f 作用在区间聚合值 x 上（若操作与区间长度相关，需在结构体 V 内维护 len 字段）
+//   2. composition(f, g): 标记复合，严格定义为“先作用旧标记 g，再作用新标记 f”，即 mapping(f, mapping(g, x))
+//   3. id()             : 返回恒等懒标记，满足 mapping(id(), x) == x
+// - apply(p, f) / apply(l, r, f): 单点或区间 [l, r) 施加标记 f
+
 template <class V, auto op, auto e, class L, auto mapping, auto composition, auto id>
 class LazySegmentTree {
 public:

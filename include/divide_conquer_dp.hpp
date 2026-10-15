@@ -5,8 +5,10 @@
 #include <cassert>
 #include <vector>
 
-// Minimize dp[g][i] = min_{j < i}(dp[g - 1][j] + cost(j, i)).
-// The minimizing j must be monotone in i.
+// 【决策单调性分治 DP 优化 (divide_conquer_dp.hpp)】
+// - 求解形如 dp_next[i] = min_{0 <= j <= i} cost(j, i) 的单层转移，要求最优决策点 opt[i] 关于 i 单调不降
+// - divide_conquer_dp(n, max_opt, cost): 在 O(n log n) 次 cost 调用内返回整层最优值与最优决策点
+
 template <typename T, typename Cost>
 std::vector<T> divide_conquer_dp(int groups, int n, Cost cost, T infinity) {
 	assert(groups >= 0 && n >= 0);

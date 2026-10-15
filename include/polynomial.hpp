@@ -12,7 +12,11 @@
 #include "types.hpp"
 #include "bit.hpp"
 
-// NTT (for ModInt) and FFT (for Complex/i64) polynomial convolutions in O(n log n).
+// 【快速数论变换 NTT、快速傅里叶变换 FFT 与多项式卷积 (polynomial.hpp)】
+// - ntt(a, inverse)         : O(n log n) 对 ModInt 数组原地执行 NTT / INTT（要求长度为 2 次幂且模数支持该长度原根，如 998244353）
+// - fft(a, inverse)         : O(n log n) 对复数数组原地执行 FFT / IFFT
+// - convolution(a, b)       : O(n log n) 计算两个 ModInt 向量（用 NTT）或两个整数向量（用复数 FFT 四舍五入为 i64）的卷积
+// - 需要多项式逆、ln、exp、pow、sqrt 等高层形式幂级数运算时，请包含 formal_power_series.hpp
 
 template <typename T>
 constexpr T polynomial_primitive_root(T mod) {

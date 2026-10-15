@@ -9,7 +9,9 @@
 
 #include "miller_rabin.hpp"
 
-// Pollard-Rho randomized prime factorization returning sorted prime factors with multiplicity.
+// 【Pollard-Rho 大整数质因数分解 (pollard_rho.hpp)】
+// - 结合 Miller-Rabin 与 Brent 判圈优化的 Pollard-Rho 随机化分解算法，期望时间复杂度 O(n^(1/4))
+// - factorize(n): 返回 n 的所有质因数按升序排列的列表（含重数，例如 factorize(12) 返回 {2, 2, 3}；n <= 1 返回空向量）
 
 inline u64 pollard_rho_split(u64 n) {
 	if (n % 2 == 0) return 2;

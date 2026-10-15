@@ -13,7 +13,9 @@
 #include "polynomial.hpp"
 #include "types.hpp"
 
-// Arbitrary-precision signed integer (base 10^9) with NTT-accelerated multiplication.
+// 【高精度有符号大整数 BigInt (bigint.hpp)】
+// - 采用 10^9 压位存储，支持任意精度正负整数的 +、-、*（大规模自动切换三模数 NTT 加速至 O(n log n)）、/、%、比较与流式输入输出
+// - 支持从 i64 或十进制字符串直接构造 BigInt("-12345678901234567890")
 
 class BigInt {
 public:

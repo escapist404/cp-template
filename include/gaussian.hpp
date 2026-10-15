@@ -8,6 +8,14 @@
 
 #include "matrix.hpp"
 
+// 【高斯消元求解线性方程组与矩阵求秩 (gaussian.hpp)】
+// - gaussian_elimination(A, b, is_zero): O(n^2 m) 求解线性方程组 A * x = b，返回 GaussianResult<T>{consistent, rank, solution, basis}
+//   - consistent: 方程组是否有解
+//   - rank      : 系数矩阵的秩
+//   - solution  : 一组特解 x_0（自由变量取 0）
+//   - basis     : 齐次方程组 A * x = 0 的零空间基向量列表（维数 = m - rank，通解为 solution + sum(c_i * basis[i])）
+// - matrix_rank(vec, n, m, is_zero): 仅求 n x m 行优先矩阵的秩（支持 n=0 或 m=0，不分配解空间）
+
 template <typename T>
 struct GaussianZero {
     bool operator()(T value) const {

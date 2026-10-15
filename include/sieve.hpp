@@ -6,7 +6,13 @@
 #include <utility>
 #include <vector>
 
-// Linear sieve for primes, smallest prime factors, and multiplicative functions on [0, n].
+// 【线性筛素数、最小质因子与积性函数 (sieve.hpp)】
+// - 在 O(n) 时间内完成 [0..n] 范围内的素数与积性函数预处理：
+// - sieve(n)           : 返回 [0..n] 是否为素数的 bool 数组
+// - sieve_prime(n)     : 返回 <= n 的所有素数升序列表
+// - sieve_factor(n)    : 返回每个数的最小质因子数组 min_p[x]
+// - sieve_phi / sieve_mu / sieve_divisor(n): 线性筛返回欧拉函数 phi、莫比乌斯函数 mu、约数个数 d 数组
+// - sieve_arithmetic(n, f_prime, f_coprime, f_power): 通用积性函数线性筛框架
 
 template <typename OnPrime, typename OnComposite>
 std::vector<int> sieve(int n, OnPrime on_prime, OnComposite on_composite) {

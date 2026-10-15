@@ -6,6 +6,13 @@
 #include <utility>
 #include <vector>
 
+// 【有向图 / 无向图欧拉路径与欧拉回路 (euler_path.hpp)】
+// - 0-based 顶点编号 [0, n)，支持重边、自环与指定起点 start（传 -1 表示自动选择合法起点），复杂度 O(n + m)
+// - euler_path(n, edges, directed, start): 返回 EulerPath{exists, vertices, edges}
+//   - exists  : 是否存在经过所有边恰好一次的欧拉路
+//   - vertices: 按序经过的顶点序列（长度 m + 1）
+//   - edges   : 按序经过的边在输入 edges 数组中的 0-based 下标序列（长度 m）
+
 struct EulerPath {
 	bool exists = false;
 	std::vector<int> vertices, edges;

@@ -3,7 +3,9 @@
 
 #include "modular_arithmetic.hpp"
 
-// Deterministic 64-bit Miller-Rabin primality test for i64 in O(log n).
+// 【确定性 Miller-Rabin 素性测试 (miller_rabin.hpp)】
+// - 选取 7 个确定性底数 {2, 325, 9375, 28178, 450775, 9780504, 1795265022}，对 64 位有符号整数范围内的所有 n 均 100% 准确
+// - is_prime_mr(n): O(k log n) 判断整数 n 是否为素数（n < 2 返回 false）
 
 inline bool is_prime_mr(i64 n) {
 	if (n < 2) return false;

@@ -7,8 +7,13 @@
 #include <utility>
 #include <vector>
 
-// Vertices on the left are [0, adj.size()), vertices on the right are
-// [0, right_size). Hopcroft-Karp: O((V + E) sqrt(V)).
+// 【Hopcroft-Karp 二分图最大匹配 (bipartite_matching.hpp)】
+// - 左部点 0-based [0, n_left)，右部点 0-based [0, n_right)，时间复杂度 O(E sqrt(V))
+// - bipartite_matching(n_left, n_right, edges): 返回 BipartiteMatchingResult{matching, left_match, right_match}
+//   - matching        : 最大匹配对列表 {{u, v}, ...}
+//   - left_match[u]   : 左部点 u 匹配的右部点编号（未匹配为 -1）
+//   - right_match[v]  : 右部点 v 匹配的左部点编号（未匹配为 -1）
+
 struct BipartiteMatchingResult {
 	int size = 0;
 	std::vector<int> left, right;

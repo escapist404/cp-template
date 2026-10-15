@@ -10,7 +10,13 @@
 #include "sieve.hpp"
 #include "types.hpp"
 
-// n >= 1. All returned sums must fit in i64.
+// 【Min_25 筛亚线性积性函数前缀和 (min25.hpp)】
+// - 在 O(n^(3/4) / log n) 时间与 O(sqrt(n)) 空间内计算 10^10 ~ 10^11 规模的素数个数、素数和及一般积性函数前缀和
+// - Min25(n)               : 构造并预处理 <= n 的所有整除分块商点上的素数个数与素数和
+// - prime_count() / prime_sum(): O(1) 返回 <= n 的素数个数 pi(n) 与素数总和
+// - quotients()            : 按升序返回所有不同的 floor(n / x) 值
+// - sum(a, b, prime_power) : 计算满足 f(1)=1、素数处 f(p) = a*p + b、素数幂处为 prime_power(p, e, p^e) 的积性函数前缀和
+
 class Min25 {
 public:
 	Min25(i64 n) : n(n) {
@@ -50,8 +56,8 @@ public:
 		return std::vector<i64>(values.rbegin(), values.rend());
 	}
 
-	// Sum f(i), 1 <= i <= n, where f(1) = 1 and f(p) = a*p + b.
-	// prime_power(p, e, power) returns f(p^e); power = p^e.
+	// 计算 sum_{i=1}^n f(i)，满足 f(1) = 1 且素数处 f(p) = a*p + b
+	// prime_power(p, e, p^e) 返回素数幂处的函数值 f(p^e)
 	template <typename PrimePower>
 	i64 sum(i64 a, i64 b, const PrimePower& prime_power) const {
 		return narrow(1 + sum_from(n, 0, a, b, prime_power));

@@ -4,7 +4,14 @@
 #include <vector>
 #include <algorithm>
 
-// 0-based Disjoint Set Union with path compression and union by size. Amortized O(alpha(n)).
+// 【并查集 (dsu.hpp)】
+// - 0-based 下标 [0, n)，同时采用路径压缩与按大小合并，单次操作均摊复杂度 O(alpha(n))
+// - get(x)            : 返回 x 所在集合的代表元（根节点）
+// - merge(x, y)       : 合并 x 与 y 所在集合（较小集合挂到较大集合下）
+// - same(x, y)        : 判断 x 与 y 是否连通
+// - size(x)           : 返回 x 所在连通分量的大小
+// - is_root(x)        : 判断 x 是否为集合根节点
+// - component_number(): 返回当前连通分量总数
 
 class DisjointSetUnion {
 	int component;

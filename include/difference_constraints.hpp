@@ -6,7 +6,13 @@
 #include <utility>
 #include <vector>
 
-// u -> v with weight w means x[v] <= x[u] + w.
+// 【差分约束系统 (difference_constraints.hpp)】
+// - 0-based 变量编号 [0, n)，使用队列优化 Bellman-Ford (SPFA) 求解，最坏复杂度 O(nm)
+// - 约束方向约定: DifferenceConstraint{u, v, w} 表示不等式 x[v] - x[u] <= w（即 x[v] <= x[u] + w）
+//   - 若需 x[v] - x[u] >= w，可转化为 x[u] - x[v] <= -w，添加 {v, u, -w}
+//   - 若需 x[v] - x[u] == w，同时添加 {u, v, w} 与 {v, u, -w}
+// - 返回 {true, x} 表示有解并给出一组可行解 x；若存在负权环（矛盾）则返回 {false, {}}
+
 template <typename T = long long>
 struct DifferenceConstraint {
 	int u, v;

@@ -7,8 +7,10 @@
 
 #include "types.hpp"
 
-// Sum floor((a * i + b) / m) for l <= i < r
-// Requires m > 0
+// 【类欧几里得算法 Floor Sum (floor_sum.hpp)】
+// - floor_sum(n, m, a, b): 在 O(log m) 时间内计算 sum_{i = 0}^{n - 1} floor((a * i + b) / m)
+// - 支持任意有符号整数 a, b（内部自动对负数系数规范化取模），要求 n >= 0, m > 0
+
 inline i64 floor_sum(i64 l, i64 r, i64 m, i64 a, i64 b) {
     assert(0 <= l && l <= r && m > 0);
     auto prefix = [&](i64 n) {

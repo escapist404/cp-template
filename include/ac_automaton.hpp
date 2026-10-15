@@ -7,8 +7,11 @@
 #include <string>
 #include <vector>
 
-// Aho-Corasick automaton for lowercase a-z strings (0-based pattern IDs).
-// Call build() once after all insert() calls before querying.
+// 【AC 自动机 Aho-Corasick Automaton (ac_automaton.hpp)】
+// - 支持 26 个小写字母 'a'-'z' 的多模式串匹配自动机，模式串编号为 0-based 的插入顺序 [0, m)
+// - 使用流程: 先依次调用 insert(pattern) 插入所有模式串，然后【必须调用一次 build()】构建失配指针与拓扑序，最后调用 query(text)
+// - query(text): O(|text| + 结点数 + m) 统计每个模式串在 text 中的出现次数（沿 fail 树逆 BFS 序累加），返回长度 m 的计数数组
+// - size() / state_links() / pattern_vertices(): 导出状态总数、各状态 {parent, fail} 与模式串终点状态编号
 
 class AhoCorasick {
 	struct Node {

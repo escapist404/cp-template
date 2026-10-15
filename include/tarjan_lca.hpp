@@ -4,7 +4,9 @@
 #include <vector>
 #include <utility>
 
-// 0 index
+// 【Tarjan 离线最近公共祖先 (tarjan_lca.hpp)】
+// - 0-based 连通无向树邻接表 adj，以 root 为根，离线批量回答 queries 中的点对 {u, v} 的 LCA
+// - 时间复杂度 O((n + q) alpha(n))，空间复杂度 O(n + q)，返回与 queries 等长的 LCA 结果数组
 
 std::vector<int> tarjan_lca(const std::vector<std::vector<int>>& adj, int root, const std::vector<std::pair<int, int>>& queries) {
 	const int n = adj.size();

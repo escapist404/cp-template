@@ -7,7 +7,11 @@
 #include <utility>
 #include <vector>
 
-// 0-based primal-dual minimum-cost flow with Johnson potentials (non-negative initial costs).
+// 【最小费用最大流 MCMF (min_cost_max_flow.hpp)】
+// - ACL 风格基于 Johnson 势能与 Dijkstra 增广的最小费用流 MinCostMaxFlow<Cap, Cost>，0-based 顶点编号 [0, n)
+// - add_edge(from, to, cap, cost): 添加容量 cap >= 0、单位费用 cost >= 0 的有向边
+// - flow(s, t, flow_limit)       : 返回 pair{最大流量, 最小总费用}
+// - slope(s, t, flow_limit)      : 返回流量-费用凸壳的所有折点序列 std::vector<std::pair<Cap, Cost>>
 
 template <typename Cap, typename Cost>
 struct MinCostMaxFlow {

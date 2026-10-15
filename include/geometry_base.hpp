@@ -4,6 +4,11 @@
 #include <cmath>
 #include "types.hpp"
 
+// 【二维计算几何基础：点、向量、直线与线段 (geometry_base.hpp)】
+// - 定义精度常数 eps = 1e-8、符号函数 sgn(x)、浮点数比较 cmp(x, y)
+// - Point / Vector: 支持向量加减、数乘、点积 (A * B)、叉积 (A ^ B)、模长 len()、旋转 rotate(rad)、极角象限排序立等
+// - Line / Segment: 有向直线与线段表示，支持点在线段上判定 on_segment(p, s)
+
 inline constexpr Real PI = 3.141592653589793238462643383279502884;
 inline constexpr Real EPS = 1E-8;
 

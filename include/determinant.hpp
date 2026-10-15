@@ -6,7 +6,10 @@
 
 #include "matrix.hpp"
 
-// T must support +, -, *, /, unary -, equality, and construction from 0 and 1.
+// 【任意模数与域上的行列式 (determinant.hpp)】
+// - determinant(a)          : O(n^3) 域上高斯消元求方阵行列式（适用于 ModInt<素数> 或浮点数）
+// - determinant_mod(a, mod) : O(n^3 log(mod)) 基于辗转相除消元，求【任意正整数模数（含合数）】下的方阵行列式
+
 template <typename T, size_t R, size_t C>
 T determinant(const Matrix<T, R, C>& input) {
 	assert(input.rows() == input.columns());

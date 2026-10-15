@@ -4,7 +4,10 @@
 #include <utility>
 #include <vector>
 
-// 0-based tree diameter via two DFS passes (requires non-negative edge weights). O(n).
+// 【树的直径 (tree_diameter.hpp)】
+// - 0-based 连通无向树，通过两次 DFS 在 O(n) 时间内求直径（要求所有树边权非负）
+// - tree_diameter_farthest(adj, start): 返回 {最远距离, 最远端点}
+// - tree_diameter(adj)                : 支持带权邻接表或无权邻接表（默认边权 1），返回 {直径长度, {端点 u, 端点 v}}
 
 template <typename T>
 std::pair<T, int> tree_diameter_farthest(const std::vector<std::vector<std::pair<int, T>>>& adj,

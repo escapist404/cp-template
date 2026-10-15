@@ -5,7 +5,9 @@
 
 #include "types.hpp"
 
-// Extended Euclidean algorithm and modular inverse for general (possibly non-prime) moduli.
+// 【扩展欧几里得与一般模逆元 (exgcd.hpp)】
+// - exgcd(a, b, x, y) : 求解裴蜀等式 a*x + b*y = gcd(a, b)，返回非负最大公约数 gcd(|a|, |b|)
+// - mod_inverse(a, m) : 求解一般模数（不必为素数）下 a 的乘法逆元；要求 gcd(a, m) == 1，返回 [0, m) 内的唯一逆元
 
 inline i64 extended_gcd(i64 a, i64 b,
 		i64& x, i64& y) {

@@ -9,7 +9,9 @@
 
 #include "types.hpp"
 
-// Maximizes score. neighbor(state, rng) must return a candidate state.
+// 【模拟退火启发式搜索 (simulated_annealing.hpp)】
+// - simulated_annealing(initial_state, energy, neighbor, schedule): 按温度衰减表接受更优解或以 Metropolis 概率 exp(-delta / T) 接受劣解
+
 template <typename State, typename Score, typename Neighbor>
 State simulated_annealing(State initial, Score score, Neighbor neighbor,
                           Real initial_temperature = 1E3, Real cooling = 0.995,

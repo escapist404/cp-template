@@ -6,7 +6,14 @@
 
 #include "bit.hpp"
 
-// ACL-style 0-based iterative segment tree over [l, r) with O(log n) prod and max_right/min_left.
+// 【非递归线段树 (segtree.hpp)】
+// - ACL 风格 0-based 左闭右开区间 [l, r) 线段树，建树 O(n)，单点修改/区间查询/树上二分均为 O(log n)
+// - 模板参数: SegmentTree<V, op, e>，要求 op(a, b) 满足结合律（无需交换律），e() 返回双边单位元
+// - set(p, x) / get(p) : 单点赋值与单点读取 (0 <= p < n)
+// - prod(l, r)         : 返回区间 [l, r) 从左到右按 op 聚合的结果（空区间返回 e()）
+// - all_prod()         : O(1) 返回全区间 [0, n) 聚合结果
+// - max_right(l, f)    : 要求 f(e()) == true 且单调；返回最大的 r in [l, n] 使 f(prod(l, r)) 为真
+// - min_left(r, f)     : 要求 f(e()) == true 且单调；返回最小的 l in [0, r] 使 f(prod(l, r)) 为真
 
 template <class V, auto op, auto e>
 class SegmentTree {
